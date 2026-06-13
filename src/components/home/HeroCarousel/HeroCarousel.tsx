@@ -34,29 +34,25 @@ export default function HeroCarousel() {
         <div className={styles.track} style={{ transform: `translateX(-${index * 100}%)` }}>
           {HERO_SLIDES.map((slide, i) => (
             <div
-              key={slide.id}
-              className={`${styles.slide} ${i === index ? styles.slideActive : ""}`}
-              style={{ background: `linear-gradient(115deg, ${slide.gradient[0]}, ${slide.gradient[1]})` }}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${i + 1} จาก ${HERO_SLIDES.length}`}
-              aria-hidden={i !== index}
-            >
-              <div className={styles.mesh} aria-hidden="true" />
-              <div className={styles.copy}>
-                <span className={styles.eyebrow}>{slide.eyebrow}</span>
-                <h2 className={styles.heroTitle}>
-                  {slide.title.split("\n").map((line, li) => (
-                    <span key={li} className={styles.heroLine}>
-                      {line}
-                    </span>
-                  ))}
-                  <span className={styles.highlight}>{slide.highlight}</span>
-                </h2>
-              </div>
-              <span className={styles.plus} aria-hidden="true">
-                +
-              </span>
+  key={slide.id}
+  className={`${styles.slide} ${i === index ? styles.slideActive : ""}`}
+  style={
+    slide.image
+      ? {
+          backgroundImage: `url(${slide.image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }
+      : {
+          background: `linear-gradient(115deg, ${slide.gradient[0]}, ${slide.gradient[1]})`,
+        }
+  }
+  role="group"
+  aria-roledescription="slide"
+  aria-label={`${i + 1} จาก ${HERO_SLIDES.length}`}
+  aria-hidden={i !== index}
+>
+              <div/>
             </div>
           ))}
         </div>

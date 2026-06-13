@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import Image from "next/image";
 import styles from "./SlideCard.module.scss";
 import { useEffect, useRef, useState } from "react";
@@ -23,11 +23,14 @@ const slideMockData: SlideCardProps[] = [
   },
   {
     title: "Exclusive",
-    description: "F✦FOREVER 1st World Tour in Bangkok ระบุชื่อบนบัตรได้เพียง 1 ใบต่อรอบการแสดง",
+    description:
+      "F✦FOREVER 1st World Tour in Bangkok ระบุชื่อบนบัตรได้เพียง 1 ใบต่อรอบการแสดง",
     imageUrl: "/image/card4.png",
-  },{
+  },
+  {
     title: "Actor",
-    description: "PANTOMIME IN BANGKOK 18 เทศกาลบริหารจินตนาการที่ทุกคนคิดถึง Pantomime in Bangkok",
+    description:
+      "PANTOMIME IN BANGKOK 18 เทศกาลบริหารจินตนาการที่ทุกคนคิดถึง Pantomime in Bangkok",
     imageUrl: "/image/card5.png",
   },
 ];
@@ -66,7 +69,7 @@ export const SlideList = () => {
 
     setCanScrollLeft(el.scrollLeft > 0);
     setCanScrollRight(
-      el.scrollLeft + el.clientWidth < el.scrollWidth - 1 // -1 กัน rounding error
+      el.scrollLeft + el.clientWidth < el.scrollWidth - 1, // -1 กัน rounding error
     );
   };
 
@@ -95,37 +98,32 @@ export const SlideList = () => {
   return (
     <div className={styles.backgroundImage}>
       {canScrollLeft && (
-  <div
-    className={`${styles.arrow} ${styles.arrowLeft}`}
-    onClick={scrollLeft}
-  >
-    <Image
-      src="/icon/left.svg"
-      alt="left"
-      width={24}
-      height={24}
-    />
-  </div>
-)}
+        <div
+          className={`${styles.arrow} ${styles.arrowLeft}`}
+          onClick={scrollLeft}
+        >
+          <Image src="/icon/left.svg" alt="left" width={24} height={24} />
+        </div>
+      )}
       {canScrollRight && (
-  <div
-    className={`${styles.arrow} ${styles.arrowRight}`}
-    onClick={scrollRight}
-  >
-    <Image
-      src="/icon/right.svg"
-      alt="right"
-      width={24}
-      height={24}
-    />
-  </div>
-)}
+        <div
+          className={`${styles.arrow} ${styles.arrowRight}`}
+          onClick={scrollRight}
+        >
+          <Image src="/icon/right.svg" alt="right" width={24} height={24} />
+        </div>
+      )}
 
       <Image src="/image/background.svg" alt="" fill />
 
       <div className={styles.header}>
         <div className={styles.logo}>
-          <Image src="/icon/ticket.svg" alt="Ticket Icon" width={40} height={40} />
+          <Image
+            src="/icon/ticket.svg"
+            alt="Ticket Icon"
+            width={40}
+            height={40}
+          />
         </div>
         <p>Trending Now</p>
       </div>

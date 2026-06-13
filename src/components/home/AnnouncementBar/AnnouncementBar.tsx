@@ -6,14 +6,13 @@ export default function AnnouncementBar() {
       <div className={styles.inner}>
         {/* CTA pill */}
         <a className={styles.cta} href="/events">
-          <span className={styles.spark} aria-hidden="true">✦</span>
           จองตั๋วง่ายด้วย AI Matching
         </a>
 
         {/* icons + hashtag + tagline */}
         <div className={styles.mid}>
           <span className={styles.icon} aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <svg width="25" height="25" viewBox="0 0 18 18" fill="none">
               <rect x="2.5" y="2.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
               <rect x="10.5" y="2.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
               <rect x="2.5" y="10.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
@@ -21,7 +20,7 @@ export default function AnnouncementBar() {
             </svg>
           </span>
           <span className={styles.icon} aria-hidden="true">
-            <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
+            <svg width="28" height="25" viewBox="0 0 20 18" fill="none">
               <path
                 d="M3 4.5h14a0 0 0 0 1 0 0v2.2a1.7 1.7 0 0 0 0 3.4v2.4a0 0 0 0 1 0 0H3a0 0 0 0 1 0 0v-2.4a1.7 1.7 0 0 0 0-3.4V4.5Z"
                 stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"
