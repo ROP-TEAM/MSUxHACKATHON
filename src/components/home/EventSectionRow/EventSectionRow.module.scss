@@ -1,0 +1,215 @@
+@use "../../../styles/responsive" as *;
+
+.section {
+  margin-bottom: 2.25rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.875rem;
+}
+
+.title {
+  position: relative;
+  padding-left: 0.85rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--b-800);
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.3rem;
+    height: 1.1rem;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, var(--p-400), var(--p-700));
+  }
+}
+
+.seeAll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  color: var(--b-500);
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--b-50);
+    color: var(--p-600);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--p-500);
+    outline-offset: 0.125rem;
+  }
+}
+
+.rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  // breathing room so the hover lift + card shadow are not clipped by
+  // overflow-y; negative margins keep the rail flush with the header.
+  padding: 0.75rem 0.5rem 1.25rem;
+  margin: -0.75rem -0.5rem 0;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.card {
+  flex: 0 0 auto;
+  width: 9.5rem;
+  scroll-snap-align: start;
+  border-radius: 0.625rem;
+  box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-0.5rem);
+    box-shadow: 0 1rem 1.75rem rgba(20, 30, 60, 0.22);
+  }
+
+  &:hover .poster {
+    filter: brightness(1.06) saturate(1.08);
+  }
+
+  // light sweep slides across on hover
+  &:hover .sheen {
+    transform: translateX(140%) skewX(-12deg);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--p-500);
+    outline-offset: 0.1875rem;
+    border-radius: 0.625rem;
+  }
+}
+
+.poster {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  transition: filter 0.25s;
+
+  // glossy top highlight — always on, gives the face depth
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 35%);
+    pointer-events: none;
+  }
+
+  // bottom scrim so text stays legible on any gradient
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 55%);
+    pointer-events: none;
+  }
+}
+
+.sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 38%, rgba(255, 255, 255, 0.35) 50%, transparent 62%);
+  transform: translateX(-140%) skewX(-12deg);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.posterText {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.625rem;
+  width: 100%;
+}
+
+.posterTitle {
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.4);
+}
+
+.posterSub {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.posterDate {
+  margin-top: 0.15rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.soldOut {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 4;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.3rem;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 0.25rem 0.5rem rgba(229, 57, 53, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .sheen,
+  .poster {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+
+  .card:hover .sheen {
+    transform: translateX(-140%) skewX(-12deg);
+  }
+}
+
+@include respond(md) {
+  .card {
+    width: 8rem;
+  }
+}
+
+@include respond(sm) {
+  .card {
+    width: 6.75rem;
+  }
+}

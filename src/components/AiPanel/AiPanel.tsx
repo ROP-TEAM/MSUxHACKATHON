@@ -151,7 +151,9 @@ export default function AiPanel({ role }: Props) {
           disabled={loading || !input.trim()}
           aria-label="ส่ง"
         >
-          ➤
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2.5 8h10M8 3.5L12.5 8 8 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
     </aside>

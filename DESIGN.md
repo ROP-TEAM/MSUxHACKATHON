@@ -180,11 +180,65 @@ Flat by default, layered on interaction. At rest, surfaces are separated by 1px 
 - **Icon:** Emoji/SVG prefix at 13px.
 
 ### Navigation
-- **Style:** Horizontal items, label typography, weight-based active indicator.
-- **Default:** Muted text.
-- **Hover:** Ink text, gentle background shift.
-- **Active:** Concert Blue text, bottom bar or weight 600.
-- **Dropdown:** Sub-items in a flyout panel — Gentle Surface, 12px radius, 1px border.
+- **Layout:** Logo left | links center | AI button right. White background, 1px bottom border.
+- **Links (in order):** หน้าแรก · คอนเสิร์ต ▼ (dropdown) · ภาพรวม · ติดต่อเรา
+- **Dropdown "คอนเสิร์ต":** งานทั้งหมด (`/events`) + ตั๋วของฉัน (`/tickets`)
+- **Active indicator:** Sliding underline bar in Concert Blue, animates `left`+`width` 0.25s ease-out. Follows hover then settles on activeKey.
+- **Default text:** Muted (`#646b70`). Active/hover: Concert Blue, weight 600.
+- **Dropdown panel:** Gentle Surface bg, 12px radius, 1px Soft Border, `position: absolute`.
+- **Right button:** Rounded square button with bubble-chat SVG icon + "AI" text label. Concert Blue on white.
+
+### Hero Carousel
+- **Full-width** banner area below nav. Height ~340px desktop.
+- **Content:** Partnership promotional banners (e.g. Dime! / KKP บัญชีเสริม) with green/purple gradient + phone mockup imagery + bold Thai headline.
+- **Indicators:** Row of dot pills below banner (gray inactive, darker active). Centered.
+- **Motion:** Slide or crossfade transition between slides.
+
+### Announcement Bar
+- **Background:** Near-black (`#111111`). Full width, ~52px tall.
+- **Layout (left→right):** "จองตั๋วด้วย AI Matching" pill CTA (Concert Blue bg) · QR icon · ticket icon · `#ไม่พลาดเทรนด์` bold white · tagline text muted · right-aligned "MSUxHackathon" brand + tagline small text.
+- **Purpose:** Persistent conversion prompt — always visible between hero and event sections.
+
+### Event Section Row
+- **Structure:** Section title (Headline 600) left + ↗ arrow link right, then horizontal-scroll rail of EventCards below.
+- **Title examples:** "กำลังมาแรง" · "ใหม่ล่าสุด" · "ละครเวที"
+- **Rail:** `overflow-x: auto`, no scrollbar visible, gap 10–12px between cards.
+- **Cards visible:** ~6 cards on desktop, partial 7th to signal scroll.
+
+### Event Card
+- **Size:** ~150×200px portrait. Image fills the entire card face (poster artwork).
+- **Shape:** Slight radius (8–12px). No heavy text overlay on card face.
+- **Hover:** Subtle scale (1.03) + shadow or brightness lift.
+- **Badge (optional):** "SOLD OUT" overlay in red on sold-out events.
+- **Below card (listing grid only):** Small text — event name + date in label typography.
+
+### News Section (มาแรงติดเทรนด์)
+- **Background:** Black (`#000` or `#0a0a0a`). Full-width dark section.
+- **Header:** "มาแรงติดเทรนด์" white title + ↗ link.
+- **Cards:** Horizontal scroll. Each card: large thumbnail top, badge pill ("Exclusive" white / "นักเลง" yellow-green on dark), Thai headline below (white, 2-line clamp), muted date/source text.
+- **Card bg:** Dark surface (~`#1a1a1a`), 12px radius.
+
+### Search Bar (listing page)
+- **Position:** Top of `/events` page, below nav.
+- **Style:** Full-width pill input, magnifier icon prefix, placeholder "ค้นหาอีเวนส์ของคุณ".
+- **Background:** Gentle Surface. Focus: white + Concert Blue border.
+
+### Event Grid (listing page)
+- **Layout:** 6-column grid, auto-fill rows of EventCards.
+- **Section title:** "งานทั้งหมด" above grid.
+- **Spacing:** ~12px gap between cards.
+
+### Pagination
+- **Style:** Numbered buttons centered below EventGrid.
+- **Format:** 1 · 2 · 3 · 4 · … · 10 (ellipsis for large ranges)
+- **Active page:** Concert Blue bg, white text, circle/pill shape.
+- **Inactive:** Muted text, transparent bg. Hover: Gentle Surface bg.
+
+### Footer
+- **Background:** Dark (`#2a2f35`). Full width.
+- **Layout:** iTiket logo (white version) top-left · Dime! App block (logo + "KKP Dime, a member of Kiatnakin Phatra Financial Group" + QR code + "Scan to download Dime! App" CTA in Concert Blue) · then 3 link columns right-aligned.
+- **Columns:** Product (Save · Invest · Spend · Manage) · Company (Company · Milestones · Career · Contact) · Legal & Regulatory (Announcements · Cookies Policy · Privacy Notice · Business License)
+- **Column headers:** Concert Blue, label weight 500. Links: Muted white/gray.
 
 ### Tabs
 - **Full-width tab bar** (wrapper header).

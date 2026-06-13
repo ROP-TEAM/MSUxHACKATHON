@@ -1,0 +1,70 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  // subtle tinted depth behind the event rails — kills the flat-white feel
+  background:
+    radial-gradient(60rem 26rem at 15% 30%, rgba(53, 154, 255, 0.06), transparent 60%),
+    radial-gradient(50rem 24rem at 95% 60%, rgba(124, 47, 247, 0.05), transparent 60%),
+    var(--p-0);
+}
+
+.eventsArea {
+  max-width: 75rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 2rem 1rem;
+}
+
+.newsHeaderRow {
+  max-width: 75rem;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0.25rem 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.newsHeaderTitle {
+  position: relative;
+  padding-left: 0.85rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--b-800);
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.3rem;
+    height: 1.1rem;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, var(--p-400), var(--p-700));
+  }
+}
+
+.newsHeaderLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  color: var(--b-500);
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--b-50);
+    color: var(--p-600);
+  }
+}
+
+@media (max-width: 768px) {
+  .eventsArea,
+  .newsHeaderRow {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
