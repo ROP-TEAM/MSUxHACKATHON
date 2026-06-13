@@ -1,0 +1,42 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--b-100, #eef0f1);
+  background: var(--b-50, #f8f9fa);
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--b-500, #646b70);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+  &:hover {
+    background: var(--b-100, #eef0f1);
+    color: var(--b-700, #2e3133);
+  }
+}
+
+.active {
+  color: var(--p-600, #1f86f2);
+  border-bottom-color: var(--p-500, #359aff);
+  background: #fff;
+}
+
+.activeAdmin {
+  color: #7c3aed;
+  border-bottom-color: #7c3aed;
+  background: #fff;
+}

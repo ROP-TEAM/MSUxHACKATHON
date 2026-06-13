@@ -1,0 +1,243 @@
+@use "../../styles/responsive" as *;
+
+.navbar {
+  display: flex;
+  align-items: center;
+  height: 4rem;
+  padding: 0 1.5rem;
+  background: var(--b-0);
+  border-bottom: 0.0625rem solid var(--b-100);
+  gap: 2rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.logo {
+  width: auto;
+  height: 2rem;
+  display: block;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  justify-content: center;
+  position: relative;
+}
+
+.indicator {
+  position: absolute;
+  bottom: 0.5rem;
+  height: 0.5rem;
+  background: var(--p-500);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.navLink {
+  position: relative;
+  /* z-index: auto — no stacking context, so span can stack above indicator */
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--b-500);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  white-space: nowrap;
+
+  /* hover background lives in ::before so it stays below indicator (z-index 1) */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    transition: background 0.15s;
+    z-index: 0;
+  }
+
+  &:hover::before {
+    background: var(--b-50);
+  }
+
+  &:hover {
+    color: var(--b-800);
+  }
+
+  /* text sits above indicator */
+  span {
+    position: relative;
+    z-index: 2;
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--p-500);
+    outline-offset: 0.125rem;
+  }
+}
+
+.active {
+  color: var(--p-1000);
+  font-weight: 600;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdownTrigger {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.chevron {
+  transition: transform 0.2s;
+  color: currentColor;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 10rem;
+  background: var(--b-0);
+  border: 0.0625rem solid var(--b-100);
+  border-radius: 0.75rem;
+  padding: 0.375rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+  z-index: 200;
+  animation: dropdownIn 0.15s ease-out;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.dropdownItem {
+  display: block;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--b-800);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover {
+    background: var(--p-100);
+    color: var(--p-700);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--p-500);
+    outline-offset: -0.125rem;
+  }
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.aiTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--b-50);
+  border: 0.0625rem solid var(--b-100);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  &:hover {
+    background: var(--p-100);
+    border-color: var(--p-300);
+    transform: translateY(-0.0625rem);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--p-500);
+    outline-offset: 0.125rem;
+  }
+}
+
+.aiTriggerOpen {
+  background: var(--p-100);
+  border-color: var(--p-300);
+}
+
+.aiIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+@include respond(md) {
+  .navbar {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+
+  .center {
+    gap: 0;
+  }
+
+  .navLink {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.82rem;
+  }
+
+}
+
+@include respond(sm) {
+  .center {
+    gap: 0;
+  }
+
+  .navLink {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .dropdownMenu {
+    left: 0;
+    transform: none;
+    min-width: 8.75rem;
+  }
+}

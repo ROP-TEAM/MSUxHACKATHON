@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
+import AppShell from "@/components/AppShell";
 import "../styles/globals.scss";
 
 export const metadata: Metadata = {
   title: "MSU x Hackathon",
-  description: "MSU x Hackathon",
+  description: "Event & Ticket Dashboard",
 };
 
 const noto = Noto_Sans_Thai({
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={noto.className}>
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
