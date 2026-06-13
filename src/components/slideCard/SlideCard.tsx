@@ -2,38 +2,82 @@
 import Image from "next/image";
 import styles from "./SlideCard.module.scss";
 import { useEffect, useRef, useState } from "react";
+import eventsData from "@/data/events.json";
+import ticketsData from "@/data/event_tickets.json";
 
-const slideMockData: SlideCardProps[] = [
-  {
-    title: "Exclusive",
-    description:
-      "Ticket to Heaven Fan Party บนช่องทาง Online  วันเสาร์ที่ 20 มิถุนายน 2569 เริ่มเวลา 10:00 น.",
-    imageUrl: "/image/card1.jpg",
-  },
-  {
-    title: "Actor",
-    description:
-      "ตามรอย เหมันต์ตะวันรอน เตรียมออกเดินทางสู่ รังเสือตะวัน และสัมผัสบรรยากาศจริงจากละคร",
-    imageUrl: "/image/card2.png",
-  },
-  {
-    title: "Actor",
-    description: "WU DESTINY FAN PARTY และ WU DESTINY AFTER PARTY",
-    imageUrl: "/image/card3.jpg",
-  },
-  {
-    title: "Exclusive",
-    description:
-      "F✦FOREVER 1st World Tour in Bangkok ระบุชื่อบนบัตรได้เพียง 1 ใบต่อรอบการแสดง",
-    imageUrl: "/image/card4.png",
-  },
-  {
-    title: "Actor",
-    description:
-      "PANTOMIME IN BANGKOK 18 เทศกาลบริหารจินตนาการที่ทุกคนคิดถึง Pantomime in Bangkok",
-    imageUrl: "/image/card5.png",
-  },
+type EventData = {
+  event_id: string;
+  title: string;
+  date: string;
+  location: string;
+  ticket_price: number;
+};
+
+type TicketData = {
+  ticket_id: string;
+  user_id: string;
+  event_id: string;
+  seat_zone: string;
+  status: string;
+};
+
+type SlideCardProps = {
+  title: string;
+  description: string;
+  imageUrl: string;
+};
+
+// แปลงวันที่เป็นรูปแบบภาษาไทย เช่น "27 มีนาคม 2569"
+const formatEventDate = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+// แปลงราคาตั๋ว
+const formatPrice = (price: number) =>
+  price === 0 ? "เข้าฟรีไม่มีค่าใช้จ่าย" : `เริ่มต้นเพียง ${price.toLocaleString("th-TH")} บาท`;
+
+// path รูปเดิมตาม mock (เรียงตามลำดับ index)
+const cardImages = [
+  "/image/card1.jpg",
+  "/image/card2.png",
+  "/image/card3.jpg",
+  "/image/card4.png",
+  "/image/card5.png",
 ];
+
+// นับจำนวนตั๋วที่ถูกจองของแต่ละ event (รวมทุก status)
+const ticketCountMap = (ticketsData as TicketData[]).reduce<Record<string, number>>(
+  (acc, ticket) => {
+    acc[ticket.event_id] = (acc[ticket.event_id] || 0) + 1;
+    return acc;
+  },
+  {},
+);
+
+// สร้าง description แบบยาวขึ้น รวมสถานที่ วันที่ ราคา และจำนวนผู้จอง
+const buildDescription = (event: EventData) => {
+  const bookedCount = ticketCountMap[event.event_id] || 0;
+  return `จัดที่ ${event.location} วันที่ ${formatEventDate(event.date)} มีผู้จองตั๋วเข้าร่วมแล้วกว่า ${bookedCount} ที่นั่ง ${formatPrice(event.ticket_price)} `;
+};
+
+// "ติดเทรนด์" = งานที่มีคนจองตั๋วเข้าเยอะที่สุด
+// เรียงตามจำนวนตั๋วจากมากไปน้อย แล้วหยิบมาตามจำนวนรูปที่มี (5 อันดับแรก)
+const slideData: SlideCardProps[] = [...(eventsData as EventData[])]
+  .sort(
+    (a, b) =>
+      (ticketCountMap[b.event_id] || 0) - (ticketCountMap[a.event_id] || 0),
+  )
+  .slice(0, cardImages.length)
+  .map((event, index) => ({
+    title: event.title,
+    description: buildDescription(event),
+    imageUrl: cardImages[index],
+  }));
 
 const SlideCard = ({ title, description, imageUrl }: SlideCardProps) => {
   return (
@@ -69,7 +113,7 @@ export const SlideList = () => {
 
     setCanScrollLeft(el.scrollLeft > 0);
     setCanScrollRight(
-      el.scrollLeft + el.clientWidth < el.scrollWidth - 1, // -1 กัน rounding error
+      el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
     );
   };
 
@@ -129,7 +173,7 @@ export const SlideList = () => {
       </div>
 
       <div className={styles.slideContainer} ref={containerRef}>
-        {slideMockData.map((slide, index) => (
+        {slideData.map((slide, index) => (
           <SlideCard key={index} {...slide} />
         ))}
       </div>
