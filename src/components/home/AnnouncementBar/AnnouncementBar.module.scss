@@ -147,25 +147,33 @@
   }
 }
 
+/* responsive */
 @include respond(md) {
   .inner {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
     padding: 0.5rem 1.25rem;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
-  .icon,
-  .hash {
-    display: none;
-  }
-}
-
-@include respond(sm) {
+  .cta,
+  .mid,
   .right {
-    display: none;
+    flex-shrink: 0;
+    scroll-snap-align: start;
   }
 
-  .cta {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.75rem;
+  .tagline,
+  .taglineSub {
+    white-space: nowrap;
   }
 }
 
