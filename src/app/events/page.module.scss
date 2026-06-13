@@ -1,0 +1,37 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(60rem 26rem at 15% 30%, rgba(53, 154, 255, 0.06), transparent 60%),
+    radial-gradient(50rem 24rem at 95% 60%, rgba(124, 47, 247, 0.05), transparent 60%),
+    var(--p-0);
+  min-height: 100%;
+}
+
+.header {
+  max-width: 75rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 0;
+}
+
+.pageTitle {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  color: var(--b-900);
+}
+
+.eventsArea {
+  max-width: 75rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 2rem 1rem;
+}
+
+@media (max-width: 768px) {
+  .header,
+  .eventsArea {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}

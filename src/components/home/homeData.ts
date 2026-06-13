@@ -2,6 +2,7 @@ import {
   getAllPosterEvents,
   getPosterById as getPosterByIdFromAdapter,
   getSections as getSectionsFromAdapter,
+  getCategorySections as getCategorySectionsFromAdapter,
 } from "@/lib/event-adapter";
 
 export type PosterEvent = {
@@ -21,6 +22,8 @@ export type PosterEvent = {
   venue?: string;
   /** ticket price in THB */
   price?: number;
+  /** ticket fill ratio 0–1 (sold+paid+reserved / total) */
+  fillRatio?: number;
 };
 
 export type NewsItem = {
@@ -38,6 +41,8 @@ export function getPosterById(id: string): PosterEvent | undefined {
 }
 
 export const SECTIONS: { title: string; events: PosterEvent[] }[] = getSectionsFromAdapter();
+
+export const CATEGORY_SECTIONS: { title: string; events: PosterEvent[] }[] = getCategorySectionsFromAdapter();
 
 export const HERO_SLIDES: {
   id: string;

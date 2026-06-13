@@ -124,6 +124,8 @@ export function getAllPosterEvents(): PosterEvent[] {
   _cache = (rawEvents as RawEvent[]).map((e) => {
     const category = extractCategory(e.title);
     const gradient = pickGradient(category);
+    const c = ticketCounts.get(e.event_id);
+    const fillRatio = c && c.total > 0 ? c.sold / c.total : 0;
 
     return {
       id: e.event_id,
@@ -136,6 +138,7 @@ export function getAllPosterEvents(): PosterEvent[] {
       venue: e.location,
       price: e.ticket_price,
       soldOut: isSoldOut(e.event_id, e.ticket_price, ticketCounts, allCounts),
+      fillRatio,
     } satisfies PosterEvent;
   });
 
@@ -188,4 +191,20 @@ export function getSections(): { title: string; events: PosterEvent[] }[] {
     { title: "ใหม่ล่าสุด", events: newest },
     { title: "ใกล้ถึงวันงาน", events: upcoming },
   ];
+}
+
+/** Group events by category (from title) — for /events page */
+export function getCategorySections(): { title: string; events: PosterEvent[] }[] {
+  const all = getAllPosterEvents();
+  const map = new Map<string, PosterEvent[]>();
+
+  for (const e of all) {
+    const cat = extractCategory(e.title);
+    if (!map.has(cat)) map.set(cat, []);
+    map.get(cat)!.push(e);
+  }
+
+  return Array.from(map.entries())
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([title, events]) => ({ title, events }));
 }
