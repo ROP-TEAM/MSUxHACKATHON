@@ -7,32 +7,32 @@ export const Footer = () => {
       <div className={styles.content}>
         <div className={styles.logo}>
           <Image src="/icon/logo.svg" alt="Logo" width={80} height={60} />
-          <p>Your trusted platform for<br></br> concert and event ticket booking</p>
+          <p>แพลตฟอร์มจองตั๋วคอนเสิร์ตและ<br />งานอีเวนต์ที่คุณวางใจได้</p>
           <div className={styles.qrCode}>
             <Image src="/icon/qrcode.svg" alt="QR Code" width={80} height={80} />
-            <p>Scan to  start your<span><br></br>journey</span></p>
+            <p>สแกนเพื่อเริ่มต้นการเดินทาง<span><br />ของคุณ</span></p>
           </div>
         </div>
         <div className={styles.tab}>
-            <h3>Booking</h3>
-            <p>Book Tickets</p>
-            <p>Search Schedules</p>
-            <p>My Bookings</p>
-            <p>Cancel/Reschedule</p>
+            <h3>การจอง</h3>
+            <p>จองบัตร</p>
+            <p>ค้นหาตารางการแสดง</p>
+            <p>การจองของฉัน</p>
+            <p>ยกเลิก/เปลี่ยนวันที่</p>
         </div>
         <div className={styles.tab}>
-            <h3>Company</h3>
-            <p>About Us</p>
-            <p>News & Promotions</p>
-            <p>Careers</p>
-            <p>Contact</p>
+            <h3>บริษัท</h3>
+            <p>เกี่ยวกับเรา</p>
+            <p>ข่าวสารและโปรโมชัน</p>
+            <p>ร่วมงานกับเรา</p>
+            <p>ติดต่อเรา</p>
         </div>
         <div className={styles.tab}>
-            <h3>Support</h3>
-            <p>Help Center</p>
-            <p>FAQ</p>
-            <p>Terms of Service</p>
-            <p>Privacy Policy</p>
+            <h3>ช่วยเหลือ</h3>
+            <p>ศูนย์ช่วยเหลือ</p>
+            <p>คำถามที่พบบ่อย</p>
+            <p>ข้อกำหนดการใช้บริการ</p>
+            <p>นโยบายความเป็นส่วนตัว</p>
         </div>
       </div>
     </div>

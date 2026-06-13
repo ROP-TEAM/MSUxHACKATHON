@@ -114,7 +114,7 @@ export const SlideList = () => {
         </div>
       )}
 
-      <Image src="/image/background.svg" alt="" fill />
+      <Image src="/image/background.svg" alt="" fill className={styles.bg} />
 
       <div className={styles.header}>
         <div className={styles.logo}>
@@ -125,7 +125,7 @@ export const SlideList = () => {
             height={40}
           />
         </div>
-        <p>Trending Now</p>
+        <p>มาแรงติดเทรนด์</p>
       </div>
 
       <div className={styles.slideContainer} ref={containerRef}>
