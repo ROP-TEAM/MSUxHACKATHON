@@ -50,6 +50,7 @@ export const HERO_SLIDES: {
   title: string;
   highlight: string;
   gradient: [string, string];
+  image:string;
 }[] = [
   {
     id: "h1",
@@ -57,6 +58,7 @@ export const HERO_SLIDES: {
     title: "เปิดประตูสู่ตลาดหุ้นสหรัฐฯ\nเพื่อลูกของคุณ ด้วย",
     highlight: "“บัญชีเสริม”",
     gradient: ["#a8e063", "#8e6bff"],
+    image: "/image/poster1.png",
   },
   {
     id: "h2",
@@ -64,6 +66,7 @@ export const HERO_SLIDES: {
     title: "จองตั๋วง่ายด้วย AI\nไม่พลาดทุกโอกาสใหม่ๆ",
     highlight: "#ไม่พลาดเทรนด์",
     gradient: ["#56ccf2", "#6a5af9"],
+    image: "/image/poster2.png",
   },
   {
     id: "h3",
@@ -71,6 +74,7 @@ export const HERO_SLIDES: {
     title: "ตั๋วเด็ดขอนแก่น พร้อมแล้ว\nกดบัตรก่อนใคร",
     highlight: "#วิศวคอมมข",
     gradient: ["#f857a6", "#ff5858"],
+    image: "/image/poster3.png",
   },
 ];
 

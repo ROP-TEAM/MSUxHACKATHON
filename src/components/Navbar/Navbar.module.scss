@@ -208,6 +208,200 @@
   flex-shrink: 0;
 }
 
+/* ---- hamburger button (hidden on desktop) ---- */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3125rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+
+  span {
+    display: block;
+    width: 1.25rem;
+    height: 0.125rem;
+    background: var(--b-700);
+    border-radius: 1rem;
+    transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s;
+  }
+}
+
+.hamburgerOpen {
+  span:nth-child(1) {
+    transform: translateY(0.4375rem) rotate(45deg);
+  }
+  span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  span:nth-child(3) {
+    transform: translateY(-0.4375rem) rotate(-45deg);
+  }
+}
+
+/* ---- mobile drawer (dime-style: dark partial-screen from top) ---- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+  background: rgba(0, 0, 0, 0.5);
+  animation: backdropIn 0.3s ease;
+}
+
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 80dvh;
+  background: #111;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  animation: drawerIn 0.35s cubic-bezier(0.32, 0, 0.67, 0);
+  will-change: transform;
+}
+
+@keyframes drawerIn {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+.mobileMenuClosing {
+  animation: drawerOut 0.28s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
+@keyframes drawerOut {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+
+/* Drawer header */
+.mobileMenuHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  flex-shrink: 0;
+}
+
+.mobileMenuLogo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.mobileMenuClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+}
+
+/* Drawer nav */
+.mobileMenuNav {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0 2rem;
+  flex: 1;
+
+  /* override global span { color: var(--b-800) } */
+  span {
+    color: inherit;
+  }
+}
+
+/* Nav items — big bold white like dime */
+.mobileNavLink {
+  display: flex;
+  align-items: center;
+  padding: 0 1.75rem;
+  height: 4.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: color 0.15s;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  letter-spacing: -0.01em;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.mobileNavLinkActive {
+  color: var(--p-400);
+
+  &:hover {
+    color: var(--p-300);
+  }
+}
+
+.mobileDropdownTrigger {
+  justify-content: space-between;
+
+  .chevron {
+    color: rgba(255, 255, 255, 0.4);
+    flex-shrink: 0;
+  }
+}
+
+.mobileDropdownChildren {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 0.5rem 0;
+  border-left: 0.1875rem solid var(--p-600);
+  margin: 0 0 0.5rem 1.75rem;
+}
+
+.mobileDropdownItem {
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  height: 3rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 0.15s;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* ---- breakpoints ---- */
 @include respond(md) {
   .navbar {
     padding: 0 1rem;
@@ -222,22 +416,28 @@
     padding: 0.5rem 0.625rem;
     font-size: 0.82rem;
   }
-
 }
 
 @include respond(sm) {
   .center {
-    gap: 0;
+    display: none;
   }
 
-  .navLink {
-    padding: 0.375rem 0.5rem;
-    font-size: 0.75rem;
+  .hamburger {
+    display: flex;
   }
 
-  .dropdownMenu {
-    left: 0;
-    transform: none;
-    min-width: 8.75rem;
+  .right {
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hamburger span {
+    transition: none;
+  }
+
+  .mobileMenu {
+    animation: none;
   }
 }
