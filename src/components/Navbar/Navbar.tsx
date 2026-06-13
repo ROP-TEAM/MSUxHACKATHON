@@ -31,7 +31,7 @@ function isDropdown(item: NavItem): item is NavDropdown {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { key: "home", label: "หน้าแรก", href: "/" },
+  { key: "home", label: "หน้าแรก", href: "/home" },
   {
     key: "concerts",
     label: "คอนเสิร์ต",
