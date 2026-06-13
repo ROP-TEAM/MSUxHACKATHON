@@ -317,7 +317,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
             {/* Drawer header */}
             <div className={styles.mobileMenuHeader}>
               <a href="/" className={styles.mobileMenuLogo} aria-label="iTiket หน้าแรก" onClick={closeMenu}>
-                <Image src="/icon/logoLight.svg" alt="" width={80} height={40} aria-hidden="true" />
+                <Image src="/icon/logo.svg" alt="" width={80} height={40} aria-hidden="true" />
               </a>
               <button
                 type="button"
