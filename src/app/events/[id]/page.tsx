@@ -4,6 +4,9 @@ import EventStarField from "@/components/eventDetail/EventStarField";
 import EventPoster from "@/components/eventDetail/EventPoster";
 import EventHeroInfo from "@/components/eventDetail/EventHeroInfo";
 import EventDetailCard from "@/components/eventDetail/EventDetailCard";
+import EventStageSection from "@/components/eventDetail/EventDetailSection";
+import { SameEvent } from "@/components/sameEvent/SameEvent";
+import { Footer } from "@/components/footer/Footer";
 import styles from "./page.module.scss";
 
 const DESCRIPTION =
@@ -53,6 +56,15 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
         </div>
       </section>
+      
+      <section className={styles.container}>
+        <div className={styles.stage}>
+          <EventStageSection />
+        </div>
+      </section>
+
+      <SameEvent />
+      <Footer />
     </div>
   );
 }

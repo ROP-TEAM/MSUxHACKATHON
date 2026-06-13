@@ -45,6 +45,22 @@
   padding-right: 2rem;
 }
 
+
+
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 200px;
+}
+
+.stage{
+    width: 80%;
+    align-items: center;
+    justify-content: center;
+}
+
 @include respond(md) {
   .hero::before {
     height: 100%;
@@ -63,5 +79,11 @@
   .body {
     width: 100%;
     padding-right: 0;
+  }
+  .container{
+    margin-top: 80px;
+  }
+  .stage{
+    width: 100%;
   }
 }
