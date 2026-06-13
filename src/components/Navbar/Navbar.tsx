@@ -48,8 +48,15 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [hoveredKey, setHoveredKey] = useState<NavKey | null>(null);
   const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuClosing, setMenuClosing] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const centerRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   const setDropdownRef = useCallback(
     (key: string) => (el: HTMLDivElement | null) => {
@@ -70,7 +77,6 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
     if (!anyInside) closeDropdown();
   }
 
-  // Attach outside-click listener once
   const outsideClickRef = useRef<boolean>(false);
   if (!outsideClickRef.current) {
     if (typeof document !== "undefined") {
@@ -78,6 +84,27 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
     }
     outsideClickRef.current = true;
   }
+
+  function closeMenu() {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setMenuClosing(true);
+    closeTimerRef.current = setTimeout(() => {
+      setMenuOpen(false);
+      setMenuClosing(false);
+      setMobileExpanded(null);
+    }, 300);
+  }
+
+  useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); }, []);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && menuOpen) closeMenu();
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuOpen]);
 
   function handleDropdownKeyDown(e: React.KeyboardEvent, key: string) {
     if (e.key === "Escape") {
@@ -102,23 +129,36 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
     if (!textEl) return;
     const parentRect = parent.getBoundingClientRect();
     const textRect = textEl.getBoundingClientRect();
-    const extra = 0.8; // 0.05rem ≈ 0.8px
+    const extra = 0.8;
     setIndicatorStyle({
       left: textRect.left - parentRect.left - extra,
       width: textRect.width + extra * 2,
     });
   }
 
-  // Measure before paint; indicator starts hidden (null) — first measure
-  // creates it at correct position, so no initial animation
   useLayoutEffect(() => {
     measureIndicator(indicatorTarget);
   }, [indicatorTarget]);
 
-  // Re-measure on resize
+  useEffect(() => {
+    if (menuOpen) {
+      const sw = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${sw}px`;
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [menuOpen]);
+
   useEffect(() => {
     function handleResize() {
       measureIndicator(indicatorTarget);
+      if (window.innerWidth > 640) setMenuOpen(false);
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -138,7 +178,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
         />
       </a>
 
-      {/* Center: Nav links + sliding indicator */}
+      {/* Center: Nav links + sliding indicator (desktop) */}
       <div
         ref={centerRef}
         className={styles.center}
@@ -237,7 +277,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
         )}
       </div>
 
-      {/* Right: AI Chat Trigger */}
+      {/* Right: AI Chat Trigger + Hamburger */}
       <div className={styles.right}>
         <button
           className={`${styles.aiTrigger} ${aiOpen ? styles.aiTriggerOpen : ""}`}
@@ -253,7 +293,113 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
             className={styles.aiIcon}
           />
         </button>
+
+        {/* Hamburger — mobile only */}
+        <button
+          ref={hamburgerRef}
+          type="button"
+          className={`${styles.hamburger} ${menuOpen ? styles.hamburgerOpen : ""}`}
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label={menuOpen ? "ปิดเมนู" : "เปิดเมนู"}
+          aria-expanded={menuOpen ? "true" : "false"}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </div>
+
+      {/* Mobile drawer */}
+      {menuOpen && (
+        <>
+          <div className={styles.backdrop} onClick={closeMenu} aria-hidden="true" />
+          <div ref={mobileMenuRef} className={`${styles.mobileMenu}${menuClosing ? ` ${styles.mobileMenuClosing}` : ""}`} role="dialog" aria-label="เมนูนำทาง">
+            {/* Drawer header */}
+            <div className={styles.mobileMenuHeader}>
+              <a href="/" className={styles.mobileMenuLogo} aria-label="iTiket หน้าแรก" onClick={closeMenu}>
+                <Image src="/icon/logoLight.svg" alt="" width={80} height={40} aria-hidden="true" />
+              </a>
+              <button
+                type="button"
+                className={styles.mobileMenuClose}
+                onClick={closeMenu}
+                aria-label="ปิดเมนู"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M4 4L16 16M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Nav items */}
+            <nav className={styles.mobileMenuNav}>
+              {NAV_ITEMS.map((item) =>
+                isDropdown(item) ? (
+                  <div key={item.key}>
+                    <button
+                      type="button"
+                      className={`${styles.mobileNavLink} ${styles.mobileDropdownTrigger} ${
+                        activeKey === item.key ? styles.mobileNavLinkActive : ""
+                      }`}
+                      onClick={() =>
+                        setMobileExpanded(mobileExpanded === item.key ? null : item.key)
+                      }
+                      aria-expanded={String(mobileExpanded === item.key) as "true" | "false"}
+                    >
+                      <span>{item.label}</span>
+                      <svg
+                        className={`${styles.chevron} ${
+                          mobileExpanded === item.key ? styles.chevronOpen : ""
+                        }`}
+                        width="14"
+                        height="14"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M3 5L6 8L9 5"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                    {mobileExpanded === item.key && (
+                      <div className={styles.mobileDropdownChildren}>
+                        {item.children.map((child) => (
+                          <a
+                            key={child.key}
+                            className={`${styles.mobileDropdownItem} ${
+                              activeKey === child.key ? styles.mobileNavLinkActive : ""
+                            }`}
+                            href={child.href}
+                            onClick={closeMenu}
+                          >
+                            <span>{child.label}</span>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <a
+                    key={item.key}
+                    className={`${styles.mobileNavLink} ${
+                      activeKey === item.key ? styles.mobileNavLinkActive : ""
+                    }`}
+                    href={item.href}
+                    onClick={closeMenu}
+                  >
+                    <span>{item.label}</span>
+                  </a>
+                )
+              )}
+            </nav>
+          </div>
+        </>
+      )}
     </nav>
   );
 }
