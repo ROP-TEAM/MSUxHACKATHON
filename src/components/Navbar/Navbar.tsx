@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react";
 import Image from "next/image";
 import styles from "./Navbar.module.scss";
 
@@ -47,7 +47,7 @@ const NAV_ITEMS: NavItem[] = [
 export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [hoveredKey, setHoveredKey] = useState<NavKey | null>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number } | null>(null);
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const centerRef = useRef<HTMLDivElement>(null);
 
@@ -98,18 +98,20 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
   function measureIndicator(key: string | null) {
     if (!key || !centerRef.current) return;
     const parent = centerRef.current;
-    const el = parent.querySelector(`[data-nav-key="${key}"]`) as HTMLElement | null;
-    if (!el) return;
+    const textEl = parent.querySelector(`[data-text-el="${key}"]`) as HTMLElement | null;
+    if (!textEl) return;
     const parentRect = parent.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
+    const textRect = textEl.getBoundingClientRect();
+    const extra = 0.8; // 0.05rem ≈ 0.8px
     setIndicatorStyle({
-      left: elRect.left - parentRect.left,
-      width: elRect.width,
+      left: textRect.left - parentRect.left - extra,
+      width: textRect.width + extra * 2,
     });
   }
 
-  // Measure on target change
-  useEffect(() => {
+  // Measure before paint; indicator starts hidden (null) — first measure
+  // creates it at correct position, so no initial animation
+  useLayoutEffect(() => {
     measureIndicator(indicatorTarget);
   }, [indicatorTarget]);
 
@@ -148,11 +150,18 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
         className={styles.center}
         onMouseLeave={() => setHoveredKey(null)}
       >
-        <div
-          className={styles.indicator}
-          style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
-          aria-hidden="true"
-        />
+        {indicatorStyle !== null && (
+          <div
+            className={styles.indicator}
+            style={{
+              left: indicatorStyle.left,
+              width: indicatorStyle.width,
+              transition:
+                "left 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            }}
+            aria-hidden="true"
+          />
+        )}
 
         {NAV_ITEMS.map((item) =>
           isDropdown(item) ? (
@@ -178,7 +187,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
                 aria-haspopup="true"
                 aria-controls={`dropdown-menu-${item.key}`}
               >
-                {item.label}
+                <span data-text-el={item.key}>{item.label}</span>
                 <svg
                   className={`${styles.chevron} ${
                     activeDropdown === item.key ? styles.chevronOpen : ""
@@ -228,7 +237,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
               href={item.href}
               onMouseEnter={() => setHoveredKey(item.key)}
             >
-              {item.label}
+              <span data-text-el={item.key}>{item.label}</span>
             </a>
           )
         )}
