@@ -1,6 +1,17 @@
+.pageContainer{
+    display: flex;
+    flex-direction: column;
+    
+}
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 200px;
+}
 .stage{
-    width: 60%;
-    height: 300px;
+    width: 80%;
     align-items: center;
     justify-content: center;
 }

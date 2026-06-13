@@ -1,13 +1,170 @@
 "use client";
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { Tooltip } from '@mantine/core';
 import styles from './StageOverview.module.scss';
+import type { Ticket } from '@/app/concert/types';
+
+interface ZoneSummary {
+  total: number;
+  used: number;
+  reserved: number;
+  cancelled: number;
+  refunded: number;
+  paid: number;
+}
 
 interface StageOverviewProps {
   onZoneClick?: (zoneId: string) => void;
+  tickets: Ticket[];
+}
+
+function summarizeByTicketZone(tickets: Ticket[]): Record<string, ZoneSummary> {
+  const map: Record<string, ZoneSummary> = {};
+
+  for (const t of tickets) {
+    const zone = t.seat_zone;
+    if (!map[zone]) {
+      map[zone] = { total: 0, used: 0, reserved: 0, cancelled: 0, refunded: 0, paid: 0 };
+    }
+    map[zone].total += 1;
+
+    switch (t.status) {
+      case "USED": map[zone].used += 1; break;
+      case "RESERVED": map[zone].reserved += 1; break;
+      case "CANCELLED": map[zone].cancelled += 1; break;
+      case "REFUNDED": map[zone].refunded += 1; break;
+      case "PAID": map[zone].paid += 1; break;
+    }
+  }
+
+  return map;
+}
+
+function getSummaryForDiagramZone(
+  diagramZoneId: string,
+  ticketZoneSummary: Record<string, ZoneSummary>
+): ZoneSummary | undefined {
+  if (["A", "B", "C", "D"].includes(diagramZoneId)) {
+    return ticketZoneSummary[diagramZoneId];
+  }
+  return undefined;
+}
+
+function ZoneTooltipContent({ zoneId, summary }: { zoneId: string; summary?: ZoneSummary }) {
+  if (!summary || summary.total === 0) {
+    return (
+      <div style={{ fontSize: 12 }}>
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>Zone {zoneId}</div>
+        <div>ไม่พบข้อมูล</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>Zone {zoneId}</div>
+      <div>total: {summary.total}</div>
+      <div>used: {summary.used}</div>
+      <div>reserved: {summary.reserved}</div>
+      <div>paid: {summary.paid}</div>
+      <div>cancelled: {summary.cancelled}</div>
+      <div>refunded: {summary.refunded}</div>
+    </div>
+  );
+}
+
+// ---- Wrapper ที่จัดการ hover + click-to-pin tooltip ----
+function ZoneTooltip({
+  zoneId,
+  summary,
+  opened,
+  onToggle,
+  onHoverChange,
+  children,
+}: {
+  zoneId: string;
+  summary?: ZoneSummary;
+  opened: boolean;
+  onToggle: () => void;
+  onHoverChange: (hovered: boolean) => void;
+  children: React.ReactNode;
+}) {
+  const hasData = !!summary && summary.total > 0;
+
+  return (
+    <Tooltip
+      label={<ZoneTooltipContent zoneId={zoneId} summary={summary} />}
+      withArrow
+      opened={hasData && opened}
+    >
+      <g
+        onClick={onToggle}
+        onMouseEnter={() => onHoverChange(true)}
+        onMouseLeave={() => onHoverChange(false)}
+        className="cursor-pointer"
+      >
+        {children}
+      </g>
+    </Tooltip>
+  );
+}
+
+function ZoneWedge({
+  block,
+  rIn,
+  rOut,
+  pathClassName,
+  textClassName,
+  summary,
+  onClick,
+  opened,
+  onToggle,
+  onHoverChange,
+  r,
+  getArcPath,
+  getLabelCoords,
+}: {
+  block: { id: string; start: number; end: number };
+  rIn: number;
+  rOut: number;
+  pathClassName: string;
+  textClassName: string;
+  summary?: ZoneSummary;
+  onClick: () => void;
+  opened: boolean;
+  onToggle: () => void;
+  onHoverChange: (hovered: boolean) => void;
+  r: (n: number) => number;
+  getArcPath: (rIn: number, rOut: number, startAngle: number, endAngle: number) => string;
+  getLabelCoords: (rIn: number, rOut: number, startAngle: number, endAngle: number) => { x: number; y: number; angle: number };
+}) {
+  const pathD = getArcPath(rIn, rOut, block.start, block.end);
+  const textPos = getLabelCoords(rIn, rOut, block.start, block.end);
+
+  return (
+    <ZoneTooltip
+      zoneId={block.id}
+      summary={summary}
+      opened={opened}
+      onToggle={() => { onToggle(); onClick(); }}
+      onHoverChange={onHoverChange}
+    >
+      <path d={pathD} className={pathClassName} />
+      <text
+        x={r(textPos.x)}
+        y={r(textPos.y + 3.5)}
+        textAnchor="middle"
+        className={textClassName}
+      >
+        {block.id}
+      </text>
+    </ZoneTooltip>
+  );
 }
 
 export default function StageOverview({
   onZoneClick,
+  tickets,
 }: StageOverviewProps) {
   const width = 800;
   const height = 630;
@@ -119,6 +276,26 @@ export default function StageOverview({
     onZoneClick?.(id);
   };
 
+  // ---- ticket summary ----
+  const ticketZoneSummary = useMemo(() => summarizeByTicketZone(tickets), [tickets]);
+
+  // ---- hover + click-to-pin tooltip state ----
+  const [activeZone, setActiveZone] = useState<string | null>(null);
+  const [hoveredZone, setHoveredZone] = useState<string | null>(null);
+
+  const toggleZone = (id: string) => {
+    setActiveZone((prev) => (prev === id ? null : id));
+  };
+
+  const handleHoverChange = (id: string, hovered: boolean) => {
+    setHoveredZone((prev) => {
+      if (hovered) return id;
+      return prev === id ? null : prev;
+    });
+  };
+
+  const isOpen = (id: string) => activeZone === id || hoveredZone === id;
+
   return (
     <div className="flex flex-col items-center justify-center p-4 bg-[#f8f9fa] rounded-3xl border border-slate-200 shadow-xl overflow-hidden w-full max-w-3xl mx-auto" id="stage-overview-diagram">
 
@@ -138,28 +315,6 @@ export default function StageOverview({
             <line x1={cx + (r1_in - 5) * Math.cos(rad(488.5))} y1={cy + (r1_in - 5) * Math.sin(rad(488.5))} x2={cx + (r1_out + 5) * Math.cos(rad(488.5))} y2={cy + (r1_out + 5) * Math.sin(rad(488.5))} stroke="#ced4da" strokeWidth="3" />
           </g>
 
-          {/* <path
-            d={`M ${cx + (r1_in - 1.5) * Math.cos(rad(345))} ${cy + (r1_in - 1.5) * Math.sin(rad(345))} A ${r1_in - 1.5} ${r1_in - 1.5} 0 0 1 ${cx + (r1_in - 1.5) * Math.cos(rad(555))} ${cy + (r1_in - 1.5) * Math.sin(rad(555))}`}
-            fill="none"
-            stroke="#495057"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
-          <path
-            d={`M ${cx + (r1_out + 2.5) * Math.cos(rad(345))} ${cy + (r1_out + 2.5) * Math.sin(rad(345))} A ${r1_out + 2.5} ${r1_out + 2.5} 0 0 1 ${cx + (r1_out + 2.5) * Math.cos(rad(555))} ${cy + (r1_out + 2.5) * Math.sin(rad(555))}`}
-            fill="none"
-            stroke="#495057"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
-          <path
-            d={`M ${cx + (r2_out + 2.5) * Math.cos(rad(345))} ${cy + (r2_out + 2.5) * Math.sin(rad(345))} A ${r2_out + 2.5} ${r2_out + 2.5} 0 0 1 ${cx + (r2_out + 2.5) * Math.cos(rad(555))} ${cy + (r2_out + 2.5) * Math.sin(rad(555))}`}
-            fill="none"
-            stroke="#495057"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          /> */}
-
           <g fill="#495057">
             <rect x={cx - 15} y={80} width={30} height={390} rx={1} />
             <rect x={180} y={248} width={440} height={20} rx={1} />
@@ -167,39 +322,67 @@ export default function StageOverview({
 
           <g id="standing-floor-zones">
 
-            <path
-              d="M 185,115 L 235,80 L 370,80 L 370,235 L 235,235 L 230,205 L 185,205 Z"
-              className={`${styles.standingZone} transition-all duration-200 cursor-pointer stroke-[4]`}
-              onClick={() => handleBlockClick('B')}
-            />
-            <text x={268} y={150} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">B</text>
-            <text x={268} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
-            <text x={268} y={192} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
+            <ZoneTooltip
+              zoneId="B"
+              summary={getSummaryForDiagramZone("B", ticketZoneSummary)}
+              opened={isOpen("B")}
+              onToggle={() => { toggleZone("B"); handleBlockClick("B"); }}
+              onHoverChange={(h) => handleHoverChange("B", h)}
+            >
+              <path
+                d="M 185,115 L 235,80 L 370,80 L 370,235 L 235,235 L 230,205 L 185,205 Z"
+                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+              />
+              <text x={268} y={150} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">B</text>
+              <text x={268} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
+              <text x={268} y={192} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
+            </ZoneTooltip>
 
-            <path
-              d="M 615,115 L 565,80 L 430,80 L 430,235 L 565,235 L 570,205 L 615,205 Z"
-              className={`${styles.standingZone} transition-all duration-200 cursor-pointer stroke-[4]`}
-              onClick={() => handleBlockClick('A')}
-            />
-            <text x={532} y={150} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">A</text>
-            <text x={532} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
-            <text x={532} y={192} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
+            <ZoneTooltip
+              zoneId="A"
+              summary={getSummaryForDiagramZone("A", ticketZoneSummary)}
+              opened={isOpen("A")}
+              onToggle={() => { toggleZone("A"); handleBlockClick("A"); }}
+              onHoverChange={(h) => handleHoverChange("A", h)}
+            >
+              <path
+                d="M 615,115 L 565,80 L 430,80 L 430,235 L 565,235 L 570,205 L 615,205 Z"
+                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+              />
+              <text x={532} y={150} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">A</text>
+              <text x={532} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
+              <text x={532} y={192} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
+            </ZoneTooltip>
 
-            <path
-              d="M 205,282 L 370,282 L 370,395 L 325,395 L 245,395 L 205,340 Z"
-              className={`${styles.standingZone} transition-all duration-200 cursor-pointer stroke-[4]`}
-              onClick={() => handleBlockClick('D')}
-            />
-            <text x={287} y={335} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">D</text>
-            <text x={287} y={353} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
+            <ZoneTooltip
+              zoneId="D"
+              summary={getSummaryForDiagramZone("D", ticketZoneSummary)}
+              opened={isOpen("D")}
+              onToggle={() => { toggleZone("D"); handleBlockClick("D"); }}
+              onHoverChange={(h) => handleHoverChange("D", h)}
+            >
+              <path
+                d="M 205,282 L 370,282 L 370,395 L 325,395 L 245,395 L 205,340 Z"
+                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+              />
+              <text x={287} y={335} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">D</text>
+              <text x={287} y={353} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
+            </ZoneTooltip>
 
-            <path
-              d="M 595,282 L 430,282 L 430,395 L 475,395 L 555,395 L 595,340 Z"
-              className={`${styles.standingZone} transition-all duration-200 cursor-pointer stroke-[4]`}
-              onClick={() => handleBlockClick('C')}
-            />
-            <text x={513} y={335} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">C</text>
-            <text x={513} y={353} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
+            <ZoneTooltip
+              zoneId="C"
+              summary={getSummaryForDiagramZone("C", ticketZoneSummary)}
+              opened={isOpen("C")}
+              onToggle={() => { toggleZone("C"); handleBlockClick("C"); }}
+              onHoverChange={(h) => handleHoverChange("C", h)}
+            >
+              <path
+                d="M 595,282 L 430,282 L 430,395 L 475,395 L 555,395 L 595,340 Z"
+                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+              />
+              <text x={513} y={335} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">C</text>
+              <text x={513} y={353} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
+            </ZoneTooltip>
           </g>
 
           <g id="stage-arena-platform">
@@ -209,59 +392,45 @@ export default function StageOverview({
           </g>
 
           <g id="ring-1F-wedges">
-            {blocks1F.map((block) => {
-              const pathD = getArcPath(r1_in, r1_out, block.start, block.end);
-              const textPos = getLabelCoords(r1_in, r1_out, block.start, block.end);
-
-              return (
-                <g
-                  key={block.id}
-                  className="cursor-pointer"
-                  onClick={() => handleBlockClick(block.id)}
-                >
-                  <path
-                    d={pathD}
-                    className={`${styles.ring1F} transition-all duration-200 stroke-[#495057] stroke-2`}
-                  />
-                  <text
-  x={r(textPos.x)}
-  y={r(textPos.y + 3.5)}
-  textAnchor="middle"
-  className="font-sans text-[11px] font-black select-none pointer-events-none fill-white"
->
-  {block.id}
-</text>
-                </g>
-              );
-            })}
+            {blocks1F.map((block) => (
+              <ZoneWedge
+                key={block.id}
+                block={block}
+                rIn={r1_in}
+                rOut={r1_out}
+                pathClassName={`${styles.ring1F} transition-all duration-200 stroke-[#495057] stroke-2`}
+                textClassName="font-sans text-[11px] font-black select-none pointer-events-none fill-white"
+                summary={getSummaryForDiagramZone(block.id, ticketZoneSummary)}
+                onClick={() => handleBlockClick(block.id)}
+                opened={isOpen(block.id)}
+                onToggle={() => toggleZone(block.id)}
+                onHoverChange={(h) => handleHoverChange(block.id, h)}
+                r={r}
+                getArcPath={getArcPath}
+                getLabelCoords={getLabelCoords}
+              />
+            ))}
           </g>
 
           <g id="ring-2F-wedges">
-            {blocks2F.map((block) => {
-              const pathD = getArcPath(r2_in, r2_out, block.start, block.end);
-              const textPos = getLabelCoords(r2_in, r2_out, block.start, block.end);
-
-              return (
-                <g
-                  key={block.id}
-                  className="cursor-pointer"
-                  onClick={() => handleBlockClick(block.id)}
-                >
-                  <path
-                    d={pathD}
-                    className={`${styles.ring2F} transition-all duration-200 stroke-[#495057] stroke-2`}
-                  />
-                  <text
-                    x={textPos.x}
-                    y={textPos.y + 3.5}
-                    textAnchor="middle"
-                    className="font-sans text-[10px] font-black select-none pointer-events-none fill-slate-900"
-                  >
-                    {block.id}
-                  </text>
-                </g>
-              );
-            })}
+            {blocks2F.map((block) => (
+              <ZoneWedge
+                key={block.id}
+                block={block}
+                rIn={r2_in}
+                rOut={r2_out}
+                pathClassName={`${styles.ring2F} transition-all duration-200 stroke-[#495057] stroke-2`}
+                textClassName="font-sans text-[10px] font-black select-none pointer-events-none fill-slate-900"
+                summary={getSummaryForDiagramZone(block.id, ticketZoneSummary)}
+                onClick={() => handleBlockClick(block.id)}
+                opened={isOpen(block.id)}
+                onToggle={() => toggleZone(block.id)}
+                onHoverChange={(h) => handleHoverChange(block.id, h)}
+                r={r}
+                getArcPath={getArcPath}
+                getLabelCoords={getLabelCoords}
+              />
+            ))}
           </g>
 
         </svg>
