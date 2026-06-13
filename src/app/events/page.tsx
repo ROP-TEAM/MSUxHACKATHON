@@ -8,9 +8,7 @@ const CATEGORIES = CATEGORY_SECTIONS.map((s) => s.title);
 const EventsPage = () => {
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 className={styles.pageTitle}>กิจกรรมทั้งหมด</h1>
-      </div>
+      <div className={styles.hero} />
 
       <div className={styles.eventsArea}>
         <EventsPageClient allEvents={ALL_POSTERS} categories={CATEGORIES} />

@@ -1,35 +1,61 @@
 .page {
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(60rem 26rem at 15% 30%, rgba(53, 154, 255, 0.06), transparent 60%),
-    radial-gradient(50rem 24rem at 95% 60%, rgba(124, 47, 247, 0.05), transparent 60%),
-    var(--p-0);
+  background: var(--p-0);
   min-height: 100%;
 }
 
-.header {
-  max-width: 75rem;
+.hero {
   width: 100%;
-  margin: 0 auto;
-  padding: 2.5rem 2rem 0;
-}
+  height: 13rem;
+  background: #1b1e3e;
+  position: relative;
+  overflow: hidden;
 
-.pageTitle {
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 800;
-  color: var(--b-900);
+  &::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 220%;
+    background: radial-gradient(
+      ellipse at top,
+      rgba(99, 60, 220, 0.45) 0%,
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -20%;
+    right: 8%;
+    width: 40%;
+    height: 130%;
+    background: radial-gradient(
+      ellipse,
+      rgba(53, 154, 255, 0.22) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
 }
 
 .eventsArea {
   max-width: 75rem;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem 2rem 1rem;
+  padding: 1.75rem 2rem 2.5rem;
 }
 
 @media (max-width: 768px) {
-  .header,
+  .hero {
+    height: 9rem;
+  }
+
   .eventsArea {
     padding-left: 1.25rem;
     padding-right: 1.25rem;

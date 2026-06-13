@@ -1,28 +1,6 @@
 import type { PosterEvent } from "../homeData";
+import PosterCard from "@/components/ui/PosterCard/PosterCard";
 import styles from "./EventSectionRow.module.scss";
-
-function PosterCard({ event }: { event: PosterEvent }) {
-  return (
-    <a className={styles.card} href={`/events/${event.id}`}>
-      <div
-        className={styles.poster}
-        style={
-          event.image
-            ? { backgroundImage: `url(${event.image})`, backgroundSize: "cover", backgroundPosition: "center" }
-            : { background: `linear-gradient(150deg, ${event.gradient[0]}, ${event.gradient[1]})` }
-        }
-      >
-        <span className={styles.sheen} aria-hidden="true" />
-        {event.soldOut && <span className={styles.soldOut}>SOLD OUT</span>}
-        <div className={styles.posterText}>
-          <strong className={styles.posterTitle}>{event.title}</strong>
-          <span className={styles.posterSub}>{event.subtitle}</span>
-          <span className={styles.posterDate}>{event.date}</span>
-        </div>
-      </div>
-    </a>
-  );
-}
 
 type Props = {
   title: string;
@@ -43,7 +21,7 @@ export default function EventSectionRow({ title, events }: Props) {
 
       <div className={styles.rail}>
         {events.map((event, i) => (
-          <PosterCard key={`${event.id}-${i}`} event={event} />
+          <PosterCard key={`${event.id}-${i}`} event={event} className={styles.railCard} />
         ))}
       </div>
     </section>
