@@ -1,0 +1,53 @@
+.container{
+    height: 380px;
+    background-color: var(--b-700);
+    display: flex;
+    align-items: center;
+    color: var(--p-0)
+}
+
+.content{
+    height: 250px;
+    width: 60%;
+    background-color: var(--b-700);
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 3rem;
+}
+.logo{
+    display: flex;
+    flex-direction: column;
+    p{
+        color: var(--p-0);
+        margin-bottom: 1rem;
+    }
+}
+.qrCode{
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin: auto;
+    p{
+        font-size: 1rem;
+        font-weight: 800;
+        width: 100px;
+        line-height: 1.2rem;
+        span{
+            color: var(--p-400);
+        }
+    }
+}
+
+.tab{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    h3{
+        color: var(--p-400);
+    }
+    p{
+        color: var(--p-0);
+    }
+}
