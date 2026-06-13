@@ -22,13 +22,13 @@ export default function EventDetailCard({ subtitle, date, venue, price, soldOut 
         <ul className={styles.meta}>
           <li className={styles.metaRow}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <rect x="3" y="4.5" width="14" height="12.5" rx="2" stroke="currentColor" strokeWidth="1.5" />
+              <rect x="3" y="4.5" width="16" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />
               <path d="M3 8H17M7 3V6M13 3V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <span>{date}</span>
           </li>
           <li className={styles.metaRow}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <svg width="23" height="23" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M10 17C10 17 16 12.5 16 8.5C16 5.46 13.31 3 10 3C6.69 3 4 5.46 4 8.5C4 12.5 10 17 10 17Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
               <circle cx="10" cy="8.5" r="2" stroke="currentColor" strokeWidth="1.5" />
             </svg>

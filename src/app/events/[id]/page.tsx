@@ -10,11 +10,11 @@ import { Footer } from "@/components/footer/footer";
 import styles from "./page.module.scss";
 
 const DESCRIPTION =
-  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. " +
-  "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, " +
-  "when an unknown printer took a galley of type and scrambled it to make a type " +
-  "specimen book. It has survived not only five centuries, but also the leap into " +
-  "electronic typesetting, remaining essentially unchanged.";
+  "จองบัตรเข้าชมงานได้อย่างสะดวกและรวดเร็วผ่านระบบออนไลน์ เพียงเลือกโซนที่นั่งที่ต้องการ " +
+  "ตรวจสอบราคาและจำนวนที่นั่งคงเหลือแบบเรียลไทม์ ก่อนดำเนินการชำระเงินผ่านช่องทางที่ปลอดภัย " +
+  "หลังจากยืนยันการสั่งซื้อสำเร็จ ระบบจะจัดส่ง E-Ticket ไปยังอีเมลและบัญชีของท่านโดยอัตโนมัติ " +
+  "สามารถนำบัตรอิเล็กทรอนิกส์ไปแสดงที่หน้างานเพื่อสแกนเข้าร่วมกิจกรรมได้ทันที " +
+  "โดยไม่ต้องพิมพ์บัตรหรือต่อแถวรับบัตรล่วงหน้าให้เสียเวลา";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -63,7 +63,7 @@ export default async function EventDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <SameEvent />
+      <SameEvent currentEventId={id} />
       <Footer />
     </div>
   );
