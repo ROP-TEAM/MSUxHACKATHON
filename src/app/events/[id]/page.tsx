@@ -28,7 +28,7 @@ export default async function EventDetailPage({ params }: Props) {
   return (
     <div className={styles.page} style={{ ["--accent" as string]: accent }}>
       <section className={styles.hero}>
-        <EventStarField />
+        <EventStarField gradient={event.gradient} />
 
         <div className={styles.heroInner}>
           <h1 className={styles.title}>{event.title}</h1>

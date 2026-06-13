@@ -1,10 +1,10 @@
 "use client";
-import StageOverview from "@/components/stageOverview/StageOverview";
+import StageOverview from "@/components/StageOverview/StageOverview";
 import styles from "./page.module.scss";
 import ticketsData from "@/data/event_tickets.json";
 import { Ticket } from "./types";
 import { SameEvent } from "@/components/sameEvent/SameEvent";
-import { Footer } from "@/components/footer/Footer";
+import { Footer } from "@/components/footer/footer";
 const ConcertPage = () => {
   return (
     <div className={styles.pageContainer}>

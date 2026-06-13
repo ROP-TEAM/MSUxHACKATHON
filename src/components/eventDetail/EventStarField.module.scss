@@ -13,10 +13,8 @@
 
 .star {
   position: absolute;
-  background-color: var(--accent);
   -webkit-mask: url("/icon/star.svg") no-repeat center / contain;
   mask: url("/icon/star.svg") no-repeat center / contain;
-  filter: drop-shadow(0 0 1.5rem var(--accent));
 }
 
 @include respond(md) {

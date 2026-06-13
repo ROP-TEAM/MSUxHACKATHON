@@ -9,6 +9,6 @@ export default function StageOverviewClient() {
   };
 
   return (
-    <StageOverview onZoneClick={handleZoneClick} />
+    <StageOverview tickets={[]} onZoneClick={handleZoneClick} />
   );
 }

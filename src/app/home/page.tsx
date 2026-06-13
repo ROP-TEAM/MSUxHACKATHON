@@ -1,4 +1,4 @@
-import { Footer } from "@/components/footer/Footer";
+import { Footer } from "@/components/footer/footer";
 import HeroCarousel from "@/components/home/HeroCarousel/HeroCarousel";
 import AnnouncementBar from "@/components/home/AnnouncementBar/AnnouncementBar";
 import EventSectionRow from "@/components/home/EventSectionRow/EventSectionRow";
