@@ -6,7 +6,7 @@ import EventHeroInfo from "@/components/eventDetail/EventHeroInfo";
 import EventDetailCard from "@/components/eventDetail/EventDetailCard";
 import EventStageSection from "@/components/eventDetail/EventDetailSection";
 import { SameEvent } from "@/components/sameEvent/SameEvent";
-import { Footer } from "@/components/footer/Footer";
+import { Footer } from "@/components/footer/footer";
 import styles from "./page.module.scss";
 
 const DESCRIPTION =

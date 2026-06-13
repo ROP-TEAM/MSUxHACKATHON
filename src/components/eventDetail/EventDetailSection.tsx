@@ -1,5 +1,5 @@
 "use client";
-import StageOverview from "@/components/stageOverview/StageOverview";
+import StageOverview from "@/components/StageOverview/StageOverview";
 import ticketsData from "@/data/event_tickets.json";
 import { Ticket } from "@/app/concert/types";
 
