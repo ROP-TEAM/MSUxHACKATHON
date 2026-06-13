@@ -31,8 +31,6 @@ export default async function EventDetailPage({ params }: Props) {
         <EventStarField gradient={event.gradient} />
 
         <div className={styles.heroInner}>
-          <h1 className={styles.title}>{event.title}</h1>
-
           <div className={styles.columns}>
             <EventPoster
               title={event.title}

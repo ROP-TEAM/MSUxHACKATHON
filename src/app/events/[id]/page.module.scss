@@ -25,7 +25,7 @@
 .heroInner {
   position: relative;
   z-index: 1;
-  max-width: 68rem;
+  max-width: 75rem;
   margin: 0 auto;
   padding: 2.5rem 2rem 0;
 }
@@ -34,6 +34,7 @@
   display: flex;
   gap: 3rem;
   align-items: flex-start;
+  padding-top: 5rem;
 }
 
 .body {
@@ -41,17 +42,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-}
-
-.title {
-  position: relative;
-  z-index: 1;
-  margin-bottom: 1.25rem;
-  color: #fff;
-  font-size: clamp(2rem, 4vw, 2.75rem);
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
+  padding-right: 2rem;
 }
 
 @include respond(md) {
@@ -63,10 +54,6 @@
     padding: 2rem 1.25rem 0;
   }
 
-  .title {
-    text-align: center;
-  }
-
   .columns {
     flex-direction: column;
     gap: 1.5rem;
@@ -75,5 +62,6 @@
 
   .body {
     width: 100%;
+    padding-right: 0;
   }
 }

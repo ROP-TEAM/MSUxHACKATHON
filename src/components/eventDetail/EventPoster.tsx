@@ -11,6 +11,7 @@ type Props = {
 export default function EventPoster({ title, image, gradient, soldOut }: Props) {
   return (
     <div className={styles.posterCol}>
+      <h1 className={styles.title}>{title}</h1>
       <div className={styles.poster}>
         {image ? (
           <Image src={image} alt={title} fill sizes="380px" className={styles.posterImg} priority />

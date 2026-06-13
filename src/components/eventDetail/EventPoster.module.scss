@@ -4,6 +4,15 @@
   flex: 0 0 22.5rem;
 }
 
+.title {
+  margin-bottom: 1.25rem;
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
 .poster {
   position: relative;
   width: 22.5rem;
@@ -40,6 +49,10 @@
 @include respond(md) {
   .posterCol {
     flex: 0 0 auto;
+  }
+
+  .title {
+    text-align: center;
   }
 
   .poster {
