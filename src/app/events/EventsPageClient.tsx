@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { PosterEvent } from "@/components/home/homeData";
 import PosterCard from "@/components/ui/PosterCard/PosterCard";
 import styles from "./EventsPageClient.module.scss";
@@ -85,6 +85,11 @@ export default function EventsPageClient({ allEvents }: Props) {
   const [dateFilter, setDateFilter] = useState<DateRange>("all");
   const [venueFilter, setVenueFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [visiblePage, setVisiblePage] = useState(1);
+  const [gridExiting, setGridExiting] = useState(false);
+  const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (exitTimer.current) clearTimeout(exitTimer.current); }, []);
 
   const now = useMemo(() => new Date("2026-06-14T00:00:00Z"), []);
   const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
@@ -139,8 +144,8 @@ export default function EventsPageClient({ allEvents }: Props) {
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const currentPage = Math.min(page, totalPages);
   const pageEvents = filtered.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
+    (visiblePage - 1) * ITEMS_PER_PAGE,
+    visiblePage * ITEMS_PER_PAGE,
   );
 
   const paginationRange = useMemo(
@@ -148,7 +153,23 @@ export default function EventsPageClient({ allEvents }: Props) {
     [currentPage, totalPages],
   );
 
-  const resetPage = () => setPage(1);
+  function resetPage() {
+    if (exitTimer.current) clearTimeout(exitTimer.current);
+    setPage(1);
+    setVisiblePage(1);
+    setGridExiting(false);
+  }
+
+  function changePage(next: number) {
+    if (next === visiblePage || gridExiting) return;
+    if (exitTimer.current) clearTimeout(exitTimer.current);
+    setGridExiting(true);
+    setPage(next);
+    exitTimer.current = setTimeout(() => {
+      setVisiblePage(next);
+      setGridExiting(false);
+    }, 280);
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -216,7 +237,10 @@ export default function EventsPageClient({ allEvents }: Props) {
 
       {/* grid */}
       {pageEvents.length > 0 ? (
-        <div className={styles.grid}>
+        <div
+          className={`${styles.grid}${gridExiting ? ` ${styles.gridExit}` : ""}`}
+          key={visiblePage}
+        >
           {pageEvents.map((event) => (
             <PosterCard key={event.id} event={event} />
           ))}
@@ -238,7 +262,7 @@ export default function EventsPageClient({ allEvents }: Props) {
                 key={p}
                 type="button"
                 className={`${styles.pageBtn} ${currentPage === p ? styles.pageBtnActive : ""}`}
-                onClick={() => setPage(p as number)}
+                onClick={() => changePage(p as number)}
               >
                 {p}
               </button>
