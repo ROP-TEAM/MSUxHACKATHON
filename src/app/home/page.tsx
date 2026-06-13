@@ -2,7 +2,8 @@ import { Footer } from "@/components/footer/footer";
 import HeroCarousel from "@/components/home/HeroCarousel/HeroCarousel";
 import AnnouncementBar from "@/components/home/AnnouncementBar/AnnouncementBar";
 import EventSectionRow from "@/components/home/EventSectionRow/EventSectionRow";
-import NewsSection from "@/components/home/NewsSection/NewsSection";
+import { SlideList } from "@/components/slideCard/SlideCard";
+// import NewsSection from "@/components/home/NewsSection/NewsSection";
 import { SECTIONS } from "@/components/home/homeData";
 import styles from "./page.module.scss";
 
@@ -27,7 +28,7 @@ const Home = () => {
         </a>
       </div>
 
-      <NewsSection />
+      <SlideList />
 
       <Footer />
     </div>

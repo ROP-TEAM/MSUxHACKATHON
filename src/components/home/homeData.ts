@@ -9,6 +9,7 @@ export type PosterEvent = {
   date: string;
   /** two-stop gradient seed for the poster face */
   gradient: [string, string];
+  image?: string;
   soldOut?: boolean;
 };
 
@@ -21,11 +22,11 @@ export type NewsItem = {
 };
 
 const POSTERS: PosterEvent[] = [
-  { id: "p1", title: "LIGHT AS ONE", subtitle: "Reunion Concert", date: "26 ก.ค. 2026", gradient: ["#3a3f4b", "#11131a"], soldOut: true },
-  { id: "p2", title: "ONE OF JUNE", subtitle: "Ryeowook Concert", date: "9 ส.ค. 2026", gradient: ["#5fa8e6", "#bfe3ff"] },
-  { id: "p3", title: "LING ORM", subtitle: "1st Fan Concert", date: "22 ส.ค. 2026", gradient: ["#e85d9c", "#7b2ff7"] },
-  { id: "p4", title: "THE DREAMER", subtitle: "Live in Bangkok", date: "12 ก.ย. 2026", gradient: ["#ff7a59", "#c81d77"] },
-  { id: "p5", title: "WINTER SEASON", subtitle: "Final Concert", date: "4 ต.ค. 2026", gradient: ["#1e2a44", "#0a0e1a"] },
+  { id: "p1", title: "LIGHT AS ONE", subtitle: "Reunion Concert", date: "26 ก.ค. 2026", gradient: ["#3a3f4b", "#11131a"], image: "/image/card1.jpg", soldOut: true },
+  { id: "p2", title: "ONE OF JUNE", subtitle: "Ryeowook Concert", date: "9 ส.ค. 2026", gradient: ["#5fa8e6", "#bfe3ff"], image: "/image/card2.png" },
+  { id: "p3", title: "LING ORM", subtitle: "1st Fan Concert", date: "22 ส.ค. 2026", gradient: ["#e85d9c", "#7b2ff7"], image: "/image/card3.jpg" },
+  { id: "p4", title: "THE DREAMER", subtitle: "Live in Bangkok", date: "12 ก.ย. 2026", gradient: ["#ff7a59", "#c81d77"], image: "/image/card4.png" },
+  { id: "p5", title: "WINTER SEASON", subtitle: "Final Concert", date: "4 ต.ค. 2026", gradient: ["#1e2a44", "#0a0e1a"], image: "/image/card5.png" },
   { id: "p6", title: "PANTO MIME", subtitle: "in Wonder", date: "8 ส.ค. 2026", gradient: ["#ff4d8d", "#ffb347"] },
   { id: "p7", title: "NEON NIGHTS", subtitle: "World Tour", date: "19 ต.ค. 2026", gradient: ["#00c2a8", "#1a3a6b"] },
 ];
