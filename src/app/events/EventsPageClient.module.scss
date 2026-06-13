@@ -28,16 +28,15 @@
 .filterSelect {
   -webkit-appearance: none;
   appearance: none;
-  padding: 0.45rem 2rem 0.45rem 0.875rem;
+  padding: 0.45rem 0 0.45rem 0.875rem;
   border-radius: 999px;
-  border: 1px solid var(--b-200);
+  border: 1px solid var(--b-0);
   background: var(--b-0);
   color: var(--b-700);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   outline: 0;
-  transition: border-color 0.15s, box-shadow 0.15s;
 
   &:hover {
     border-color: var(--b-400);
@@ -45,7 +44,6 @@
 
   &:focus {
     border-color: var(--p-400);
-    box-shadow: 0 0 0 3px rgba(124, 47, 247, 0.1);
   }
 }
 
@@ -62,15 +60,14 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.45rem 0.875rem;
-  border-radius: 999px;
+  border-radius: 10px;
   background: var(--b-50);
-  border: 1px solid var(--b-200);
-  min-width: 14rem;
+  border: 1px solid var(--b-50);
+  min-width: 19rem;
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:focus-within {
     border-color: var(--p-400);
-    box-shadow: 0 0 0 3px rgba(124, 47, 247, 0.1);
   }
 }
 
@@ -117,9 +114,10 @@
 
 /* ---- section heading ---- */
 .sectionTitle {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
+  margin-top: 40px;
+  margin-left: 20px;
+  font-size: 1.15rem;
+  font-weight: 600;
   color: var(--b-900);
 }
 
