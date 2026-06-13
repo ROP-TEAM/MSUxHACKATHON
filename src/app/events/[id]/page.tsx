@@ -56,10 +56,10 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
         </div>
       </section>
-      
+
       <section className={styles.container}>
         <div className={styles.stage}>
-          <EventStageSection />
+          <EventStageSection eventId={id} />
         </div>
       </section>
 

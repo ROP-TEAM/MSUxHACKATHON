@@ -1,14 +1,17 @@
-
 'use client';
 
 import StageOverview from './StageOverview';
 
-export default function StageOverviewClient() {
+interface StageOverviewClientProps {
+  eventId: string;
+}
+
+export default function StageOverviewClient({ eventId }: StageOverviewClientProps) {
   const handleZoneClick = (id: string) => {
     console.log(id);
   };
 
   return (
-    <StageOverview tickets={[]} onZoneClick={handleZoneClick} />
+    <StageOverview eventId={eventId} onZoneClick={handleZoneClick} />
   );
 }
