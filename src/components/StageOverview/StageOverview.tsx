@@ -265,7 +265,6 @@ export default function StageOverview({
               setActiveId={(id) => { setActiveId(id); if (id) onZoneClick?.("Standing"); }}
             >
               <path d="M 185,115 L 235,80 L 370,80 L 370,235 L 235,235 L 230,205 L 185,205 Z" className={`${styles.standingZone} transition-all duration-200 stroke-[4]`} />
-              <text x={268} y={150} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">B</text>
               <text x={268} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
               <text x={268} y={184} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
             </ZoneTooltip>
@@ -279,7 +278,6 @@ export default function StageOverview({
               setActiveId={(id) => { setActiveId(id); if (id) onZoneClick?.("Standing"); }}
             >
               <path d="M 615,115 L 565,80 L 430,80 L 430,235 L 565,235 L 570,205 L 615,205 Z" className={`${styles.standingZone} transition-all duration-200 stroke-[4]`} />
-              <text x={532} y={150} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">A</text>
               <text x={532} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
               <text x={532} y={184} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
             </ZoneTooltip>
