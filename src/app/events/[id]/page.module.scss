@@ -1,0 +1,79 @@
+@use "../../../styles/responsive" as *;
+
+.page {
+  position: relative;
+  min-height: 100%;
+  background: var(--b-0);
+}
+
+.hero {
+  position: relative;
+
+  // black band behind the upper (hero text + poster top) region
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 24rem;
+    background: radial-gradient(120% 140% at 50% 0%, #16131c 0%, #0a0a0d 70%);
+    z-index: 0;
+  }
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 0;
+}
+
+.columns {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1.25rem;
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+@include respond(md) {
+  .hero::before {
+    height: 100%;
+  }
+
+  .heroInner {
+    padding: 2rem 1.25rem 0;
+  }
+
+  .title {
+    text-align: center;
+  }
+
+  .columns {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .body {
+    width: 100%;
+  }
+}

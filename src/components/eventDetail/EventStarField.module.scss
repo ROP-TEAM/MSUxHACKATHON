@@ -1,0 +1,26 @@
+@use "../../styles/responsive" as *;
+
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24rem;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  background-color: var(--accent);
+  -webkit-mask: url("/icon/star.svg") no-repeat center / contain;
+  mask: url("/icon/star.svg") no-repeat center / contain;
+  filter: drop-shadow(0 0 1.5rem var(--accent));
+}
+
+@include respond(md) {
+  .stars {
+    height: 100%;
+  }
+}

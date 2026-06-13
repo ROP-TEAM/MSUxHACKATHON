@@ -1,0 +1,49 @@
+@use "../../styles/responsive" as *;
+
+.posterCol {
+  flex: 0 0 22.5rem;
+}
+
+.poster {
+  position: relative;
+  width: 22.5rem;
+  aspect-ratio: 3 / 4;
+  margin-top: 0.5rem;
+  border-radius: 0.125rem;
+  overflow: hidden;
+  box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.55);
+}
+
+.posterImg {
+  object-fit: cover;
+}
+
+.posterFallback {
+  position: absolute;
+  inset: 0;
+}
+
+.soldOut {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.35rem;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0.25rem 0.75rem rgba(229, 57, 53, 0.5);
+}
+
+@include respond(md) {
+  .posterCol {
+    flex: 0 0 auto;
+  }
+
+  .poster {
+    width: min(20rem, 80vw);
+    margin-top: 0;
+  }
+}

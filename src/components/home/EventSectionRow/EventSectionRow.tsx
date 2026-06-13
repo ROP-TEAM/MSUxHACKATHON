@@ -3,7 +3,7 @@ import styles from "./EventSectionRow.module.scss";
 
 function PosterCard({ event }: { event: PosterEvent }) {
   return (
-    <a className={styles.card} href={`/events#${event.id}`}>
+    <a className={styles.card} href={`/events/${event.id}`}>
       <div
         className={styles.poster}
         style={
