@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-13T20:30:00+07:00",
+  "title": "Design System: MSU x Hackathon",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Concert Blue", "canonical": "#359aff", "tonalRamp": ["#021b38", "#06386d", "#0a54a1", "#0f6dd0", "#1f86f2", "#359aff", "#73b7ff", "#a9d3ff", "#cfe7ff", "#e8f3ff"] },
+      "admin-accent": { "role": "secondary", "displayName": "Admin Purple", "canonical": "#7c3aed", "tonalRamp": ["#1a0533", "#2d0b5e", "#3b0d82", "#4c1d95", "#6d28d9", "#7c3aed", "#a78bfa", "#c4b5fd", "#ddd6fe", "#f5f3ff"] },
+      "neutral-bg": { "role": "neutral", "displayName": "Pure White", "canonical": "#ffffff", "tonalRamp": ["#000000", "#121314", "#1f2123", "#2e3133", "#464b4f", "#646b70", "#8e9499", "#b7bcc0", "#d9dcde", "#eef0f1", "#f8f9fa", "#ffffff"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles, hero sections." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings, card titles." },
+      "body": { "displayName": "Body", "purpose": "Prose, descriptions. Max 65–75ch." },
+      "label": { "displayName": "Label", "purpose": "Chips, badges, metadata, tab text." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-state", "value": "cubic-bezier(0.25, 0.46, 0.45, 0.94)", "purpose": "State transitions (hover, focus, active) — 0.15–0.2s duration." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "AI Chat Trigger",
+      "kind": "button",
+      "refersTo": "ai-chat-trigger",
+      "description": "Pill-shaped floating button that opens the AI chat panel.",
+      "html": "<button class=\"ds-ai-trigger\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 28 26\" fill=\"none\"><path d=\"M15.999 14.448c0 .296-.088.586-.253.833s-.399.439-.673.552a1.43 1.43 0 0 1-.867.086 1.43 1.43 0 0 1-.768-.411 1.43 1.43 0 0 1-.41-.767 1.43 1.43 0 0 1 .085-.867c.114-.274.306-.508.553-.673a1.43 1.43 0 0 1 .833-.253c.398 0 .78.158 1.061.44.281.28.44.662.44 1.06Zm5.5-1.5c-.297 0-.587.088-.833.253s-.44.399-.553.673a1.43 1.43 0 0 0-.086.867c.058.29.201.558.41.767.21.21.477.353.768.41.291.058.593.029.867-.085a1.43 1.43 0 0 0 .673-.552c.165-.247.253-.537.253-.834 0-.398-.158-.78-.44-1.06a1.5 1.5 0 0 0-1.06-.44Zm6.417 10.434c.102.345.109.71.02 1.059-.089.348-.27.666-.524.92s-.572.435-.92.524a2.09 2.09 0 0 1-1.06-.02l-3.088-.909c-1.218.588-2.542.922-3.893.983a12.7 12.7 0 0 1-9.965-4.627A12.7 12.7 0 0 1 8.803 4.12a12.7 12.7 0 0 1 4.763-1.1c1.327-.04 2.649.186 3.888.663 1.239.477 2.37 1.196 3.329 2.116a12.7 12.7 0 0 1 2.576 3.647 1.5 1.5 0 0 1 .28 1.573l-1.083 2.956c.527.418.983.89 1.36 1.405s.693 1.088.879 1.676l.909 3.089Z\" fill=\"white\"/></svg><span>Ask AI</span></button>",
+      "css": ".ds-ai-trigger { display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: #359aff; color: #fff; border: none; border-radius: 24px; font-family: 'Noto Sans Thai', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); } .ds-ai-trigger:hover { background: #0f6dd0; transform: translateY(-1px); } .ds-ai-trigger:focus-visible { outline: 2px solid #359aff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Suggestion Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Clickable suggestion card for AI prompts.",
+      "html": "<button class=\"ds-chip\"><span class=\"ds-chip-icon\">💬</span><span>มี Event อะไรบ้างในปีนี้?</span></button>",
+      "css": ".ds-chip { display: flex; align-items: flex-start; gap: 8px; padding: 11px 13px; border-radius: 12px; border: 1px solid #eef0f1; background: #f8f9fa; cursor: pointer; text-align: left; font-family: 'Noto Sans Thai', sans-serif; font-size: 0.78rem; color: #2e3133; line-height: 1.5; width: 100%; transition: background 0.15s, border-color 0.15s; } .ds-chip:hover { background: #e8f3ff; border-color: #a9d3ff; } .ds-chip:focus-visible { outline: 2px solid #359aff; outline-offset: 2px; } .ds-chip-icon { flex-shrink: 0; font-size: 13px; margin-top: 1px; }"
+    },
+    {
+      "name": "Chat Bubble (User)",
+      "kind": "custom",
+      "refersTo": "chat-bubble-user",
+      "description": "User message bubble in AI chat.",
+      "html": "<div style=\"display:flex;justify-content:flex-end\"><p class=\"ds-msg-user\">มี Event อะไรบ้างในปีนี้?</p></div>",
+      "css": ".ds-msg-user { background: #359aff; color: #fff; padding: 9px 13px; border-radius: 16px 16px 4px 16px; font-family: 'Noto Sans Thai', sans-serif; font-size: 0.78rem; line-height: 1.5; margin: 0; max-width: 85%; white-space: pre-wrap; }"
+    },
+    {
+      "name": "Chat Bubble (AI)",
+      "kind": "custom",
+      "refersTo": "chat-bubble-ai",
+      "description": "AI message bubble in chat.",
+      "html": "<div style=\"display:flex;align-items:flex-start;gap:7px\"><span class=\"ds-ai-avatar\">✦</span><p class=\"ds-msg-ai\">มีคอนเสิร์ตทั้งหมด 5 งานในปีนี้ครับ</p></div>",
+      "css": ".ds-ai-avatar { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #359aff, #0f6dd0); color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; margin-top: 2px; } .ds-msg-ai { background: #f8f9fa; color: #1f2123; padding: 9px 13px; border-radius: 4px 16px 16px 16px; font-family: 'Noto Sans Thai', sans-serif; font-size: 0.78rem; line-height: 1.6; margin: 0; white-space: pre-wrap; flex: 1; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Text input for AI chat.",
+      "html": "<div style=\"display:flex;align-items:center;gap:7px\"><input class=\"ds-input\" placeholder=\"ถามเกี่ยวกับ Event และตั๋ว…\"/><button class=\"ds-send\" aria-label=\"Send\">➤</button></div>",
+      "css": ".ds-input { flex: 1; padding: 9px 13px; border-radius: 24px; border: 1px solid #d9dcde; font-family: 'Noto Sans Thai', sans-serif; font-size: 0.78rem; color: #1f2123; background: #f8f9fa; outline: none; transition: border-color 0.15s, background 0.15s; } .ds-input::placeholder { color: #8e9499; } .ds-input:focus { border-color: #359aff; background: #fff; } .ds-input:disabled { opacity: 0.6; } .ds-send { width: 34px; height: 34px; border-radius: 50%; background: #359aff; color: #fff; border: none; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: background 0.15s; } .ds-send:hover { background: #0f6dd0; } .ds-send:disabled { opacity: 0.4; cursor: not-allowed; } .ds-send:focus-visible { outline: 2px solid #359aff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Navigation Link",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Primary navigation item.",
+      "html": "<nav style=\"display:flex;gap:4px;font-family:'Noto Sans Thai',sans-serif\"><a class=\"ds-nav-item\">หน้าแรก</a><a class=\"ds-nav-item\" style=\"color:#359aff;font-weight:600\">คอนเสิร์ต</a><a class=\"ds-nav-item\">ภาพรวม</a><a class=\"ds-nav-item\">ติดต่อเรา</a></nav>",
+      "css": ".ds-nav-item { padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; color: #646b70; text-decoration: none; cursor: pointer; transition: background 0.15s, color 0.15s; } .ds-nav-item:hover { background: #f8f9fa; color: #1f2123; } .ds-nav-item:focus-visible { outline: 2px solid #359aff; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Festival Wall",
+    "overview": "Like a festival's information wall — bold, colorful posters, clear wayfinding, everything you need visible at a glance. The interface feels alive and energetic, not corporate or sterile. It's a digital space where concert-goers and organizers meet, with AI as a friendly guide (not a cold terminal). This system explicitly rejects SaaS-corporate templates, dark-and-moody themes, and motion that distracts rather than guides. Every element earns its place: playful precision.",
+    "keyCharacteristics": [
+      "Bold blue anchor with energetic accents",
+      "Clean, flat surfaces that lift on interaction",
+      "Thai-first typography (Noto Sans Thai throughout)",
+      "Rounded, friendly shapes",
+      "Motion that responds, not decorates"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Concert Blue carries ≤20% of any given screen. Its rarity is the point — when you see blue, it means something.", "section": "colors" },
+      { "name": "The Weight Hierarchy Rule", "body": "Hierarchy is expressed through weight first, size second. A headline at 600/1rem has more presence than a label at 500/0.875rem — the weight step is the primary signal.", "section": "typography" },
+      { "name": "The No-Shadow Rule", "body": "Depth is conveyed through color, never shadow. A button hover darkens; a card hover shifts background; a selected tab gets a bottom border. If you find a box-shadow outside of modal/tooltip native browser chrome, it's a mistake.", "section": "elevation" }
+    ],
+    "dos": [
+      "Use Concert Blue sparingly — it's the brand's one voice, make it count.",
+      "Use weight over size for hierarchy.",
+      "Keep surfaces flat at rest; lift with color on interaction.",
+      "Animate with purpose — state transitions (hover, focus, active) in 0.15–0.2s.",
+      "Use text-wrap: balance on headings to avoid orphans."
+    ],
+    "donts": [
+      "Use box-shadows. Depth comes from color, not shadow.",
+      "Use side-stripe borders (border-left > 1px as colored accent).",
+      "Use gradient text (background-clip: text).",
+      "Use SaaS-corporate template patterns (big number + small label stats, identical card grids).",
+      "Put numbered section markers (01/02/03) above every section.",
+      "Use tiny uppercase tracked eyebrows ('ABOUT' / 'PROCESS') as a default scaffold.",
+      "Apply glassmorphism (backdrop blurs on cards).",
+      "Use bounce or elastic easings.",
+      "Nest cards."
+    ]
+  }
+}
