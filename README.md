@@ -2,6 +2,12 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Create `.env.local` from `.env.example` and add your Google AI Studio key:
+
+```bash
+GEMINI_API_KEY=your_google_ai_studio_key_here
+```
+
 First, run the development server:
 
 ```bash
@@ -15,6 +21,9 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+The home page includes a Gemini Free Tier test lab for the hackathon e-commerce
+data. The API key is used only in the server route at `/api/ai/gemini`.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
