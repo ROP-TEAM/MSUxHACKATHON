@@ -23,6 +23,7 @@ type NavItem = NavLink | NavDropdown;
 type Props = {
   onAiToggle: () => void;
   aiOpen: boolean;
+  activeKey?: NavKey;
 };
 
 function isDropdown(item: NavItem): item is NavDropdown {
@@ -43,9 +44,12 @@ const NAV_ITEMS: NavItem[] = [
   { key: "contact", label: "ติดต่อเรา", href: "/contact" },
 ];
 
-export default function Navbar({ onAiToggle, aiOpen }: Props) {
+export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [hoveredKey, setHoveredKey] = useState<NavKey | null>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const centerRef = useRef<HTMLDivElement>(null);
 
   const setDropdownRef = useCallback(
     (key: string) => (el: HTMLDivElement | null) => {
@@ -59,22 +63,25 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
     setActiveDropdown(null);
   }
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      const anyInside = Array.from(dropdownRefs.current.values()).some(
-        (el) => el.contains(e.target as Node)
-      );
-      if (!anyInside) closeDropdown();
+  function handleClickOutside(e: MouseEvent) {
+    const anyInside = Array.from(dropdownRefs.current.values()).some(
+      (el) => el.contains(e.target as Node)
+    );
+    if (!anyInside) closeDropdown();
+  }
+
+  // Attach outside-click listener once
+  const outsideClickRef = useRef<boolean>(false);
+  if (!outsideClickRef.current) {
+    if (typeof document !== "undefined") {
+      document.addEventListener("mousedown", handleClickOutside);
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    outsideClickRef.current = true;
+  }
 
   function handleDropdownKeyDown(e: React.KeyboardEvent, key: string) {
     if (e.key === "Escape") {
       closeDropdown();
-      // Return focus to trigger
       const trigger = document.getElementById(`nav-trigger-${key}`);
       trigger?.focus();
     }
@@ -84,6 +91,36 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
       firstItem?.focus();
     }
   }
+
+  // --- Sliding indicator ---
+  const indicatorTarget = hoveredKey || activeKey;
+
+  function measureIndicator(key: string | null) {
+    if (!key || !centerRef.current) return;
+    const parent = centerRef.current;
+    const el = parent.querySelector(`[data-nav-key="${key}"]`) as HTMLElement | null;
+    if (!el) return;
+    const parentRect = parent.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    setIndicatorStyle({
+      left: elRect.left - parentRect.left,
+      width: elRect.width,
+    });
+  }
+
+  // Measure on target change
+  useEffect(() => {
+    measureIndicator(indicatorTarget);
+  }, [indicatorTarget]);
+
+  // Re-measure on resize
+  useEffect(() => {
+    function handleResize() {
+      measureIndicator(indicatorTarget);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [indicatorTarget]);
 
   return (
     <nav className={styles.navbar} aria-label="Main navigation">
@@ -105,19 +142,31 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
         />
       </div>
 
-      {/* Center: Nav links */}
-      <div className={styles.center}>
+      {/* Center: Nav links + sliding indicator */}
+      <div
+        ref={centerRef}
+        className={styles.center}
+        onMouseLeave={() => setHoveredKey(null)}
+      >
+        <div
+          className={styles.indicator}
+          style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+          aria-hidden="true"
+        />
+
         {NAV_ITEMS.map((item) =>
           isDropdown(item) ? (
             <div
               key={item.key}
               className={styles.dropdown}
               ref={setDropdownRef(item.key)}
+              onMouseEnter={() => setHoveredKey(item.key)}
             >
               <button
                 id={`nav-trigger-${item.key}`}
+                data-nav-key={item.key}
                 className={`${styles.navLink} ${styles.dropdownTrigger} ${
-                  activeDropdown === item.key ? styles.active : ""
+                  activeKey === item.key ? styles.active : ""
                 }`}
                 onClick={() =>
                   setActiveDropdown(
@@ -125,7 +174,7 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
                   )
                 }
                 onKeyDown={(e) => handleDropdownKeyDown(e, item.key)}
-                aria-expanded={activeDropdown === item.key}
+                aria-expanded={activeDropdown === item.key ? "true" : "false"}
                 aria-haspopup="true"
                 aria-controls={`dropdown-menu-${item.key}`}
               >
@@ -174,8 +223,10 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
           ) : (
             <a
               key={item.key}
-              className={styles.navLink}
+              data-nav-key={item.key}
+              className={`${styles.navLink} ${activeKey === item.key ? styles.active : ""}`}
               href={item.href}
+              onMouseEnter={() => setHoveredKey(item.key)}
             >
               {item.label}
             </a>
@@ -183,7 +234,7 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
         )}
       </div>
 
-      {/* Right: AI Chat Trigger (Dime-style pill) */}
+      {/* Right: AI Chat Trigger */}
       <div className={styles.right}>
         <button
           className={`${styles.aiTrigger} ${aiOpen ? styles.aiTriggerOpen : ""}`}

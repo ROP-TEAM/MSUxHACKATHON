@@ -14,9 +14,23 @@ Context: ใช้งานในมือถือ/ desktop, เน้นค้
 
 ## Product Purpose
 
-MSU x Hackathon — แพลตฟอร์มบริหาร Event คอนเสิร์ตและบัตรเข้าชม เอาข้อมูลดิบ (JSON) มาแสดงผลเป็น Dashboard ที่ใช้งานได้จริง พร้อม AI ช่วยวิเคราะห์และตอบคำถาม
+**iTiket** — แพลตฟอร์มค้นหาและจองบัตรคอนเสิร์ต/Event สำหรับผู้บริโภค (consumer-facing) มี AI Matching ช่วยแนะนำงานที่ตรงใจ และมีหน้า "ภาพรวม" สำหรับผู้จัดงานดูสถิติ
 
-Success criteria: ข้อมูลดูง่าย, ค้นหาได้, กรองได้, มีกราฟ KPI, AI ช่วยวิเคราะห์
+**หน้าหลักและ Features ที่ปรากฏใน Design:**
+- **Hero Carousel** — banner โปรโมชัน (partnership กับ Dime! / KKP) พร้อม slide dots
+- **Announcement Bar** (dark) — "จองตั๋วด้วย AI Matching" CTA + QR icon + `#ไม่พลาดเทรนด์` + tagline + branding
+- **กำลังมาแรง** — horizontal-scroll row ของ event poster cards + ↗ ลิงก์ดูทั้งหมด
+- **ใหม่ล่าสุด** — horizontal-scroll row เหมือนกัน
+- **ละครเวที** — category section (Theater/Stage play)
+- **ข่าวล่าสุด** + **มาแรงติดเทรนด์** — dark section ข่าวสาร featured articles
+- **หน้า Concert Listing** — search bar + grid งานทั้งหมด (6 col × rows) + pagination
+- **Footer** (dark) — iTiket logo + Dime! QR code + 3 columns: Product / Company / Legal & Regulatory
+
+**Navigation:** หน้าแรก | คอนเสิร์ต ▼ | ภาพรวม | ติดต่อเรา + AI icon (right)
+
+**Partnership:** Dime! App (Kiatnakin Phatra Financial Group) — featured ใน hero banner และ footer
+
+Success criteria: ค้นหา event ได้เร็ว, ดูเทรนด์ที่กำลังมาแรงได้ทันที, จองบัตรง่าย, AI ช่วย match งานที่ใช่
 
 ## Brand Personality
 

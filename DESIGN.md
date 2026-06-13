@@ -1,6 +1,6 @@
 ---
-name: MSU x Hackathon
-description: Event & Ticket Dashboard with AI Companion
+name: iTiket
+description: Consumer Event Discovery & Ticket Booking Platform — horizontal-scroll category rows, AI Matching CTA bar, hero carousel, dark news section, paginated event grid
 colors:
   primary: "#359aff"
   primary-deep: "#0f6dd0"
@@ -10,6 +10,8 @@ colors:
   neutral-border: "#eef0f1"
   neutral-text: "#1f2123"
   neutral-muted: "#646b70"
+  footer-bg: "#2a2f35"
+  announcement-bg: "#111111"
 typography:
   display:
     fontFamily: "Noto Sans Thai, sans-serif"
@@ -78,13 +80,31 @@ components:
 
 **Creative North Star: "The Festival Wall"**
 
-Like a festival's information wall — bold, colorful posters, clear wayfinding, everything you need visible at a glance. The interface feels alive and energetic, not corporate or sterile. It's a digital space where concert-goers and organizers meet, with AI as a friendly guide (not a cold terminal).
+Like a festival's information wall — bold, colorful event posters in a grid, clear wayfinding, everything visible at a glance. The interface is a consumer-facing ticket discovery platform: users land on the home page and immediately see trending events, browse by category, and book via AI Matching. Organizers access a separate "ภาพรวม" (Overview) page for stats.
 
 This system explicitly rejects SaaS-corporate templates, dark-and-moody themes, and motion that distracts rather than guides. Every element earns its place: playful precision.
 
+**Page Structure (as designed):**
+
+*Home (หน้าแรก):*
+1. **Nav** — logo left, links center (หน้าแรก | คอนเสิร์ต ▼ | ภาพรวม | ติดต่อเรา), AI icon right
+2. **Hero Carousel** — full-width promotional banner (Dime! partnership, green/purple gradient), slide dots
+3. **Announcement Bar** (black) — "จองตั๋วด้วย AI Matching" pill CTA + QR icon + ticket icon + `#ไม่พลาดเทรนด์` + tagline + MSUxHackathon branding
+4. **Event Section Rows** — each: section title + ↗ arrow, horizontal-scroll poster cards
+   - กำลังมาแรง / ใหม่ล่าสุด / ละครเวที
+5. **ข่าวล่าสุด** header row
+6. **มาแรงติดเทรนด์** (dark black section) — featured news cards with thumbnail, badge (Exclusive / นักเลง), Thai headline
+7. **Footer** (dark ~`#2a2f35`) — iTiket logo + Dime! App QR code block + 3-column links (Product / Company / Legal & Regulatory)
+
+*Concert Listing (คอนเสิร์ต):*
+1. **Search Bar** — "ค้นหาอีเวนส์ของคุณ" with search icon
+2. **งานทั้งหมด** — 6-column event poster grid, auto-fill rows
+3. **Pagination** — 1 2 3 4 … 10 numbered
+
 **Key Characteristics:**
 - Bold blue anchor with energetic accents
-- Clean, flat surfaces that lift on interaction
+- Event poster cards as primary visual unit (image-dominant, no heavy text overlay on card)
+- Clean white body, dark footer, black announcement bar — three distinct surface layers
 - Thai-first typography (Noto Sans Thai throughout)
 - Rounded, friendly shapes
 - Motion that responds, not decorates
