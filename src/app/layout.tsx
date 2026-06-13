@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
 import AppShell from "@/components/AppShell";
 import "../styles/globals.scss";
+import '@mantine/core/styles.css';
+import { MantineProvider } from '@mantine/core';
 
 export const metadata: Metadata = {
   title: "MSU x Hackathon",
@@ -22,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={noto.className}>
-        <AppShell>{children}</AppShell>
+        <MantineProvider>
+          <AppShell>{children}</AppShell>
+        </MantineProvider>
       </body>
     </html>
   );

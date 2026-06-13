@@ -48,8 +48,11 @@
     padding: 0 20px;
     z-index: 2;
 
+    scrollbar-width: none;      // Firefox
+    -ms-overflow-style: none;   // IE/Edge legacy
+
     &::-webkit-scrollbar {
-        display: none;
+        display: none;          // Chrome, Safari, Edge ใหม่
     }
 }
 
