@@ -1,0 +1,71 @@
+@use "../../styles/responsive" as *;
+
+.darkInfo {
+  min-height: 17rem;
+  color: #fff;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.followBtn {
+  padding: 0.45rem 1.1rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.5rem;
+  background: var(--b-900);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tagDot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #ff4d4d;
+}
+
+.description {
+  margin-top: 1.25rem;
+  max-width: 44rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+@include respond(md) {
+  .darkInfo {
+    min-height: 0;
+    text-align: center;
+  }
+
+  .actions {
+    justify-content: center;
+  }
+
+  .description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

@@ -1,0 +1,139 @@
+@use "../../styles/responsive" as *;
+
+.detail {
+  padding-top: 2.5rem;
+}
+
+.detailHead {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.detailName {
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 800;
+  color: var(--b-900);
+}
+
+.status {
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.statusOpen {
+  background: #18b65b;
+}
+
+.statusSold {
+  background: #e53935;
+}
+
+.detailMid {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.meta {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: var(--b-700);
+
+  svg {
+    flex: 0 0 auto;
+    color: var(--accent);
+  }
+}
+
+.price {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--b-900);
+  white-space: nowrap;
+}
+
+.priceUnit {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.purchaseRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.favBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background: var(--b-900);
+  color: #fff;
+  transition: background 0.15s, transform 0.15s;
+
+  &:hover {
+    background: var(--b-700);
+    transform: translateY(-0.125rem);
+  }
+}
+
+.buyBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background: var(--b-900);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  transition: background 0.15s, transform 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--accent);
+    transform: translateY(-0.125rem);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@include respond(md) {
+  .detail {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--b-0);
+    border-radius: 1rem;
+    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.4);
+  }
+
+  .detailMid {
+    align-items: flex-start;
+  }
+}

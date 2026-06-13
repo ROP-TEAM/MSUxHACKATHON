@@ -2,9 +2,9 @@ import { Footer } from "@/components/footer/Footer";
 import HeroCarousel from "@/components/home/HeroCarousel/HeroCarousel";
 import AnnouncementBar from "@/components/home/AnnouncementBar/AnnouncementBar";
 import EventSectionRow from "@/components/home/EventSectionRow/EventSectionRow";
+import { SlideList } from "@/components/slideCard/SlideCard";
 import { SECTIONS } from "@/components/home/homeData";
 import styles from "./page.module.scss";
-import { SlideList } from "@/components/slideCard/SlideCard";
 
 const Home = () => {
   return (

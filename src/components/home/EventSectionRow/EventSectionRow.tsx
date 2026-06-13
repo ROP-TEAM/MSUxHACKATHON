@@ -3,12 +3,14 @@ import styles from "./EventSectionRow.module.scss";
 
 function PosterCard({ event }: { event: PosterEvent }) {
   return (
-    <a className={styles.card} href={`/events#${event.id}`}>
+    <a className={styles.card} href={`/events/${event.id}`}>
       <div
         className={styles.poster}
-        style={{
-          background: `linear-gradient(150deg, ${event.gradient[0]}, ${event.gradient[1]})`,
-        }}
+        style={
+          event.image
+            ? { backgroundImage: `url(${event.image})`, backgroundSize: "cover", backgroundPosition: "center" }
+            : { background: `linear-gradient(150deg, ${event.gradient[0]}, ${event.gradient[1]})` }
+        }
       >
         <span className={styles.sheen} aria-hidden="true" />
         {event.soldOut && <span className={styles.soldOut}>SOLD OUT</span>}
