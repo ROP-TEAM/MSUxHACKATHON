@@ -13,6 +13,7 @@ const ConcertPage = () => {
           <StageOverview
             tickets={ticketsData as Ticket[]}
             onZoneClick={(zoneId) => console.log(`Zone ${zoneId} clicked`)}
+             eventId="default-event-id"
           />
         </div>
       </div>
