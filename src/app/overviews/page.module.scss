@@ -1,0 +1,173 @@
+.container {
+  position: relative;
+}
+.box {
+  position: absolute;
+  top: 240px;
+  left: 50%;
+  transform: translateX(-50%);
+   background: linear-gradient(
+    90deg,
+    #050505 0%,
+    #0a0a0a 55%,
+    #3a3212 80%,
+    #8a6b1d 100%
+  );
+  border-radius: 10px;
+  width: 50%;
+  padding: 30px 50px 60px 50px;
+  display: flex;
+  justify-content: space-between;
+}
+.left_box {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  h1 {
+    font-size: 1.25rem;
+    color: var(--b-300);
+    font-weight: 500;
+  }
+  h2 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--b-0);
+  }
+  p {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--b-300);
+  }
+}
+.ticket {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.right_box {
+  p {
+    font-size: 1.25rem;
+    color: var(--b-300);
+    font-weight: 500;
+  }
+}
+.sticker{
+    position: absolute;
+    top:8px; 
+    right: 0px;  
+}
+.tab{
+    width: 100%;
+    margin-top: 200px;
+}
+.filterRow {
+  display: flex;
+  width: 50%;
+  align-content:center;
+  margin:auto;
+  justify-content: space-between;
+}
+
+.filters {
+  display: flex;
+  gap: 40px;
+}
+
+.filterSelect {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.searchBox {
+  width: 250px;
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 0 20px;
+
+  border-radius: 12px;
+  background: #f5f5f5;
+   margin-left: auto;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+}
+
+.searchIcon {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.ticketList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ticketCard{
+    display: flex;
+    justify-content: space-between;
+    width:50%;
+    align-content:center;
+    align-items:center;
+  margin:auto;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--b-300);
+}
+
+.details{
+    display: flex;
+    gap: 10px;
+    align-items:center;
+}
+
+.user{
+    display: flex;
+    gap:15px
+}
+
+.text{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    h3{
+        font-size: 1rem;
+    }
+}
+.status {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 80px;
+}
+
+.icon {
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.user {
+  p {
+    font-size: 0.875rem;
+    color: var(--b-400);
+  }
+}
