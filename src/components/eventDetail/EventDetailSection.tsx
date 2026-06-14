@@ -5,6 +5,7 @@ import StageOverview from "@/components/StageOverview/StageOverview";
 import ticketsData from "@/data/event_tickets.json";
 import { Ticket } from "@/app/concert/types";
 import { ZoneModal } from "../zoneModal/ZoneModal";
+import { getPosterById } from "@/components/home/homeData";
 
 interface ZoneSummary {
   total: number;
@@ -41,6 +42,7 @@ interface EventStageSectionProps {
 export default function EventStageSection({ eventId }: EventStageSectionProps) {
   const [activeZone, setActiveZone] = useState<string | null>(null);
 
+  const event = getPosterById(eventId);
   const tickets = ticketsData as Ticket[];
 
   const ticketZoneSummary = useMemo(() => {
@@ -56,11 +58,12 @@ export default function EventStageSection({ eventId }: EventStageSectionProps) {
         onZoneClick={(zoneId) => setActiveZone(zoneId)}
       />
 
-      <ZoneModal
+     <ZoneModal
   isActive={activeZone !== null}
   onClose={() => setActiveZone(null)}
   zoneId={activeZone}
   eventId={eventId}
+  eventTitle={event?.title ?? ""}
 />
      
     </>
