@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import type { PosterEvent } from "@/components/home/homeData";
 import rawEvents from "@/data/events.json";
 import rawTickets from "@/data/event_tickets.json";
@@ -48,17 +46,23 @@ function extractCategory(title: string): string {
 
 // ---- poster image resolution ----
 
-const EVENTS_IMG_DIR = path.join(process.cwd(), "public", "image", "events");
-
-/** Scan directory once at startup; key = stem (ev-001), value = public URL. */
-const POSTER_FILES: Map<string, string> = new Map(
-  fs.existsSync(EVENTS_IMG_DIR)
-    ? fs.readdirSync(EVENTS_IMG_DIR).map((file) => [
-        path.basename(file, path.extname(file)),
-        `/image/events/${file}`,
-      ])
-    : []
-);
+/**
+ * Poster images bundled under public/image/events/.
+ * Static map (no fs) so this module stays importable in client bundles.
+ * Add new files here when poster art is added.
+ */
+const POSTER_FILES: Map<string, string> = new Map([
+  ["ev-001", "/image/events/ev-001.jpg"],
+  ["ev-002", "/image/events/ev-002.jpg"],
+  ["ev-003", "/image/events/ev-003.jpg"],
+  ["ev-004", "/image/events/ev-004.jpg"],
+  ["ev-005", "/image/events/ev-005.jpg"],
+  ["ev-006", "/image/events/ev-006.jpg"],
+  ["ev-007", "/image/events/ev-007.jpg"],
+  ["ev-008", "/image/events/ev-008.jpg"],
+  ["ev-009", "/image/events/ev-009.jpg"],
+  ["ev-010", "/image/events/ev-010.jpg"],
+]);
 
 function resolvePoster(eventId: string): string | undefined {
   return POSTER_FILES.get(eventId);
@@ -121,7 +125,8 @@ function isSoldOut(
   ticketCounts: TicketCounts,
   allCounts: number[],
 ): boolean {
-  if (price === 0) return true;
+  // Free events are never sold out — they always have open seats.
+  if (price === 0) return false;
   const c = ticketCounts.get(eventId);
   if (!c || c.total === 0) return false;
   const sorted = [...allCounts].sort((a, b) => b - a);

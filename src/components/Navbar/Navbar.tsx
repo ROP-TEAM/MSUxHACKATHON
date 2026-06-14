@@ -1,12 +1,24 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react";
+import {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./Navbar.module.scss";
 
-type NavKey = "home" | "concerts" | "all-events" | "my-tickets" | "overview" | "contact";
+type NavKey =
+  | "home"
+  | "concerts"
+  | "all-events"
+  | "my-tickets"
+  | "overview"
+  | "contact";
 
 type NavLink = {
   key: NavKey;
@@ -38,7 +50,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "คอนเสิร์ต",
     children: [
       { key: "all-events", label: "งานทั้งหมด", href: "/events" },
-      { key: "my-tickets", label: "ตั๋วของฉัน", href: "/tickets" },
+      { key: "my-tickets", label: "ตั๋วของฉัน", href: "/mytickets" },
     ],
   },
   { key: "overview", label: "ภาพรวม", 
@@ -59,7 +71,9 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
   const [menuClosing, setMenuClosing] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dropdownHoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownHoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const centerRef = useRef<HTMLDivElement>(null);
@@ -88,7 +102,7 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
       if (el) dropdownRefs.current.set(key, el);
       else dropdownRefs.current.delete(key);
     },
-    []
+    [],
   );
 
   function closeDropdown() {
@@ -96,8 +110,8 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
   }
 
   function handleClickOutside(e: MouseEvent) {
-    const anyInside = Array.from(dropdownRefs.current.values()).some(
-      (el) => el.contains(e.target as Node)
+    const anyInside = Array.from(dropdownRefs.current.values()).some((el) =>
+      el.contains(e.target as Node),
     );
     if (!anyInside) closeDropdown();
   }
@@ -120,10 +134,14 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
     }, 300);
   }
 
-  useEffect(() => () => {
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    if (dropdownHoverTimerRef.current) clearTimeout(dropdownHoverTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      if (dropdownHoverTimerRef.current)
+        clearTimeout(dropdownHoverTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -149,7 +167,9 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
   function measureIndicator(key: string | null) {
     if (!key || !centerRef.current) return;
     const parent = centerRef.current;
-    const textEl = parent.querySelector(`[data-text-el="${key}"]`) as HTMLElement | null;
+    const textEl = parent.querySelector(
+      `[data-text-el="${key}"]`,
+    ) as HTMLElement | null;
     if (!textEl) return;
     const parentRect = parent.getBoundingClientRect();
     const textRect = textEl.getBoundingClientRect();
@@ -234,7 +254,10 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
                 setActiveDropdown(item.key);
               }}
               onMouseLeave={() => {
-                dropdownHoverTimerRef.current = setTimeout(() => setActiveDropdown(null), 150);
+                dropdownHoverTimerRef.current = setTimeout(
+                  () => setActiveDropdown(null),
+                  150,
+                );
               }}
             >
               <button
@@ -245,7 +268,7 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
                 }`}
                 onClick={() =>
                   setActiveDropdown(
-                    activeDropdown === item.key ? null : item.key
+                    activeDropdown === item.key ? null : item.key,
                   )
                 }
                 onKeyDown={(e) => handleDropdownKeyDown(e, item.key)}
@@ -353,8 +376,19 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
                 onClick={closeMenu}
                 aria-label="ปิดเมนู"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path d="M4 4L16 16M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 4L16 16M16 4L4 16"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </button>
             </div>
@@ -369,9 +403,13 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
                         activeKey === item.key ? styles.mobileNavLinkActive : ""
                       }`}
                       onClick={() =>
-                        setMobileExpanded(mobileExpanded === item.key ? null : item.key)
+                        setMobileExpanded(
+                          mobileExpanded === item.key ? null : item.key,
+                        )
                       }
-                      aria-expanded={String(mobileExpanded === item.key) as "true" | "false"}
+                      aria-expanded={
+                        String(mobileExpanded === item.key) as "true" | "false"
+                      }
                     >
                       <span>{item.label}</span>
                       <svg

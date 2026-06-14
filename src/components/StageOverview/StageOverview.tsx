@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Tooltip } from '@mantine/core';
 import styles from './StageOverview.module.scss';
 import type { Ticket } from '@/app/concert/types';
@@ -18,6 +18,9 @@ interface StageOverviewProps {
   onZoneClick: (zoneId: string) => void;
   tickets?: Ticket[];
   eventId: string;
+  selectedZone?: string | null; // NEW: highlight this zone grey
+  selectedBlockId?: string | null; // NEW: highlight this specific block (e.g. "2F-31")
+  tooltipMode?: "summary" | "selection";
 }
 
 function summarizeByTicketZone(tickets: Ticket[]): Record<string, ZoneSummary> {
@@ -29,14 +32,28 @@ function summarizeByTicketZone(tickets: Ticket[]): Record<string, ZoneSummary> {
     }
     map[zone].total += 1;
     switch (t.status) {
-      case "USED": map[zone].used += 1; break;
-      case "RESERVED": map[zone].reserved += 1; break;
+      case "USED":      map[zone].used += 1;      break;
+      case "RESERVED":  map[zone].reserved += 1;  break;
       case "CANCELLED": map[zone].cancelled += 1; break;
-      case "REFUNDED": map[zone].refunded += 1; break;
-      case "PAID": map[zone].paid += 1; break;
+      case "REFUNDED":  map[zone].refunded += 1;  break;
+      case "PAID":      map[zone].paid += 1;       break;
     }
   }
   return map;
+}
+
+function SeatSelectionTooltip({
+  zoneId,
+  blockLabel,
+}: {
+  zoneId: string;
+  blockLabel?: string;
+}) {
+  return (
+    <div style={{ fontSize: 12, fontWeight: 700 }}>
+      Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
+    </div>
+  );
 }
 
 function getSummaryForZone(
@@ -46,35 +63,52 @@ function getSummaryForZone(
   return ticketZoneSummary[zoneKey];
 }
 
-function ZoneTooltipContent({ zoneId, summary }: { zoneId: string; summary?: ZoneSummary }) {
+// NEW: tooltip content shows zone + block/seat info when selected
+function ZoneTooltipContent({
+  zoneId,
+  summary,
+  blockLabel,
+}: {
+  zoneId: string;
+  summary?: ZoneSummary;
+  blockLabel?: string; // e.g. "บล็อก 31" for 2F seat blocks
+}) {
   if (!summary || summary.total === 0) {
     return (
       <div style={{ fontSize: 12 }}>
-        <div style={{ fontWeight: 700, marginBottom: 4 }}>Zone {zoneId}</div>
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>
+          Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
+        </div>
         <div>ไม่พบข้อมูลตั๋ว</div>
       </div>
     );
   }
+  const available = summary.total - summary.used - summary.reserved - summary.cancelled - summary.refunded;
   return (
     <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-      <div style={{ fontWeight: 700, marginBottom: 4 }}>Zone {zoneId}</div>
-      <div>ทั้งหมด: {summary.total} ตั๋ว</div>
-      <div>ใช้แล้ว: {summary.used} ตั๋ว</div>
-      <div>จ่ายแล้ว: {summary.paid} ตั๋ว</div>
-      <div>จอง: {summary.reserved} ตั๋ว</div>
-      <div>ยกเลิก: {summary.cancelled} ตั๋ว</div>
-      <div>คืนเงิน: {summary.refunded} ตั๋ว</div>
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>
+        Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
+      </div>
+      <div>ทั้งหมด: {summary.total} ที่นั่ง</div>
+      <div>ใช้แล้ว: {summary.used}</div>
+      <div>จ่ายแล้ว: {summary.paid}</div>
+      <div>จอง: {summary.reserved}</div>
+      <div>ยกเลิก: {summary.cancelled}</div>
+      <div>คืนเงิน: {summary.refunded}</div>
     </div>
   );
 }
 
-// Tooltip ขึ้นตรงอันที่กด/hover — แต่ content คือ logical zone
 function ZoneTooltip({
-  tooltipZoneId,   // content ใน tooltip (A, B, C, D, Standing)
-  blockId,         // id เฉพาะของ element นี้สำหรับ open state
+  tooltipZoneId,
+  blockId,
   summary,
   activeId,
   setActiveId,
+  selectedBlockId,
+  onZoneClick,
+  blockLabel,
+  tooltipMode = "summary",
   children,
 }: {
   tooltipZoneId: string;
@@ -82,21 +116,32 @@ function ZoneTooltip({
   summary?: ZoneSummary;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
+  selectedBlockId?: string | null;
+  onZoneClick: () => void;
+  blockLabel?: string;
+  tooltipMode?: "summary" | "selection";
   children: React.ReactNode;
 }) {
-  const opened = activeId === blockId;
+  const isSelected = selectedBlockId === blockId;
 
+  let opened: boolean;
+  let label: React.ReactNode;
+
+       if (tooltipMode === "selection") {
+    opened = isSelected;
+    label = <SeatSelectionTooltip zoneId={tooltipZoneId} blockLabel={blockLabel} />;
+  } else {
+    opened = activeId === blockId || isSelected;
+    label = <ZoneTooltipContent zoneId={tooltipZoneId} summary={summary} blockLabel={blockLabel} />;
+  }
   return (
-    <Tooltip
-      label={<ZoneTooltipContent zoneId={tooltipZoneId} summary={summary} />}
-      withArrow
-      opened={opened}
-    >
+    <Tooltip label={label} withArrow opened={opened}>
       <g
-        onClick={() => setActiveId(opened ? null : blockId)}
-        onMouseEnter={() => setActiveId(blockId)}
-        onMouseLeave={() => setActiveId(null)}
+        onClick={onZoneClick}
+        onMouseEnter={() => { if (tooltipMode !== "selection") setActiveId(blockId); }}
+        onMouseLeave={() => { if (tooltipMode !== "selection") setActiveId(null); }}
         className="cursor-pointer"
+        data-selected={isSelected}
       >
         {children}
       </g>
@@ -116,6 +161,10 @@ function ZoneWedge({
   onClick,
   activeId,
   setActiveId,
+  selectedBlockId,
+  isSelected,
+  blockLabel,
+  tooltipMode = "summary",
   r,
   getArcPath,
   getLabelCoords,
@@ -131,6 +180,10 @@ function ZoneWedge({
   onClick: () => void;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
+  tooltipMode?: "summary" | "selection";
+  selectedBlockId?: string | null;
+  isSelected?: boolean;
+  blockLabel?: string;
   r: (n: number) => number;
   getArcPath: (rIn: number, rOut: number, startAngle: number, endAngle: number) => string;
   getLabelCoords: (rIn: number, rOut: number, startAngle: number, endAngle: number) => { x: number; y: number; angle: number };
@@ -144,17 +197,22 @@ function ZoneWedge({
       blockId={blockId}
       summary={summary}
       activeId={activeId}
-      setActiveId={(id) => {
-        setActiveId(id);
-        if (id) onClick();
-      }}
+      setActiveId={setActiveId}
+      selectedBlockId={selectedBlockId}
+      onZoneClick={onClick}
+      blockLabel={blockLabel}
+      tooltipMode={tooltipMode}
     >
-      <path d={pathD} className={pathClassName} />
+      <path
+        d={pathD}
+        className={`${pathClassName}${isSelected ? ` ${styles.selected}` : ""}`}
+      />
       <text
         x={r(textPos.x)}
         y={r(textPos.y + 3.5)}
         textAnchor="middle"
         className={textClassName}
+        style={isSelected ? { fill: "#ffffff" } : undefined}
       >
         {block.id}
       </text>
@@ -166,6 +224,10 @@ export default function StageOverview({
   onZoneClick,
   tickets,
   eventId,
+  selectedZone = null,
+  selectedBlockId = null,
+  tooltipMode = "summary",
+
 }: StageOverviewProps) {
   const width = 800;
   const height = 630;
@@ -231,12 +293,48 @@ export default function StageOverview({
     [eventTickets]
   );
 
-  // activeId = blockId เฉพาะของ element ที่ถูก hover/click อยู่
+  // NEW: per-block summary for 1F/2F blocks, keyed by "1F-<id>" / "2F-<id>"
+  // Assumes Ticket has a `seat_block` field matching block.id (e.g. "31").
+  // If your data uses a different field name, adjust `t.seat_block` below.
+  const ticketBlockSummary = useMemo(() => {
+    const map: Record<string, ZoneSummary> = {};
+    for (const t of eventTickets) {
+      const blockKey = (t as any).seat_block as string | undefined;
+      const ring = t.seat_zone === "B" ? "1F" : t.seat_zone === "A" ? "2F" : null;
+      if (!ring || !blockKey) continue;
+      const key = `${ring}-${blockKey}`;
+      if (!map[key]) {
+        map[key] = { total: 0, used: 0, reserved: 0, cancelled: 0, refunded: 0, paid: 0 };
+      }
+      map[key].total += 1;
+      switch (t.status) {
+        case "USED":      map[key].used += 1;      break;
+        case "RESERVED":  map[key].reserved += 1;  break;
+        case "CANCELLED": map[key].cancelled += 1; break;
+        case "REFUNDED":  map[key].refunded += 1;  break;
+        case "PAID":      map[key].paid += 1;       break;
+      }
+    }
+    return map;
+  }, [eventTickets]);
+
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  // NEW: keep selected block's tooltip pinned open; clear hover state when selection changes
+  useEffect(() => {
+    setActiveId(null);
+  }, [selectedBlockId, selectedZone]);
+
+  // Maps a clicked SVG element id -> what gets reported to parent + highlighted
+  const handleZoneOrBlockClick = (zoneId: string, blockId: string) => {
+    onZoneClick(zoneId); // parent (ZoneModal) updates summary panel
+    // If you want block-level selection too, parent should also track blockId
+    // — see note below on lifting state.
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-[#f8f9fa] rounded-3xl border border-slate-200 shadow-xl overflow-hidden w-full max-w-3xl mx-auto" id="stage-overview-diagram">
-      <div className="relative w-full aspect-[4/3] max-h-[460px] bg-[#f8f9fa] rounded-2xl select-none" id="arena-map-viewport">
+    <div className="flex flex-col items-center justify-center w-full h-full bg-[#f8f9fa] rounded-2xl select-none" id="stage-overview-diagram">
+      <div className="relative w-full h-full" id="arena-map-viewport">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
 
           <g opacity="0.15">
@@ -262,9 +360,14 @@ export default function StageOverview({
               blockId="SF-B"
               summary={getSummaryForZone("Standing", ticketZoneSummary)}
               activeId={activeId}
-              setActiveId={(id) => { setActiveId(id); if (id) onZoneClick?.("Standing"); }}
+              setActiveId={setActiveId}
+              selectedBlockId={selectedZone === "Standing" ? "SF-B" : null}
+              onZoneClick={() => handleZoneOrBlockClick("Standing", "SF-B")}
             >
-              <path d="M 185,115 L 235,80 L 370,80 L 370,235 L 235,235 L 230,205 L 185,205 Z" className={`${styles.standingZone} transition-all duration-200 stroke-[4]`} />
+              <path
+                d="M 185,115 L 235,80 L 370,80 L 370,235 L 235,235 L 230,205 L 185,205 Z"
+                className={`${styles.standingZone}${selectedZone === "Standing" ? ` ${styles.selected}` : ""} transition-all duration-200 stroke-[4]`}
+              />
               <text x={268} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
               <text x={268} y={184} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
             </ZoneTooltip>
@@ -275,9 +378,15 @@ export default function StageOverview({
               blockId="SF-A"
               summary={getSummaryForZone("Standing", ticketZoneSummary)}
               activeId={activeId}
-              setActiveId={(id) => { setActiveId(id); if (id) onZoneClick?.("Standing"); }}
+              setActiveId={setActiveId}
+              selectedBlockId={selectedZone === "Standing" ? "SF-A" : null}
+              onZoneClick={() => handleZoneOrBlockClick("Standing", "SF-A")}
             >
-              <path d="M 615,115 L 565,80 L 430,80 L 430,235 L 565,235 L 570,205 L 615,205 Z" className={`${styles.standingZone} transition-all duration-200 stroke-[4]`} />
+              <path
+                d="M 615,115 L 565,80 L 430,80 L 430,235 L 565,235 L 570,205 L 615,205 Z"
+                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+                style={selectedZone === "Standing" ? { fill: "#868e96" } : undefined}
+              />
               <text x={532} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
               <text x={532} y={184} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
             </ZoneTooltip>
@@ -288,9 +397,15 @@ export default function StageOverview({
               blockId="zone-D"
               summary={getSummaryForZone("D", ticketZoneSummary)}
               activeId={activeId}
-              setActiveId={(id) => { setActiveId(id); if (id) onZoneClick?.("D"); }}
+              setActiveId={setActiveId}
+              selectedBlockId={selectedZone === "D" ? "zone-D" : null}
+              onZoneClick={() => handleZoneOrBlockClick("D", "zone-D")}
             >
-              <path d="M 205,282 L 370,282 L 370,395 L 325,395 L 245,395 L 205,340 Z" className={`${styles.standingZone} transition-all duration-200 stroke-[4]`} />
+              <path
+                d="M 205,282 L 370,282 L 370,395 L 325,395 L 245,395 L 205,340 Z"
+                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+                style={selectedZone === "D" ? { fill: "#868e96" } : undefined}
+              />
               <text x={287} y={345} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">D</text>
             </ZoneTooltip>
 
@@ -300,9 +415,15 @@ export default function StageOverview({
               blockId="zone-C"
               summary={getSummaryForZone("C", ticketZoneSummary)}
               activeId={activeId}
-              setActiveId={(id) => { setActiveId(id); if (id) onZoneClick?.("C"); }}
+              setActiveId={setActiveId}
+              selectedBlockId={selectedZone === "C" ? "zone-C" : null}
+              onZoneClick={() => handleZoneOrBlockClick("C", "zone-C")}
             >
-              <path d="M 595,282 L 430,282 L 430,395 L 475,395 L 555,395 L 595,340 Z" className={`${styles.standingZone} transition-all duration-200 stroke-[4]`} />
+              <path
+                d="M 595,282 L 430,282 L 430,395 L 475,395 L 555,395 L 595,340 Z"
+                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+                style={selectedZone === "C" ? { fill: "#868e96" } : undefined}
+              />
               <text x={513} y={345} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">C</text>
             </ZoneTooltip>
           </g>
@@ -313,50 +434,61 @@ export default function StageOverview({
             <line x1={cx} y1={85} x2={cx} y2={105} stroke="#343a40" strokeWidth="20" />
           </g>
 
-          {/* Ring 1F — เลขที่นั่ง 1-17, tooltip Zone B */}
           <g id="ring-1F-wedges">
-            {blocks1F.map((block) => (
-              <ZoneWedge
-                key={block.id}
-                block={block}
-                tooltipZoneId="B"
-                blockId={`1F-${block.id}`}
-                rIn={r1_in}
-                rOut={r1_out}
-                pathClassName={`${styles.ring1F} transition-all duration-200 stroke-[#495057] stroke-2`}
-                textClassName="font-sans text-[11px] font-black select-none pointer-events-none fill-white"
-                summary={getSummaryForZone("B", ticketZoneSummary)}
-                onClick={() => onZoneClick?.("B")}
-                activeId={activeId}
-                setActiveId={setActiveId}
-                r={r}
-                getArcPath={getArcPath}
-                getLabelCoords={getLabelCoords}
-              />
-            ))}
+            {blocks1F.map((block) => {
+              const blockId = `1F-${block.id}`;
+              return (
+                <ZoneWedge
+                  key={block.id}
+                  block={block}
+                  tooltipZoneId="B"
+                  blockId={blockId}
+                  rIn={r1_in}
+                  rOut={r1_out}
+                  pathClassName={`${styles.ring1F} transition-all duration-200 stroke-[#495057] stroke-2`}
+                  textClassName="font-sans text-[11px] font-black select-none pointer-events-none fill-white"
+                  summary={getSummaryForZone("B", ticketZoneSummary)}
+                  onClick={() => handleZoneOrBlockClick("B", blockId)}
+                  activeId={activeId}
+                  setActiveId={setActiveId}
+                  selectedBlockId={selectedBlockId}
+                  isSelected={selectedBlockId === blockId || (selectedZone === "B" && !selectedBlockId)}
+                  blockLabel={`บล็อก ${block.id}`}
+                  r={r}
+                  getArcPath={getArcPath}
+                  getLabelCoords={getLabelCoords}
+                />
+              );
+            })}
           </g>
 
-          {/* Ring 2F — เลขที่นั่ง 26-45, tooltip Zone A */}
           <g id="ring-2F-wedges">
-            {blocks2F.map((block) => (
-              <ZoneWedge
-                key={block.id}
-                block={block}
-                tooltipZoneId="A"
-                blockId={`2F-${block.id}`}
-                rIn={r2_in}
-                rOut={r2_out}
-                pathClassName={`${styles.ring2F} transition-all duration-200 stroke-[#495057] stroke-2`}
-                textClassName="font-sans text-[10px] font-black select-none pointer-events-none fill-slate-900"
-                summary={getSummaryForZone("A", ticketZoneSummary)}
-                onClick={() => onZoneClick?.("A")}
-                activeId={activeId}
-                setActiveId={setActiveId}
-                r={r}
-                getArcPath={getArcPath}
-                getLabelCoords={getLabelCoords}
-              />
-            ))}
+            {blocks2F.map((block) => {
+              const blockId = `2F-${block.id}`;
+              const blockSummary = ticketBlockSummary[blockId] ?? getSummaryForZone("A", ticketZoneSummary);
+              return (
+                <ZoneWedge
+                  key={block.id}
+                  block={block}
+                  tooltipZoneId="A"
+                  blockId={blockId}
+                  rIn={r2_in}
+                  rOut={r2_out}
+                  pathClassName={`${styles.ring2F} transition-all duration-200 stroke-[#495057] stroke-2`}
+                  textClassName="font-sans text-[10px] font-black select-none pointer-events-none fill-slate-900"
+                  summary={blockSummary}
+                  onClick={() => handleZoneOrBlockClick("A", blockId)}
+                  activeId={activeId}
+                  setActiveId={setActiveId}
+                  selectedBlockId={selectedBlockId}
+                  isSelected={selectedBlockId === blockId || (selectedZone === "A" && !selectedBlockId)}
+                  blockLabel={`โซน A · บล็อก ${block.id}`}
+                  r={r}
+                  getArcPath={getArcPath}
+                  getLabelCoords={getLabelCoords}
+                />
+              );
+            })}
           </g>
 
         </svg>
