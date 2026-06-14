@@ -79,7 +79,6 @@ function ZoneTooltipContent({
         <div style={{ fontWeight: 700, marginBottom: 4 }}>
           Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
         </div>
-        <div>ไม่พบข้อมูลตั๋ว</div>
       </div>
     );
   }
@@ -89,12 +88,6 @@ function ZoneTooltipContent({
       <div style={{ fontWeight: 700, marginBottom: 4 }}>
         Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
       </div>
-      <div>ทั้งหมด: {summary.total} ที่นั่ง</div>
-      <div>ใช้แล้ว: {summary.used}</div>
-      <div>จ่ายแล้ว: {summary.paid}</div>
-      <div>จอง: {summary.reserved}</div>
-      <div>ยกเลิก: {summary.cancelled}</div>
-      <div>คืนเงิน: {summary.refunded}</div>
     </div>
   );
 }
