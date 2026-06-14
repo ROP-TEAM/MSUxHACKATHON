@@ -3,8 +3,9 @@ import { Noto_Sans_Thai } from "next/font/google";
 import AppShell from "@/components/AppShell";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 import "../styles/globals.scss";
-import '@mantine/core/styles.css';
-import { MantineProvider } from '@mantine/core';
+import "@mantine/core/styles.css";
+import { MantineProvider } from "@mantine/core";
+import { Footer } from "@/components/footer/footer";
 
 export const metadata: Metadata = {
   title: "MSU x Hackathon",
@@ -26,7 +27,6 @@ const noto = Noto_Sans_Thai({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-noto-sans-thai",
 });
-
 export default function RootLayout({
   children,
 }: Readonly<{
