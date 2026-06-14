@@ -1,0 +1,75 @@
+.mytickets {
+  max-width: 44rem;
+  padding-inline: min(1rem, 8%);
+  margin: 2rem auto;
+  .mytickets_title {
+    font-weight: 500;
+    font-size: 1rem;
+  }
+}
+
+.tickets_image {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+  display: block;
+  margin-top: 1rem;
+}
+
+.modal_inner {
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible !important;
+}
+
+.modal_content {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  max-width: 100%;
+  overflow: visible !important;
+}
+
+.modal_body {
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.modal_ticket_wrapper {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+
+  .modal_ticket_title {
+    padding-inline: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    .modal_tiket_icon {
+      cursor: pointer;
+      display: flex;
+      gap: 1rem;
+    }
+    .modal_ticket_name {
+      font-weight: 400;
+      color: var(--b-300);
+    }
+  }
+
+  @media (max-width: 768px) and (orientation: portrait) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    width: 90vh;
+    max-width: 72rem;
+
+    .modal_ticket_title {
+      .modal_ticket_name {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}

@@ -1,10 +1,22 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react";
+import {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 import Image from "next/image";
 import styles from "./Navbar.module.scss";
 
-type NavKey = "home" | "concerts" | "all-events" | "my-tickets" | "overview" | "contact";
+type NavKey =
+  | "home"
+  | "concerts"
+  | "all-events"
+  | "my-tickets"
+  | "overview"
+  | "contact";
 
 type NavLink = {
   key: NavKey;
@@ -37,22 +49,31 @@ const NAV_ITEMS: NavItem[] = [
     label: "คอนเสิร์ต",
     children: [
       { key: "all-events", label: "งานทั้งหมด", href: "/events" },
-      { key: "my-tickets", label: "ตั๋วของฉัน", href: "/tickets" },
+      { key: "my-tickets", label: "ตั๋วของฉัน", href: "/mytickets" },
     ],
   },
   { key: "overview", label: "ภาพรวม", href: "/overview" },
   { key: "contact", label: "ติดต่อเรา", href: "/contact" },
 ];
 
-export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props) {
+export default function Navbar({
+  onAiToggle,
+  aiOpen,
+  activeKey = "home",
+}: Props) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [hoveredKey, setHoveredKey] = useState<NavKey | null>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number } | null>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuClosing, setMenuClosing] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dropdownHoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownHoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const centerRef = useRef<HTMLDivElement>(null);
@@ -64,7 +85,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
       if (el) dropdownRefs.current.set(key, el);
       else dropdownRefs.current.delete(key);
     },
-    []
+    [],
   );
 
   function closeDropdown() {
@@ -72,8 +93,8 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
   }
 
   function handleClickOutside(e: MouseEvent) {
-    const anyInside = Array.from(dropdownRefs.current.values()).some(
-      (el) => el.contains(e.target as Node)
+    const anyInside = Array.from(dropdownRefs.current.values()).some((el) =>
+      el.contains(e.target as Node),
     );
     if (!anyInside) closeDropdown();
   }
@@ -96,10 +117,14 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
     }, 300);
   }
 
-  useEffect(() => () => {
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    if (dropdownHoverTimerRef.current) clearTimeout(dropdownHoverTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      if (dropdownHoverTimerRef.current)
+        clearTimeout(dropdownHoverTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -107,7 +132,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
 
   function handleDropdownKeyDown(e: React.KeyboardEvent, key: string) {
@@ -129,7 +154,9 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
   function measureIndicator(key: string | null) {
     if (!key || !centerRef.current) return;
     const parent = centerRef.current;
-    const textEl = parent.querySelector(`[data-text-el="${key}"]`) as HTMLElement | null;
+    const textEl = parent.querySelector(
+      `[data-text-el="${key}"]`,
+    ) as HTMLElement | null;
     if (!textEl) return;
     const parentRect = parent.getBoundingClientRect();
     const textRect = textEl.getBoundingClientRect();
@@ -208,23 +235,30 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
               className={styles.dropdown}
               ref={setDropdownRef(item.key)}
               onMouseEnter={() => {
-                if (dropdownHoverTimerRef.current) clearTimeout(dropdownHoverTimerRef.current);
+                if (dropdownHoverTimerRef.current)
+                  clearTimeout(dropdownHoverTimerRef.current);
                 setHoveredKey(item.key);
                 setActiveDropdown(item.key);
               }}
               onMouseLeave={() => {
-                dropdownHoverTimerRef.current = setTimeout(() => setActiveDropdown(null), 150);
+                dropdownHoverTimerRef.current = setTimeout(
+                  () => setActiveDropdown(null),
+                  150,
+                );
               }}
             >
               <button
                 id={`nav-trigger-${item.key}`}
                 data-nav-key={item.key}
                 className={`${styles.navLink} ${styles.dropdownTrigger} ${
-                  activeKey === item.key || item.children.some((c) => c.key === activeKey) ? styles.active : ""
+                  activeKey === item.key ||
+                  item.children.some((c) => c.key === activeKey)
+                    ? styles.active
+                    : ""
                 }`}
                 onClick={() =>
                   setActiveDropdown(
-                    activeDropdown === item.key ? null : item.key
+                    activeDropdown === item.key ? null : item.key,
                   )
                 }
                 onKeyDown={(e) => handleDropdownKeyDown(e, item.key)}
@@ -284,7 +318,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
             >
               <span data-text-el={item.key}>{item.label}</span>
             </a>
-          )
+          ),
         )}
       </div>
 
@@ -323,12 +357,32 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
       {/* Mobile drawer */}
       {menuOpen && (
         <>
-          <div className={styles.backdrop} onClick={closeMenu} aria-hidden="true" />
-          <div ref={mobileMenuRef} className={`${styles.mobileMenu}${menuClosing ? ` ${styles.mobileMenuClosing}` : ""}`} role="dialog" aria-label="เมนูนำทาง">
+          <div
+            className={styles.backdrop}
+            onClick={closeMenu}
+            aria-hidden="true"
+          />
+          <div
+            ref={mobileMenuRef}
+            className={`${styles.mobileMenu}${menuClosing ? ` ${styles.mobileMenuClosing}` : ""}`}
+            role="dialog"
+            aria-label="เมนูนำทาง"
+          >
             {/* Drawer header */}
             <div className={styles.mobileMenuHeader}>
-              <a href="/" className={styles.mobileMenuLogo} aria-label="iTiket หน้าแรก" onClick={closeMenu}>
-                <Image src="/icon/logo.svg" alt="" width={80} height={40} aria-hidden="true" />
+              <a
+                href="/"
+                className={styles.mobileMenuLogo}
+                aria-label="iTiket หน้าแรก"
+                onClick={closeMenu}
+              >
+                <Image
+                  src="/icon/logo.svg"
+                  alt=""
+                  width={80}
+                  height={40}
+                  aria-hidden="true"
+                />
               </a>
               <button
                 type="button"
@@ -336,8 +390,19 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
                 onClick={closeMenu}
                 aria-label="ปิดเมนู"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path d="M4 4L16 16M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 4L16 16M16 4L4 16"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </button>
             </div>
@@ -353,9 +418,13 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
                         activeKey === item.key ? styles.mobileNavLinkActive : ""
                       }`}
                       onClick={() =>
-                        setMobileExpanded(mobileExpanded === item.key ? null : item.key)
+                        setMobileExpanded(
+                          mobileExpanded === item.key ? null : item.key,
+                        )
                       }
-                      aria-expanded={String(mobileExpanded === item.key) as "true" | "false"}
+                      aria-expanded={
+                        String(mobileExpanded === item.key) as "true" | "false"
+                      }
                     >
                       <span>{item.label}</span>
                       <svg
@@ -383,7 +452,9 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
                           <a
                             key={child.key}
                             className={`${styles.mobileDropdownItem} ${
-                              activeKey === child.key ? styles.mobileNavLinkActive : ""
+                              activeKey === child.key
+                                ? styles.mobileNavLinkActive
+                                : ""
                             }`}
                             href={child.href}
                             onClick={closeMenu}
@@ -405,7 +476,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
                   >
                     <span>{item.label}</span>
                   </a>
-                )
+                ),
               )}
             </nav>
           </div>
