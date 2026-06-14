@@ -1,5 +1,5 @@
 "use client";
-
+import { Select } from "@mantine/core";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import type { PosterEvent } from "@/components/home/homeData";
@@ -8,7 +8,13 @@ import styles from "./EventsPageClient.module.scss";
 
 const ITEMS_PER_PAGE = 18;
 
-type PriceRange = "all" | "free" | "lt500" | "500-1500" | "1500-3000" | "gt3000";
+type PriceRange =
+  | "all"
+  | "free"
+  | "lt500"
+  | "500-1500"
+  | "1500-3000"
+  | "gt3000";
 type DateRange = "all" | "thisMonth" | "nextMonth" | "next3Months";
 
 const PRICE_OPTIONS: { value: PriceRange; label: string }[] = [
@@ -32,10 +38,14 @@ type Props = {
   categories: string[];
 };
 
-function getPaginationRange(current: number, total: number): (number | "...")[] {
+function getPaginationRange(
+  current: number,
+  total: number,
+): (number | "...")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
   if (current <= 4) return [1, 2, 3, 4, "...", total];
-  if (current >= total - 3) return [1, "...", total - 3, total - 2, total - 1, total];
+  if (current >= total - 3)
+    return [1, "...", total - 3, total - 2, total - 1, total];
   return [1, "...", current - 1, current, current + 1, "...", total];
 }
 
@@ -48,38 +58,26 @@ function FilterSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const label = options[0].label;
   return (
-    <div className={styles.filterSelectWrap}>
-      <select
-        className={styles.filterSelect}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-label={label}
-        title={label}
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <svg
-        className={styles.chevron}
-        width="13"
-        height="13"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        aria-hidden="true"
-      >
-        <polyline points="6 9 12 15 18 9" />
-      </svg>
-    </div>
+    <Select
+      data={options}
+      value={value}
+      onChange={(v) => v && onChange(v)}
+      allowDeselect={false}
+      styles={{
+        input: {
+          border: "none",
+          boxShadow: "none",
+          background: "transparent",
+          cursor: "pointer",
+        },
+        wrapper: {
+          border: "none",
+        },
+      }}
+    />
   );
 }
-
 export default function EventsPageClient({ allEvents }: Props) {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
@@ -91,7 +89,12 @@ export default function EventsPageClient({ allEvents }: Props) {
   const [gridExiting, setGridExiting] = useState(false);
   const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => () => { if (exitTimer.current) clearTimeout(exitTimer.current); }, []);
+  useEffect(
+    () => () => {
+      if (exitTimer.current) clearTimeout(exitTimer.current);
+    },
+    [],
+  );
 
   const now = useMemo(() => new Date("2026-06-14T00:00:00Z"), []);
   const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
@@ -129,9 +132,12 @@ export default function EventsPageClient({ allEvents }: Props) {
       const nowMs = now.getTime();
       list = list.filter((e) => {
         const t = new Date(e.rawDate).getTime();
-        if (dateFilter === "thisMonth") return t >= nowMs && t < nowMs + MONTH_MS;
-        if (dateFilter === "nextMonth") return t >= nowMs + MONTH_MS && t < nowMs + 2 * MONTH_MS;
-        if (dateFilter === "next3Months") return t >= nowMs && t < nowMs + 3 * MONTH_MS;
+        if (dateFilter === "thisMonth")
+          return t >= nowMs && t < nowMs + MONTH_MS;
+        if (dateFilter === "nextMonth")
+          return t >= nowMs + MONTH_MS && t < nowMs + 2 * MONTH_MS;
+        if (dateFilter === "next3Months")
+          return t >= nowMs && t < nowMs + 3 * MONTH_MS;
         return true;
       });
     }
@@ -181,12 +187,18 @@ export default function EventsPageClient({ allEvents }: Props) {
           <FilterSelect
             options={PRICE_OPTIONS}
             value={priceFilter}
-            onChange={(v) => { setPriceFilter(v as PriceRange); resetPage(); }}
+            onChange={(v) => {
+              setPriceFilter(v as PriceRange);
+              resetPage();
+            }}
           />
           <FilterSelect
             options={DATE_OPTIONS}
             value={dateFilter}
-            onChange={(v) => { setDateFilter(v as DateRange); resetPage(); }}
+            onChange={(v) => {
+              setDateFilter(v as DateRange);
+              resetPage();
+            }}
           />
           {venues.length > 0 && (
             <FilterSelect
@@ -195,7 +207,10 @@ export default function EventsPageClient({ allEvents }: Props) {
                 ...venues.map((v) => ({ value: v, label: v })),
               ]}
               value={venueFilter}
-              onChange={(v) => { setVenueFilter(v); resetPage(); }}
+              onChange={(v) => {
+                setVenueFilter(v);
+                resetPage();
+              }}
             />
           )}
         </div>
@@ -219,13 +234,19 @@ export default function EventsPageClient({ allEvents }: Props) {
             type="text"
             placeholder="ค้นหาอีเวนต์ของคุณ"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); resetPage(); }}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              resetPage();
+            }}
           />
           {search && (
             <button
               type="button"
               className={styles.clearBtn}
-              onClick={() => { setSearch(""); resetPage(); }}
+              onClick={() => {
+                setSearch("");
+                resetPage();
+              }}
               aria-label="ล้างค้นหา"
             >
               ×
