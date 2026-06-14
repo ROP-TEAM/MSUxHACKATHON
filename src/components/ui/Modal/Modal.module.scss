@@ -1,0 +1,45 @@
+.background {
+  width: 100vw;
+  height: 800px;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding-top: 5rem;
+  padding-bottom: 20rem;
+}
+
+.modal {
+  width: 80%;
+  height: 900px;
+  background-color: var(--p-0);
+  border-radius: 1rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .background {
+    inset: 0;
+    top: 0;
+
+    width: 100vw;
+    height: 100dvh;
+
+    padding: 0;
+    overflow: hidden;
+
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .modal {
+    width: 100vw;
+    height: 100dvh;
+
+    border-radius: 0;
+  }
+}
