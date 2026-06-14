@@ -2,10 +2,6 @@
 
 import styles from "./page.module.scss";
 import Image from "next/image";
-<<<<<<< HEAD
-import { useMemo, useState, useSyncExternalStore } from "react";
-import { simulationStore, STATUS_CONFIG, type TicketRow } from "@/lib/simulation-store";
-=======
 import { useMemo, useState } from "react";
 import { Popover, UnstyledButton } from "@mantine/core";
 
@@ -177,7 +173,6 @@ const STATUS_CONFIG: Record<TicketStatus, { icon: string; color: string }> = {
   REFUNDED: { icon: "/icon/refunded.svg", color: "#2563EB" },
   PAID: { icon: "/icon/paid.svg", color: "#D97706" },
 };
->>>>>>> 2b74891 (news responsive)
 
 export default function Overview() {
   const [price, setPrice] = useState("all");
@@ -185,13 +180,6 @@ export default function Overview() {
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
 
-<<<<<<< HEAD
-  const tickets = useSyncExternalStore(
-    simulationStore.subscribeMerged,
-    simulationStore.getMergedSnapshot,
-    simulationStore.getMergedServerSnapshot,
-  );
-=======
   const tickets = useMemo<TicketRow[]>(() => {
     return ticketsData
       .map((ticket) => {
@@ -218,7 +206,6 @@ export default function Overview() {
       .filter((ticket): ticket is TicketRow => ticket !== null)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, []);
->>>>>>> 2b74891 (news responsive)
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -327,19 +314,8 @@ export default function Overview() {
                 defaultLabel="สถานที่"
               />
 
-<<<<<<< HEAD
-                {allLocations.map((location) => (
-                  <option key={location} value={location}>
-                    {location}
-                  </option>
-                ))}
-              </select>
-
-              <select
-=======
               <FilterSelect
                 options={statusOptions}
->>>>>>> 2b74891 (news responsive)
                 value={status}
                 onChange={setStatus}
                 defaultLabel="ประเภท"
