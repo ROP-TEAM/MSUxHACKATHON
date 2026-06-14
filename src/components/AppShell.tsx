@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar/Navbar";
 import LiveOrderFeed from "./realtime/LiveOrderFeed";
+import AiPanelWrapper from "./AiPanel/AiPanelWrapper";
 import styles from "./AppShell.module.scss";
 
 import { Footer } from "./footer/footer";
@@ -58,7 +59,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={styles.appShell}>
-      <div className={styles.shellInner}>
+      <div
+        className={`${styles.shellInner}${aiOpen ? ` ${styles.shellInnerPushed}` : ""}`}>
         <Navbar
           onAiToggle={toggleAi}
           aiOpen={aiOpen}
@@ -69,6 +71,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <Footer />
         </main>
         <LiveOrderFeed />
+      </div>
+      <div
+        ref={panelRef}
+        className={`${styles.panel}${aiOpen ? ` ${styles.panelOpen}` : ""}`}
+        tabIndex={-1}
+      >
+        {aiOpen && <AiPanelWrapper onClose={closeAi} />}
       </div>
     </div>
   );

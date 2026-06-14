@@ -28,7 +28,16 @@ export default function LiveOrderFeed() {
     return () => clearInterval(id);
   }, []);
 
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem("feed-collapsed") === "true";
+    } catch { return false; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem("feed-collapsed", String(collapsed)); } catch {}
+  }, [collapsed]);
 
   if (!mounted) return null;
 

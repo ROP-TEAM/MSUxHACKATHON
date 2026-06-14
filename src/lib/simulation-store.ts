@@ -77,6 +77,7 @@ export type SimOrder = {
 
 export type SimSnapshot = {
   orders: SimOrder[];
+  purchases: SimOrder[]; // user purchases — never capped, never reset
   paused: boolean;
   totalTickets: number;
   revenue: number;
@@ -131,15 +132,17 @@ const persisted = loadPersisted();
 
 let uid = persisted.uid;
 
-const INITIAL: SimSnapshot = {
+const INITIAL = {
   orders: [],
-  paused: false,
+  purchases: [],
   totalTickets: BASE_COUNT,
   revenue: BASE_REVENUE,
   added: 0,
   speed: 1,
+  paused: false,
   ...(persisted.state ?? {}),
-};
+  // spread may leave paused undefined if saved-state omitted it
+} as SimSnapshot;
 
 function makeOrder(): SimOrder {
   const event = rand(EVENTS);
@@ -221,7 +224,30 @@ function buildMergedRows(state: SimSnapshot): TicketRow[] {
     });
   }
 
-  const all = [...real, ...sim];
+  const purchased: TicketRow[] = [];
+  for (const o of state.purchases) {
+    const event = EVENT_MAP.get(o.event_id);
+    const cfg = STATUS_CONFIG[o.status as TicketStatus] ?? {
+      icon: "/icon/ticket1.svg",
+      color: "#888888",
+    };
+    purchased.push({
+      id: o.ticket_id,
+      name: o.buyer,
+      eventTitle: o.title,
+      location: o.location,
+      date: event?.date ?? new Date(o.at).toISOString(),
+      seat: o.zone,
+      price: o.price,
+      status: o.status as TicketStatus,
+      icon: cfg.icon,
+      color: cfg.color,
+      user_id: o.user_id,
+      event_id: o.event_id,
+    });
+  }
+
+  const all = [...real, ...sim, ...purchased];
   all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   return all;
 }
@@ -239,14 +265,53 @@ function invalidateMerged() {
 }
 
 // Stable reference for server-side rendering — never changes
-const serverMergedCache = buildMergedRows({ orders: [], paused: false, totalTickets: 0, revenue: 0, added: 0, speed: 1 });
+const serverMergedCache = buildMergedRows({ orders: [], purchases: [], paused: false, totalTickets: 0, revenue: 0, added: 0, speed: 1 });
 
 // ── Store factory ────────────────────────────────────────────────────
 
 const BASE_INTERVAL = 2500;
-// Sim plateau = BASE_COUNT + MAX_ORDERS. Lower this to fill up faster
-// (e.g. 10 → tops out at BASE_COUNT + 10). Tune freely.
 const MAX_ORDERS = 150;
+
+// ── Per-event seat capacity ─────────────────────────────────
+// Real event_tickets.json has ~1-4 tickets per event.
+// Multiply by 5 for a capacity that allows sim to visually fill up.
+// Sim generates ~3 orders/event → events hit sold out quickly at small caps.
+const CAPACITY_MULTIPLIER = 2;
+const DEFAULT_CAPACITY = 3; // for events with 0 real tickets
+
+function getEventCapacity(eventId: string): number {
+  const real = TICKETS.filter((t) => t.event_id === eventId).length;
+  if (real === 0) return DEFAULT_CAPACITY;
+  return Math.max(real * CAPACITY_MULTIPLIER, DEFAULT_CAPACITY);
+}
+
+/** Count of real tickets (paid/used/reserved) for an event */
+function getRealSoldCount(eventId: string): number {
+  return TICKETS.filter(
+    (t) =>
+      t.event_id === eventId &&
+      (t.status === "PAID" || t.status === "USED" || t.status === "RESERVED"),
+  ).length;
+}
+
+/** Count of sim orders for an event */
+function getSimOrderCount(eventId: string, orders: SimOrder[]): number {
+  return orders.filter((o) => o.event_id === eventId).length;
+}
+
+/** Live sold-out check — combines real tickets + sim orders against capacity */
+export function isEventSoldOut(eventId: string, orders: SimOrder[]): boolean {
+  const ev = EVENT_MAP.get(eventId);
+  if (!ev || ev.ticket_price === 0) return false; // free events never sold out
+  const capacity = getEventCapacity(eventId);
+  const filled = getRealSoldCount(eventId) + getSimOrderCount(eventId, orders);
+  return filled >= capacity;
+}
+
+/** Get current state from the simulation store for sold-out checks */
+export function getSimOrdersSnapshot(): SimOrder[] {
+  return simulationStore.getSnapshot().orders;
+}
 
 function createSimulationStore() {
   let state: SimSnapshot = { ...INITIAL };
@@ -273,11 +338,12 @@ function createSimulationStore() {
     // Derive every counter from `orders` (capped) — single source, no drift.
     // Plateaus at BASE + MAX_ORDERS, so the sim visibly "fills up" then holds.
     const simRevenue = orders.reduce((s, o) => s + o.price, 0);
+    const purchaseRevenue = state.purchases.reduce((s, o) => s + o.price, 0);
     state = {
       ...state,
       orders,
-      totalTickets: BASE_COUNT + orders.length,
-      revenue: BASE_REVENUE + simRevenue,
+      totalTickets: BASE_COUNT + orders.length + state.purchases.length,
+      revenue: BASE_REVENUE + simRevenue + purchaseRevenue,
       added: orders.length,
     };
     persist();
@@ -324,6 +390,7 @@ function createSimulationStore() {
     },
     setPaused(paused: boolean) {
       state = { ...state, paused };
+      persist();
       notify();
     },
     setSpeed(speed: number) {
@@ -335,15 +402,51 @@ function createSimulationStore() {
     },
     reset() {
       uid = 0;
+      const purchases = state.purchases; // keep user purchases
+      const purchaseRevenue = purchases.reduce((s, o) => s + o.price, 0);
       state = {
         orders: [],
+        purchases,
         paused: false,
-        totalTickets: BASE_COUNT,
-        revenue: BASE_REVENUE,
+        totalTickets: BASE_COUNT + purchases.length,
+        revenue: BASE_REVENUE + purchaseRevenue,
         added: 0,
         speed: 1,
       };
-      clearPersisted();
+      persist();
+      invalidateMerged();
+      notify();
+      notifyMerged();
+    },
+
+    buyTicket(buyEventId: string, buyZone?: string) {
+      const ev = EVENT_MAP.get(buyEventId);
+      if (!ev) return;
+      const me = USERS[0]; // "Somchai Jaidee" — แทนตัวผู้ใช้
+      ++uid;
+      const purchase: SimOrder = {
+        id: `buy-${uid}`,
+        at: Date.now(),
+        ticket_id: `et-buy-${String(uid).padStart(3, "0")}`,
+        user_id: me.user_id,
+        event_id: buyEventId,
+        title: ev.title,
+        buyer: me.name,
+        zone: buyZone ?? rand(REAL_ZONES),
+        price: ev.ticket_price,
+        location: ev.location,
+        status: "PAID",
+      };
+      const purchases = [...state.purchases, purchase];
+      const simRevenue = state.orders.reduce((s, o) => s + o.price, 0);
+      const purchaseRevenue = purchases.reduce((s, o) => s + o.price, 0);
+      state = {
+        ...state,
+        purchases,
+        totalTickets: BASE_COUNT + state.orders.length + purchases.length,
+        revenue: BASE_REVENUE + simRevenue + purchaseRevenue,
+      };
+      persist();
       invalidateMerged();
       notify();
       notifyMerged();
@@ -352,7 +455,7 @@ function createSimulationStore() {
     // ── Merged subscription ───────────────────────────────────────
     subscribeMerged(listener: Listener) {
       mergedListeners.add(listener);
-      if (mergedListeners.size === 1 && listeners.size === 0) start();
+      start();
       return () => {
         mergedListeners.delete(listener);
         if (listeners.size === 0 && mergedListeners.size === 0) stop();

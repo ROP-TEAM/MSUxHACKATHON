@@ -6,9 +6,10 @@ type Props = {
   venue: string;
   price: number;
   soldOut?: boolean;
+  onBuy?: () => void;
 };
 
-export default function EventDetailCard({ subtitle, date, venue, price, soldOut }: Props) {
+export default function EventDetailCard({ subtitle, date, venue, price, soldOut, onBuy }: Props) {
   return (
     <div className={styles.detail}>
       <div className={styles.detailHead}>
@@ -47,7 +48,7 @@ export default function EventDetailCard({ subtitle, date, venue, price, soldOut 
             <path d="M11 19C11 19 3 14.5 3 8.8C3 6.15 5.1 4 7.7 4C9.2 4 10.5 4.8 11 6C11.5 4.8 12.8 4 14.3 4C16.9 4 19 6.15 19 8.8C19 14.5 11 19 11 19Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
           </svg>
         </button>
-        <button type="button" className={styles.buyBtn} disabled={soldOut}>
+        <button type="button" className={styles.buyBtn} disabled={soldOut} onClick={onBuy}>
           {soldOut ? "ขายหมดแล้ว" : "ซื้อบัตร!"}
         </button>
       </div>
