@@ -10,7 +10,14 @@ import styles from "./AppShell.module.scss";
 // Client-only: reads sessionStorage + runs timers. No SSR → no hydration mismatch.
 const LiveOrderFeed = dynamic(() => import("./realtime/LiveOrderFeed"), { ssr: false });
 
-type NavKey = "home" | "concerts" | "all-events" | "my-tickets" | "overview" | "contact";
+import { Footer } from "./footer/footer";
+type NavKey =
+  | "home"
+  | "concerts"
+  | "all-events"
+  | "my-tickets"
+  | "overview"
+  | "contact";
 
 function getActiveKey(pathname: string): NavKey {
   if (pathname === "/") return "home";
@@ -55,22 +62,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={styles.appShell}>
-      <Navbar onAiToggle={toggleAi} aiOpen={aiOpen} activeKey={getActiveKey(pathname)} />
-      <div className={styles.content}>
+      <div className={styles.shellInner}>
+        <Navbar
+          onAiToggle={toggleAi}
+          aiOpen={aiOpen}
+          activeKey={getActiveKey(pathname)}
+        />
         <main className={styles.main}>
           {children}
+          <Footer />
         </main>
-        {aiOpen && (
-          <div className={styles.panelOverlay} onClick={closeAi} aria-hidden="true" />
-        )}
-        <div
-          ref={panelRef}
-          className={`${styles.panel} ${aiOpen ? styles.panelOpen : ""}`}
-          aria-hidden={aiOpen ? "false" : "true"}
-          tabIndex={aiOpen ? 0 : -1}
-        >
-          <AiPanelWrapper onClose={closeAi} />
-        </div>
       </div>
       <LiveOrderFeed />
     </div>

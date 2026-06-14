@@ -52,7 +52,7 @@ const NAV_ITEMS: NavItem[] = [
       { key: "my-tickets", label: "ตั๋วของฉัน", href: "/mytickets" },
     ],
   },
-  { key: "overview", label: "ภาพรวม", href: "/overview" },
+  { key: "overview", label: "ภาพรวม", href: "/overviews" },
   { key: "contact", label: "ติดต่อเรา", href: "/contact" },
 ];
 

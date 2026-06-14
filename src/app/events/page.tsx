@@ -11,20 +11,19 @@ function EventsPageInner() {
   return (
     <div className={styles.page}>
       <Image
-              src="/image/background1.svg"
-              alt="background"
-              width={400}
-              height={250}
-              style={{
-                width: "100%",
-                height: "100%",
-              }}/>
+        src="/image/background1.svg"
+        alt="background"
+        width={400}
+        height={250}
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+      />
 
       <div className={styles.eventsArea}>
         <EventsPageClient allEvents={ALL_POSTERS} categories={CATEGORIES} />
       </div>
-
-      <Footer />
     </div>
   );
 }
