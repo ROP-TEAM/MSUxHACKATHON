@@ -132,16 +132,17 @@ const persisted = loadPersisted();
 
 let uid = persisted.uid;
 
-const INITIAL: SimSnapshot = {
+const INITIAL = {
   orders: [],
   purchases: [],
-  paused: false,
   totalTickets: BASE_COUNT,
   revenue: BASE_REVENUE,
   added: 0,
   speed: 1,
+  paused: false,
   ...(persisted.state ?? {}),
-};
+  // spread may leave paused undefined if saved-state omitted it
+} as SimSnapshot;
 
 function makeOrder(): SimOrder {
   const event = rand(EVENTS);
@@ -350,6 +351,7 @@ function createSimulationStore() {
     },
     setPaused(paused: boolean) {
       state = { ...state, paused };
+      persist();
       notify();
     },
     setSpeed(speed: number) {
@@ -381,16 +383,16 @@ function createSimulationStore() {
     buyTicket(buyEventId: string, buyZone?: string) {
       const ev = EVENT_MAP.get(buyEventId);
       if (!ev) return;
-      const user = rand(USERS);
+      const me = USERS[0]; // "Somchai Jaidee" — แทนตัวผู้ใช้
       ++uid;
       const purchase: SimOrder = {
         id: `buy-${uid}`,
         at: Date.now(),
         ticket_id: `et-buy-${String(uid).padStart(3, "0")}`,
-        user_id: user.user_id,
+        user_id: me.user_id,
         event_id: buyEventId,
         title: ev.title,
-        buyer: user.name,
+        buyer: me.name,
         zone: buyZone ?? rand(REAL_ZONES),
         price: ev.ticket_price,
         location: ev.location,
@@ -414,7 +416,7 @@ function createSimulationStore() {
     // ── Merged subscription ───────────────────────────────────────
     subscribeMerged(listener: Listener) {
       mergedListeners.add(listener);
-      if (mergedListeners.size === 1 && listeners.size === 0) start();
+      start();
       return () => {
         mergedListeners.delete(listener);
         if (listeners.size === 0 && mergedListeners.size === 0) stop();
