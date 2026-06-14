@@ -65,7 +65,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           aria-hidden={aiOpen ? "false" : "true"}
           tabIndex={aiOpen ? 0 : -1}
         >
-          <AiPanelWrapper />
+          <AiPanelWrapper onClose={closeAi} />
         </div>
       </div>
     </div>

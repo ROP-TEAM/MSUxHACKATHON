@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import type { PosterEvent } from "@/components/home/homeData";
 import PosterCard from "@/components/ui/PosterCard/PosterCard";
 import styles from "./EventsPageClient.module.scss";
@@ -80,7 +81,8 @@ function FilterSelect({
 }
 
 export default function EventsPageClient({ allEvents }: Props) {
-  const [search, setSearch] = useState("");
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
   const [priceFilter, setPriceFilter] = useState<PriceRange>("all");
   const [dateFilter, setDateFilter] = useState<DateRange>("all");
   const [venueFilter, setVenueFilter] = useState("all");

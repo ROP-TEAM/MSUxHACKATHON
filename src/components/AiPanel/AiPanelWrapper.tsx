@@ -6,7 +6,9 @@ import styles from "./AiPanelWrapper.module.scss";
 
 type Role = "user" | "admin";
 
-export default function AiPanelWrapper() {
+type Props = { onClose?: () => void };
+
+export default function AiPanelWrapper({ onClose }: Props) {
   const [role, setRole] = useState<Role>("user");
 
   return (
@@ -25,7 +27,7 @@ export default function AiPanelWrapper() {
           ⬡ แอดมิน
         </button>
       </div>
-      <AiPanel role={role} />
+      <AiPanel role={role} onClose={onClose} />
     </div>
   );
 }
