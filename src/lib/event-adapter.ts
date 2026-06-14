@@ -44,6 +44,14 @@ function extractCategory(title: string): string {
   return title.replace(/\s+\d{4}$/, "");
 }
 
+// ---- poster image resolution ----
+
+/** Images exist for ev-001 → ev-010; derive path from id, no per-event entries. */
+function resolvePoster(eventId: string): string | undefined {
+  const num = parseInt(eventId.replace("ev-", ""), 10);
+  if (num >= 1 && num <= 10) return `/image/events/${eventId}.jpg`;
+}
+
 // ---- gradient palette (deterministic by category name) ----
 
 const PALETTE: [string, string][] = [
@@ -135,6 +143,7 @@ export function getAllPosterEvents(): PosterEvent[] {
       rawDate: e.date,
       gradient,
       accent: gradient[0],
+      image: resolvePoster(e.event_id),
       venue: e.location,
       price: e.ticket_price,
       soldOut: isSoldOut(e.event_id, e.ticket_price, ticketCounts, allCounts),
