@@ -12,11 +12,16 @@ function formatBaht(n: number): string {
 }
 
 export default function LiveOrderFeed() {
-  const snap = useSyncExternalStore(
+  const liveSnap = useSyncExternalStore(
     simulationStore.subscribe,
     simulationStore.getSnapshot,
     simulationStore.getServerSnapshot,
   );
+
+  // Client-only widget (reads sessionStorage, ticks with timers). Render
+  // nothing on the server / before mount so there is no SSR HTML to mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Local clock so expired toasts fade out between store ticks.
   const [now, setNow] = useState(() => Date.now());
@@ -25,6 +30,9 @@ export default function LiveOrderFeed() {
     return () => clearInterval(id);
   }, []);
 
+  if (!mounted) return null;
+
+  const snap = liveSnap;
   const visible = snap.orders.filter((o) => now - o.at < AUTO_DISMISS_MS);
   const fillPct =
     snap.totalCapacity > 0 ? Math.round((snap.totalSold / snap.totalCapacity) * 100) : 0;
@@ -37,11 +45,11 @@ export default function LiveOrderFeed() {
           {snap.paused ? "หยุดชั่วคราว" : "LIVE"}
         </span>
         <div className={styles.stats}>
-          <span>{snap.soldToday.toLocaleString("th-TH")} ใบ</span>
-          <span className={styles.sep}>·</span>
-          <span>{formatBaht(snap.revenue)}</span>
-          <span className={styles.sep}>·</span>
-          <span>{fillPct}%</span>
+          <span style={{ color: "#ffffff" }}>{snap.soldToday.toLocaleString("th-TH")} ใบ</span>
+          <span style={{ color: "rgba(255,255,255,0.4)" }}>·</span>
+          <span style={{ color: "#ffffff" }}>{formatBaht(snap.revenue)}</span>
+          <span style={{ color: "rgba(255,255,255,0.4)" }}>·</span>
+          <span style={{ color: "#ffffff" }}>{fillPct}%</span>
         </div>
         <button
           type="button"
@@ -68,11 +76,11 @@ export default function LiveOrderFeed() {
           <div key={o.id} className={styles.card}>
             <span className={styles.ticket}>🎟️</span>
             <div className={styles.info}>
-              <strong className={styles.title}>{o.title}</strong>
-              <span className={styles.meta}>
+              <strong className={styles.title} style={{ color: "#ffffff" }}>{o.title}</strong>
+              <span className={styles.meta} style={{ color: "#a5b4fc" }}>
                 โซน {o.zone} · {o.qty} ใบ · {formatBaht(o.total)}
               </span>
-              <span className={styles.loc}>
+              <span className={styles.loc} style={{ color: "rgba(255,255,255,0.65)" }}>
                 {o.location} · {o.remaining > 0 ? `เหลือ ${o.remaining} ที่` : "เต็มแล้ว"}
               </span>
             </div>

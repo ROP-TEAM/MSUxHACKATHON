@@ -2,10 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
 import Navbar from "./Navbar/Navbar";
 import AiPanelWrapper from "./AiPanel/AiPanelWrapper";
-import LiveOrderFeed from "./realtime/LiveOrderFeed";
 import styles from "./AppShell.module.scss";
+
+// Client-only: reads sessionStorage + runs timers. No SSR → no hydration mismatch.
+const LiveOrderFeed = dynamic(() => import("./realtime/LiveOrderFeed"), { ssr: false });
 
 type NavKey = "home" | "concerts" | "all-events" | "my-tickets" | "overview" | "contact";
 
