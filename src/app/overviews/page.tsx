@@ -3,7 +3,150 @@
 import styles from "./page.module.scss";
 import Image from "next/image";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { simulationStore, STATUS_CONFIG, type TicketRow } from "@/lib/simulation-store";
+import { simulationStore } from "@/lib/simulation-store";
+import { Popover, UnstyledButton } from "@mantine/core";
+
+// --- คอมโพเนนต์ FilterSelect เขียนเองสไตล์ Dime! ---
+function FilterSelect({
+  options,
+  value,
+  onChange,
+  defaultLabel,
+}: {
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+  defaultLabel: string;
+}) {
+  const [opened, setOpened] = useState(false);
+
+  const selectedLabel =
+    value === "all"
+      ? defaultLabel
+      : options.find((opt) => opt.value === value)?.label || value;
+
+  return (
+    <Popover
+      opened={opened}
+      onChange={setOpened}
+      position="bottom-start"
+      offset={4}
+      radius="md"
+      shadow="md"
+    >
+      <Popover.Target>
+        <UnstyledButton
+          onClick={() => setOpened((o) => !o)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            background: "transparent",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            fontSize: "1rem",
+            color: "inherit",
+            height: "40px",
+          }}
+        >
+          <span>{selectedLabel}</span>
+          <span style={{ display: "inline-flex", alignItems: "center" }}>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+        </UnstyledButton>
+      </Popover.Target>
+
+      <Popover.Dropdown
+        style={{
+          padding: "0.5rem 0rem",
+          width: "max-content",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {/* เพิ่มตัวเลือก "ทั้งหมด" กลับเข้าไปในลิสต์ Dropdown */}
+          <UnstyledButton
+            onClick={() => {
+              onChange("all");
+              setOpened(false);
+            }}
+            style={{
+              width: "100%",
+              padding:
+                value === "all"
+                  ? "0.625rem 1.25rem 0.625rem 1rem"
+                  : "0.625rem 1.25rem",
+              fontSize: "0.925rem",
+              fontFamily: "inherit",
+              textAlign: "left",
+              fontWeight: value === "all" ? 600 : 400,
+              borderLeft:
+                value === "all"
+                  ? "4px solid var(--p-500)"
+                  : "4px solid transparent",
+              backgroundColor: value === "all" ? "#f8f9fa" : "transparent",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#f8f9fa")
+            }
+            onMouseLeave={(e) => {
+              if (value !== "all")
+                e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            {defaultLabel}
+          </UnstyledButton>
+
+          {options.map((option) => {
+            const isSelected = value === option.value;
+            return (
+              <UnstyledButton
+                key={option.value}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpened(false);
+                }}
+                style={{
+                  width: "100%",
+                  padding: isSelected
+                    ? "0.625rem 1.25rem 0.625rem 1rem"
+                    : "0.625rem 1.25rem",
+                  fontSize: "0.925rem",
+                  fontFamily: "inherit",
+                  textAlign: "left",
+                  fontWeight: isSelected ? 600 : 400,
+                  borderLeft: isSelected
+                    ? "4px solid #39e19c"
+                    : "4px solid transparent",
+                  backgroundColor: isSelected ? "#f8f9fa" : "transparent",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#f8f9fa")
+                }
+                onMouseLeave={(e) => {
+                  if (!isSelected)
+                    e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                {option.label}
+              </UnstyledButton>
+            );
+          })}
+        </div>
+      </Popover.Dropdown>
+    </Popover>
+  );
+}
 
 export default function Overview() {
   const [price, setPrice] = useState("all");
@@ -25,7 +168,6 @@ export default function Overview() {
         ticket.eventTitle.toLowerCase().includes(search.toLowerCase());
 
       const matchVenue = venue === "all" || ticket.location === venue;
-
       const matchStatus = status === "all" || ticket.status === status;
 
       const matchPrice =
@@ -38,15 +180,32 @@ export default function Overview() {
     });
   }, [tickets, search, venue, status, price]);
 
+  // คัดแยกโครงสร้างข้อมูลส่งเข้าคอมโพเนนต์ Filter
+  const priceOptions = [
+    { value: "500", label: "ต่ำกว่า 500" },
+    { value: "1000", label: "500 - 1000" },
+    { value: "1500", label: "มากกว่า 1000" },
+  ];
+
+  const venueOptions = useMemo(() => {
+    return [...new Set(tickets.map((t) => t.location))].map((location) => ({
+      value: location,
+      label: location,
+    }));
+  }, [tickets]);
+
+  const statusOptions = [
+    { value: "CANCELLED", label: "CANCELLED" },
+    { value: "USED", label: "USED" },
+    { value: "RESERVED", label: "RESERVED" },
+    { value: "REFUNDED", label: "REFUNDED" },
+    { value: "PAID", label: "PAID" },
+  ];
+
   const latestDate =
     tickets.length > 0
       ? new Date(tickets[0].date).toLocaleDateString("th-TH")
       : "-";
-
-  const allLocations = useMemo(
-    () => [...new Set(tickets.map((t) => t.location))],
-    [tickets],
-  );
 
   return (
     <div className={styles.container}>
@@ -55,10 +214,7 @@ export default function Overview() {
         alt="background"
         width={400}
         height={250}
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
+        style={{ width: "100%", height: "100%" }}
       />
 
       <div className={styles.box}>
@@ -74,7 +230,6 @@ export default function Overview() {
 
         <div className={styles.right_box}>
           <p>{latestDate}</p>
-
           <Image
             src="/image/box.svg"
             alt="icon"
@@ -88,44 +243,31 @@ export default function Overview() {
       <div className={styles.tab}>
         <div>
           <div className={styles.filterRow}>
-            <div className={styles.filters}>
-              <select
+            <div
+              className={styles.filters}
+              style={{ display: "flex", gap: "1.5rem" }}
+            >
+              {/* เปลี่ยนมาใช้คอมโพเนนต์ FilterSelect ทั้งหมด */}
+              <FilterSelect
+                options={priceOptions}
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className={styles.filterSelect}
-              >
-                <option value="all">ราคาบัตร</option>
-                <option value="500">ต่ำกว่า 500</option>
-                <option value="1000">500 - 1000</option>
-                <option value="1500">มากกว่า 1000</option>
-              </select>
+                onChange={setPrice}
+                defaultLabel="ราคาบัตร"
+              />
 
-              <select
+              <FilterSelect
+                options={venueOptions}
                 value={venue}
-                onChange={(e) => setVenue(e.target.value)}
-                className={styles.filterSelect}
-              >
-                <option value="all">สถานที่</option>
+                onChange={setVenue}
+                defaultLabel="สถานที่"
+              />
 
-                {allLocations.map((location) => (
-                  <option key={location} value={location}>
-                    {location}
-                  </option>
-                ))}
-              </select>
-
-              <select
+              <FilterSelect
+                options={statusOptions}
                 value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className={styles.filterSelect}
-              >
-                <option value="all">ประเภท</option>
-                <option value="CANCELLED">CANCELLED</option>
-                <option value="USED">USED</option>
-                <option value="RESERVED">RESERVED</option>
-                <option value="REFUNDED">REFUNDED</option>
-                <option value="PAID">PAID</option>
-              </select>
+                onChange={setStatus}
+                defaultLabel="ประเภท"
+              />
             </div>
 
             <div className={styles.searchBox}>
@@ -164,7 +306,6 @@ export default function Overview() {
 
                   <div className={styles.text}>
                     <h3>{ticket.name}</h3>
-
                     <div className={styles.user}>
                       <p>{ticket.eventTitle}</p>
                       <p>{new Date(ticket.date).toLocaleDateString("th-TH")}</p>
@@ -173,13 +314,7 @@ export default function Overview() {
                   </div>
                 </div>
 
-                <h2
-                  style={{
-                    color: ticket.color,
-                  }}
-                >
-                  {ticket.status}
-                </h2>
+                <h2 style={{ color: ticket.color }}>{ticket.status}</h2>
               </div>
             ))}
           </div>
