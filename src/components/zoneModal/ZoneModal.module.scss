@@ -18,11 +18,53 @@
   padding: 1rem;
   min-width: 0;
   overflow: hidden;
+  position: relative;
 
   > div {
     width: 100%;
     max-width: 100%;
   }
+}
+.leftPanel::before {
+  content: "";
+  position: absolute;
+
+  bottom: -255px;
+  right: -10px;
+
+  width: 900px;
+  height: 700px;
+
+  background: url("/image/bgModal.svg") no-repeat center;
+  background-size: contain;
+
+  pointer-events: none;
+}
+
+
+.leftPanel::after {
+  content: "";
+  position: absolute;
+
+  top: -300px;
+  left: -250px;
+
+  width: 700px;
+  height: 700px;
+
+  background: url("/image/bgModal2.svg") no-repeat center;
+  background-size: contain;
+
+  pointer-events: none;
+}
+
+.leftPanel {
+  background-color: #f8f9fa;
+
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.12) 1px, transparent 1px);
+
+  background-size: 8px 8px;
 }
 
 /* ---- right panel (info) ---- */
