@@ -14,18 +14,20 @@ const COLORS = ["#8b5cf6", "#10b981", "#3b82f6", "#f59e0b", "#d946ef", "#9ca3af"
 function AnalyticDashboardChart() {
   const [timeFilter, setTimeFilter] = useState("month"); 
 
-  // คำนวณข้อมูลเพียง 1 ครั้ง ส่งไปให้กราฟใช้ร่วมกัน
   const chartData = useMemo(() => {
-    const CURRENT_DATE = new Date("2026-06-14T10:10:18+07:00");
+    const CURRENT_DATE = new Date();
     const currentYear = CURRENT_DATE.getFullYear();
     const currentMonth = CURRENT_DATE.getMonth();
 
     const startOfWeek = new Date(CURRENT_DATE);
-    startOfWeek.setDate(CURRENT_DATE.getDate() - CURRENT_DATE.getDay());
+    const dayOfWeek = CURRENT_DATE.getDay();
+    const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
+    
+    startOfWeek.setDate(CURRENT_DATE.getDate() - distanceToMonday);
     startOfWeek.setHours(0, 0, 0, 0);
 
     const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); 
     endOfWeek.setHours(23, 59, 59, 999);
 
     const validTickets = ticketsData.filter(
