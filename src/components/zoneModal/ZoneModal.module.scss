@@ -21,7 +21,7 @@
   position: relative;
 
   > div {
-    width: 100%;
+    width: 80%;
     max-width: 100%;
   }
 }
@@ -371,7 +371,7 @@
   padding: 0 55px;
   h1 {
     font-weight: 600;
-    font-size: 2.25rem;
+    font-size: 2rem;
   }
 }
 
@@ -479,7 +479,6 @@
 }
 
 .share{
-  margin-top: 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -680,4 +679,8 @@
     color:var(--b-1000);
     border: none;
   }
+}
+
+.floatingClose{
+  display: none;
 }
