@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar/Navbar";
-import AiPanelWrapper from "./AiPanel/AiPanelWrapper";
 import styles from "./AppShell.module.scss";
 
 import { Footer } from "./footer/footer";

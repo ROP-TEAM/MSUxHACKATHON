@@ -39,7 +39,9 @@ const formatEventDate = (iso: string) => {
 
 // แปลงราคาตั๋ว
 const formatPrice = (price: number) =>
-  price === 0 ? "เข้าฟรีไม่มีค่าใช้จ่าย" : `เริ่มต้นเพียง ${price.toLocaleString("th-TH")} บาท`;
+  price === 0
+    ? "เข้าฟรีไม่มีค่าใช้จ่าย"
+    : `เริ่มต้นเพียง ${price.toLocaleString("th-TH")} บาท`;
 
 // path รูปเดิมตาม mock (เรียงตามลำดับ index)
 const cardImages = [
@@ -51,13 +53,12 @@ const cardImages = [
 ];
 
 // นับจำนวนตั๋วที่ถูกจองของแต่ละ event (รวมทุก status)
-const ticketCountMap = (ticketsData as TicketData[]).reduce<Record<string, number>>(
-  (acc, ticket) => {
-    acc[ticket.event_id] = (acc[ticket.event_id] || 0) + 1;
-    return acc;
-  },
-  {},
-);
+const ticketCountMap = (ticketsData as TicketData[]).reduce<
+  Record<string, number>
+>((acc, ticket) => {
+  acc[ticket.event_id] = (acc[ticket.event_id] || 0) + 1;
+  return acc;
+}, {});
 
 // สร้าง description แบบยาวขึ้น รวมสถานที่ วันที่ ราคา และจำนวนผู้จอง
 const buildDescription = (event: EventData) => {
@@ -79,7 +80,7 @@ const slideData: SlideCardProps[] = [...(eventsData as EventData[])]
     imageUrl: cardImages[index],
   }));
 
-const SlideCard = ({ title, description, imageUrl }: SlideCardProps) => {
+export const SlideCard = ({ title, description, imageUrl }: SlideCardProps) => {
   return (
     <div className={styles.card}>
       <div className={styles.title}>
@@ -97,27 +98,29 @@ const SlideCard = ({ title, description, imageUrl }: SlideCardProps) => {
           objectPosition: "top",
         }}
       />
-      <p>{description}</p>
+      {/* ใส่ suppressHydrationWarning ตรงนี้เพื่อแก้ Error เรื่อง Date ไม่ตรงกัน */}
+      <p suppressHydrationWarning>{description}</p>
     </div>
   );
 };
 
+// นำ SlideList กลับมา Export เพื่อให้ page.tsx เรียกใช้ได้
 export const SlideList = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false); // เช็คว่าเรนเดอร์บน Client แล้วหรือยัง
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollRight, setCanScrollRight] = useState(false); // เริ่มต้นเป็น false ไว้ก่อน
 
   const checkScroll = () => {
     const el = containerRef.current;
     if (!el) return;
 
     setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(
-      el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
-    );
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   };
 
   useEffect(() => {
+    setIsMounted(true); // ยืนยันว่าฝั่ง Client โหลดเสร็จแล้ว
     checkScroll();
     const el = containerRef.current;
     if (!el) return;
@@ -141,7 +144,8 @@ export const SlideList = () => {
 
   return (
     <div className={styles.backgroundImage}>
-      {canScrollLeft && (
+      {/* แสดงลูกศรเมื่อ isMounted เป็น true เท่านั้น เพื่อแก้ Hydration Error */}
+      {isMounted && canScrollLeft && (
         <div
           className={`${styles.arrow} ${styles.arrowLeft}`}
           onClick={scrollLeft}
@@ -149,7 +153,8 @@ export const SlideList = () => {
           <Image src="/icon/left.svg" alt="left" width={24} height={24} />
         </div>
       )}
-      {canScrollRight && (
+
+      {isMounted && canScrollRight && (
         <div
           className={`${styles.arrow} ${styles.arrowRight}`}
           onClick={scrollRight}
@@ -158,6 +163,7 @@ export const SlideList = () => {
         </div>
       )}
 
+      {/* เปลี่ยนกลับมาใช้ fill ตามที่ปรับแก้ไป */}
       <Image src="/image/background.svg" alt="" fill className={styles.bg} />
 
       <div className={styles.header}>
