@@ -26,6 +26,8 @@ export type SimSnapshot = {
   revenue: number;
   totalSold: number;
   totalCapacity: number;
+  /** eventId -> seats sold by the simulation so far */
+  perEvent: Record<string, number>;
   paused: boolean;
 };
 
@@ -46,7 +48,7 @@ const ZONE_CAPACITY: Record<string, number> = {
   D: 200,
 };
 const ZONES = Object.keys(ZONE_CAPACITY);
-const CAPACITY_PER_EVENT = Object.values(ZONE_CAPACITY).reduce((a, b) => a + b, 0);
+export const CAPACITY_PER_EVENT = Object.values(ZONE_CAPACITY).reduce((a, b) => a + b, 0);
 
 const MAX_RECENT = 6;
 const MAX_QTY = 4;
@@ -111,10 +113,22 @@ const EMPTY_SNAPSHOT: SimSnapshot = Object.freeze({
   revenue: 0,
   totalSold: 0,
   totalCapacity: TOTAL_CAPACITY,
+  perEvent: {},
   paused: false,
 });
 
 let snapshot: SimSnapshot = buildSnapshot();
+
+function buildPerEvent(): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const eventId in state.inventory) {
+    let sold = 0;
+    const zones = state.inventory[eventId];
+    for (const z in zones) sold += zones[z];
+    if (sold > 0) out[eventId] = sold;
+  }
+  return out;
+}
 
 function buildSnapshot(): SimSnapshot {
   return {
@@ -123,6 +137,7 @@ function buildSnapshot(): SimSnapshot {
     revenue: state.revenue,
     totalSold: state.totalSold,
     totalCapacity: TOTAL_CAPACITY,
+    perEvent: buildPerEvent(),
     paused: state.paused,
   };
 }

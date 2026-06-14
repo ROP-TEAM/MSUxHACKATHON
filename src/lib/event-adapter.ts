@@ -125,7 +125,8 @@ function isSoldOut(
   ticketCounts: TicketCounts,
   allCounts: number[],
 ): boolean {
-  if (price === 0) return true;
+  // Free events are never sold out — they always have open seats.
+  if (price === 0) return false;
   const c = ticketCounts.get(eventId);
   if (!c || c.total === 0) return false;
   const sorted = [...allCounts].sort((a, b) => b - a);

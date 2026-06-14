@@ -2,11 +2,14 @@
 
 import styles from "./page.module.scss";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import ticketsData from "@/data/event_tickets.json";
 import usersData from "@/data/users.json";
 import eventsData from "@/data/events.json";
+import { simulationStore, type LiveOrder } from "@/lib/simulation-store";
+
+const MAX_LIVE_ROWS = 50;
 
 type TicketStatus = "CANCELLED" | "USED" | "RESERVED" | "REFUNDED" | "PAID";
 
@@ -86,8 +89,40 @@ export default function Overview() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, []);
 
+  // ── Live simulation feed → accumulate orders into the overview list ──
+  const snap = useSyncExternalStore(
+    simulationStore.subscribe,
+    simulationStore.getSnapshot,
+    simulationStore.getServerSnapshot,
+  );
+
+  const [liveRows, setLiveRows] = useState<TicketRow[]>([]);
+
+  useEffect(() => {
+    if (snap.orders.length === 0) return;
+    setLiveRows((prev) => {
+      const seen = new Set(prev.map((r) => r.id));
+      const incoming: TicketRow[] = snap.orders
+        .filter((o: LiveOrder) => !seen.has(o.id))
+        .map((o: LiveOrder) => ({
+          id: o.id,
+          name: "ผู้ซื้อเรียลไทม์",
+          eventTitle: o.title,
+          location: o.location,
+          date: new Date(o.at).toISOString(),
+          seat: o.zone,
+          price: o.price,
+          status: "PAID" as TicketStatus,
+          icon: STATUS_CONFIG.PAID.icon,
+          color: STATUS_CONFIG.PAID.color,
+        }));
+      if (incoming.length === 0) return prev;
+      return [...incoming, ...prev].slice(0, MAX_LIVE_ROWS);
+    });
+  }, [snap.orders]);
+
   const filteredTickets = useMemo(() => {
-    return tickets.filter((ticket) => {
+    return [...liveRows, ...tickets].filter((ticket) => {
       const matchSearch =
         search === "" ||
         ticket.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -105,7 +140,7 @@ export default function Overview() {
 
       return matchSearch && matchVenue && matchStatus && matchPrice;
     });
-  }, [tickets, search, venue, status, price]);
+  }, [tickets, liveRows, search, venue, status, price]);
 
   const latestDate =
     tickets.length > 0
@@ -128,7 +163,7 @@ export default function Overview() {
       <div className={styles.box}>
         <div className={styles.left_box}>
           <h1>รายการทั้งหมด</h1>
-          <h2>{tickets.length} ใบ</h2>
+          <h2>{(tickets.length + liveRows.length).toLocaleString("th-TH")} ใบ</h2>
 
           <div className={styles.ticket}>
             <Image src="/icon/ticket1.svg" alt="icon" width={30} height={30} />
