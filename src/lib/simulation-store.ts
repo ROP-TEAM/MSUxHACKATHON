@@ -18,6 +18,19 @@ const REAL_STATUSES = [...new Set(TICKETS.map((t) => t.status))];
 const EVENT_MAP = new Map(EVENTS.map((e) => [e.event_id, e]));
 const USER_MAP = new Map(USERS.map((u) => [u.user_id, u]));
 
+// Real base: count + revenue of the resolvable tickets in event_tickets.json.
+// Every headline number starts from here, so the UI reflects the full real
+// dataset from the first frame (not 0) and feed == overview always.
+let BASE_COUNT = 0;
+let BASE_REVENUE = 0;
+for (const t of TICKETS) {
+  const u = USER_MAP.get(t.user_id);
+  const e = EVENT_MAP.get(t.event_id);
+  if (!u || !e) continue;
+  BASE_COUNT++;
+  BASE_REVENUE += e.ticket_price;
+}
+
 // ── Shared types (consumed by pages across the app) ──────────────────
 
 export type TicketStatus = "CANCELLED" | "USED" | "RESERVED" | "REFUNDED" | "PAID";
@@ -121,8 +134,8 @@ let uid = persisted.uid;
 const INITIAL: SimSnapshot = {
   orders: [],
   paused: false,
-  totalTickets: 0,
-  revenue: 0,
+  totalTickets: BASE_COUNT,
+  revenue: BASE_REVENUE,
   added: 0,
   speed: 1,
   ...(persisted.state ?? {}),
@@ -231,7 +244,9 @@ const serverMergedCache = buildMergedRows({ orders: [], paused: false, totalTick
 // ── Store factory ────────────────────────────────────────────────────
 
 const BASE_INTERVAL = 2500;
-const MAX_ORDERS = 50;
+// Sim plateau = BASE_COUNT + MAX_ORDERS. Lower this to fill up faster
+// (e.g. 10 → tops out at BASE_COUNT + 10). Tune freely.
+const MAX_ORDERS = 150;
 
 function createSimulationStore() {
   let state: SimSnapshot = { ...INITIAL };
@@ -254,12 +269,16 @@ function createSimulationStore() {
   function tick() {
     if (state.paused) return;
     const order = makeOrder();
+    const orders = [order, ...state.orders].slice(0, MAX_ORDERS);
+    // Derive every counter from `orders` (capped) — single source, no drift.
+    // Plateaus at BASE + MAX_ORDERS, so the sim visibly "fills up" then holds.
+    const simRevenue = orders.reduce((s, o) => s + o.price, 0);
     state = {
       ...state,
-      orders: [order, ...state.orders].slice(0, MAX_ORDERS),
-      totalTickets: state.totalTickets + 1,
-      revenue: state.revenue + order.price,
-      added: state.added + 1,
+      orders,
+      totalTickets: BASE_COUNT + orders.length,
+      revenue: BASE_REVENUE + simRevenue,
+      added: orders.length,
     };
     persist();
     invalidateMerged();
@@ -319,8 +338,8 @@ function createSimulationStore() {
       state = {
         orders: [],
         paused: false,
-        totalTickets: 0,
-        revenue: 0,
+        totalTickets: BASE_COUNT,
+        revenue: BASE_REVENUE,
         added: 0,
         speed: 1,
       };

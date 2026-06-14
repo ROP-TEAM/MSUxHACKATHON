@@ -79,7 +79,6 @@ function ZoneTooltipContent({
         <div style={{ fontWeight: 700, marginBottom: 4 }}>
           Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
         </div>
-        <div>ไม่พบข้อมูลตั๋ว</div>
       </div>
     );
   }
@@ -89,12 +88,6 @@ function ZoneTooltipContent({
       <div style={{ fontWeight: 700, marginBottom: 4 }}>
         Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
       </div>
-      <div>ทั้งหมด: {summary.total} ที่นั่ง</div>
-      <div>ใช้แล้ว: {summary.used}</div>
-      <div>จ่ายแล้ว: {summary.paid}</div>
-      <div>จอง: {summary.reserved}</div>
-      <div>ยกเลิก: {summary.cancelled}</div>
-      <div>คืนเงิน: {summary.refunded}</div>
     </div>
   );
 }
@@ -350,9 +343,9 @@ export default function StageOverview({
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
 
           <g opacity="0.15">
-            <line x1={cx} y1={0} x2={cx} y2={height} stroke="#343a40" strokeWidth="2" strokeDasharray="3,3" />
-            <circle cx={cx} cy={cy} r={r1_in} fill="none" stroke="#343a40" strokeWidth="1" />
-            <circle cx={cx} cy={cy} r={r2_in} fill="none" stroke="#343a40" strokeWidth="1" />
+            <line x1={cx} y1={0} x2={cx} y2={height} stroke="#3A127A" strokeWidth="2" strokeDasharray="3,3" />
+            <circle cx={cx} cy={cy} r={r1_in} fill="none" stroke="#3A127A" strokeWidth="1" />
+            <circle cx={cx} cy={cy} r={r2_in} fill="none" stroke="#3A127A" strokeWidth="1" />
           </g>
 
           <g stroke="#ffffff" strokeWidth="2" opacity="0.9" fill="none">
@@ -360,7 +353,7 @@ export default function StageOverview({
             <line x1={cx + (r1_in - 5) * Math.cos(rad(488.5))} y1={cy + (r1_in - 5) * Math.sin(rad(488.5))} x2={cx + (r1_out + 5) * Math.cos(rad(488.5))} y2={cy + (r1_out + 5) * Math.sin(rad(488.5))} stroke="#ced4da" strokeWidth="3" />
           </g>
 
-          <g fill="#495057">
+          <g fill="#3A127A">
             <rect x={cx - 15} y={80} width={30} height={390} rx={1} />
             <rect x={180} y={248} width={440} height={20} rx={1} />
           </g>
@@ -415,7 +408,7 @@ export default function StageOverview({
             >
               <path
                 d="M 205,282 L 370,282 L 370,395 L 325,395 L 245,395 L 205,340 Z"
-                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+                className={`${styles.ZoneD} transition-all duration-200 stroke-[4]`}
                 style={selectedZone === "D" ? { fill: "#868e96" } : undefined}
               />
               <text x={287} y={345} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">D</text>
@@ -433,7 +426,7 @@ export default function StageOverview({
             >
               <path
                 d="M 595,282 L 430,282 L 430,395 L 475,395 L 555,395 L 595,340 Z"
-                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
+                className={`${styles.ZoneC} transition-all duration-200 stroke-[4]`}
                 style={selectedZone === "C" ? { fill: "#868e96" } : undefined}
               />
               <text x={513} y={345} textAnchor="middle" className="font-sans font-black text-xl fill-white pointer-events-none">C</text>
@@ -441,9 +434,9 @@ export default function StageOverview({
           </g>
 
           <g id="stage-arena-platform">
-            <rect x={290} y={15} width={220} height={70} rx={1} fill="#343a40" stroke="#1e2530" strokeWidth="2.5" />
+            <rect x={290} y={15} width={220} height={70} rx={1} fill="#5E27B6" stroke="#8E53FA" strokeWidth="2.5" />
             <text x={400} y={58} textAnchor="middle" className="font-sans fill-white text-[24px] font-black tracking-[0.2em]">STAGE</text>
-            <line x1={cx} y1={85} x2={cx} y2={105} stroke="#343a40" strokeWidth="20" />
+            <line x1={cx} y1={85} x2={cx} y2={105} stroke="#3A127A" strokeWidth="20" />
           </g>
 
           <g id="ring-1F-wedges">
