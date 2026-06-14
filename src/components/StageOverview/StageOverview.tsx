@@ -16,7 +16,7 @@ interface ZoneSummary {
 
 interface StageOverviewProps {
   onZoneClick: (zoneId: string) => void;
-  tickets: Ticket[];
+  tickets?: Ticket[];
   eventId: string;
 }
 
