@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar/Navbar";
 import AiPanelWrapper from "./AiPanel/AiPanelWrapper";
+import LiveOrderFeed from "./realtime/LiveOrderFeed";
 import styles from "./AppShell.module.scss";
 
 type NavKey = "home" | "concerts" | "all-events" | "my-tickets" | "overview" | "contact";
@@ -68,6 +69,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <AiPanelWrapper onClose={closeAi} />
         </div>
       </div>
+      <LiveOrderFeed />
     </div>
   );
 }

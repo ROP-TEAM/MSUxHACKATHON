@@ -1,0 +1,27 @@
+{
+  "name": "MSU x Hackathon — Event & Ticket",
+  "short_name": "MSU Events",
+  "description": "ระบบจัดการ Event และตั๋ว พร้อม AI ผู้ช่วยและออเดอร์เรียลไทม์",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0b12",
+  "theme_color": "#0b0b12",
+  "lang": "th",
+  "categories": ["events", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo/msuLogo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

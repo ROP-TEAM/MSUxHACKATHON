@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
 import AppShell from "@/components/AppShell";
+import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 import "../styles/globals.scss";
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
@@ -8,6 +9,16 @@ import { MantineProvider } from '@mantine/core';
 export const metadata: Metadata = {
   title: "MSU x Hackathon",
   description: "Event & Ticket Dashboard",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "MSU Events",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0b12",
 };
 
 const noto = Noto_Sans_Thai({
@@ -27,6 +38,7 @@ export default function RootLayout({
         <MantineProvider>
           <AppShell>{children}</AppShell>
         </MantineProvider>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
