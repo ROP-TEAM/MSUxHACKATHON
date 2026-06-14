@@ -10,8 +10,8 @@ type NavKey = "home" | "concerts" | "all-events" | "my-tickets" | "overview" | "
 
 function getActiveKey(pathname: string): NavKey {
   if (pathname === "/") return "home";
-  if (pathname.startsWith("/events")) return "concerts";
-  if (pathname.startsWith("/tickets")) return "concerts";
+  if (pathname.startsWith("/events")) return "all-events";
+  if (pathname.startsWith("/tickets")) return "my-tickets";
   if (pathname.startsWith("/overview")) return "overview";
   if (pathname.startsWith("/contact")) return "contact";
   return "home";

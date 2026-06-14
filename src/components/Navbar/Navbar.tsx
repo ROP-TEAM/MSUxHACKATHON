@@ -52,6 +52,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
   const [menuClosing, setMenuClosing] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownHoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const centerRef = useRef<HTMLDivElement>(null);
@@ -95,7 +96,10 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
     }, 300);
   }
 
-  useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); }, []);
+  useEffect(() => () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    if (dropdownHoverTimerRef.current) clearTimeout(dropdownHoverTimerRef.current);
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -203,13 +207,20 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
               key={item.key}
               className={styles.dropdown}
               ref={setDropdownRef(item.key)}
-              onMouseEnter={() => setHoveredKey(item.key)}
+              onMouseEnter={() => {
+                if (dropdownHoverTimerRef.current) clearTimeout(dropdownHoverTimerRef.current);
+                setHoveredKey(item.key);
+                setActiveDropdown(item.key);
+              }}
+              onMouseLeave={() => {
+                dropdownHoverTimerRef.current = setTimeout(() => setActiveDropdown(null), 150);
+              }}
             >
               <button
                 id={`nav-trigger-${item.key}`}
                 data-nav-key={item.key}
                 className={`${styles.navLink} ${styles.dropdownTrigger} ${
-                  activeKey === item.key ? styles.active : ""
+                  activeKey === item.key || item.children.some((c) => c.key === activeKey) ? styles.active : ""
                 }`}
                 onClick={() =>
                   setActiveDropdown(
@@ -252,7 +263,7 @@ export default function Navbar({ onAiToggle, aiOpen, activeKey = "home" }: Props
                     <a
                       key={child.key}
                       id={`dropdown-item-${item.key}-${i}`}
-                      className={styles.dropdownItem}
+                      className={`${styles.dropdownItem}${activeKey === child.key ? ` ${styles.dropdownItemActive}` : ""}`}
                       href={child.href}
                       role="menuitem"
                       tabIndex={-1}
