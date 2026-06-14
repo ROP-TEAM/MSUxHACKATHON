@@ -5,7 +5,6 @@ import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 import "../styles/globals.scss";
 import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
-import { Footer } from "@/components/footer/footer";
 
 export const metadata: Metadata = {
   title: "MSU x Hackathon",

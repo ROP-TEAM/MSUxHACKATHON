@@ -18,7 +18,6 @@
   padding: 30px 50px 90px 50px;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5rem;
 }
 .left_box {
   display: flex;
@@ -65,15 +64,17 @@
   margin-bottom: 100px;
 }
 .filterRow {
+  padding-top: 1.5rem;
   display: flex;
   width: 50%;
-  margin-inline: auto;
+  margin: 1rem auto;
   align-content: center;
   justify-content: space-between;
 }
 
 .filters {
   display: flex;
+  align-items: centerโ;
   gap: 40px;
 }
 

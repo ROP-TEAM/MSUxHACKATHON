@@ -1,162 +1,159 @@
 @use "../../styles/responsive" as *;
-.backgroundImage {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    top:-100px;
 
-    &:hover .arrow {
-        opacity: 1;
-    }
+.backgroundImage {
+  margin-bottom: 10rem;
+  position: relative;
+  width: 100%;
+  /* ใช้ padding ดันบน-ล่าง แทนการฟิกซ์ความสูงแบบตายตัว */
+  padding: 60px 0 80px 0;
+  overflow: hidden;
+  /* border: 2px solid red; (สามารถลบออกได้เลยหากจัด Layout เสร็จแล้ว) */
+
+  &:hover .arrow {
+    opacity: 1;
+  }
 }
 
-.header{
-    position: absolute;
-    top: 150px;
-    left: 100px;
-    z-index: 2;
+.bg {
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
 
-    p{
-        position: absolute;
-        font-size: 1.25rem;
-        color: var(--b-100);
-        top: 5px;
-        left: 60px;
-        font-weight: 600;
-        width: 150px;
-    }
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: 100px;
+  margin-bottom: 30px; /* ดันให้มีระยะห่างกับตัวการ์ด */
+  z-index: 2;
+
+  p {
+    font-size: 1.25rem;
+    color: var(--b-100);
+    font-weight: 600;
+    margin: 0;
+  }
 }
 
 .logo {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    background-color: var(--b-700);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
+  width: 40px;
+  height: 40px;
+  background-color: var(--b-700);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.slideContainer{
-    position: absolute;
-    left: 80px;
-    right: 0;
-    top: 220px;
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    padding: 0 20px;
-    z-index: 2;
+.slideContainer {
+  position: relative;
+  margin-left: 80px;
+  padding: 0 20px;
 
-    scrollbar-width: none;      // Firefox
-    -ms-overflow-style: none;   // IE/Edge legacy
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  z-index: 2;
 
-    &::-webkit-scrollbar {
-        display: none;          // Chrome, Safari, Edge ใหม่
-    }
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE/Edge legacy
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Edge ใหม่
+  }
 }
 
 .card {
-    position: relative;
-    flex: 0 0 auto;
-    width: 400px;
-    background-color: var(--p-0);
-    border-radius: 12px;
-    overflow: hidden;
-    color: var(--b-100, #fff);
+  position: relative;
+  flex: 0 0 auto;
+  width: 400px;
+  background-color: var(--p-0);
+  border-radius: 12px;
+  overflow: hidden;
+  color: var(--b-100, #fff);
 
-    img {
-        display: block;
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-    }
+  img {
+    display: block;
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
 
-
-    p {
-        font-size: 1rem;
-        margin: 20px 25px;
-        color: var(--b-1000);
-        font-weight: 500;
-    }
-}
-.title{
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: var(--b-0);
-    padding: 5px 15px;
-    border-radius: 25px;
-    z-index: 5;
+  p {
+    font-size: 1rem;
+    margin: 20px 25px;
+    color: var(--b-1000);
+    font-weight: 500;
+  }
 }
 
-.arrowLeft {
-    left: 50px;
-}
-
-.arrowRight {
-    right: 50px;
+.title {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: var(--b-0);
+  padding: 5px 15px;
+  border-radius: 25px;
+  z-index: 5;
 }
 
 .arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+  position: absolute;
+  /* ปรับให้เลื่อนลงมาหน่อย เพื่อชดเชยกับความสูงของ header ที่รวมอยู่ในกล่องแล้ว */
+  top: 60%;
+  transform: translateY(-50%);
 
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
 
-    background: var(--b-0);
-    color: var(--b-1000);
+  background: var(--b-0);
+  color: var(--b-1000);
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    font-size: 30px;
-    font-weight: 600;
-    cursor: pointer;
+  font-size: 30px;
+  font-weight: 600;
+  cursor: pointer;
 
-    z-index: 10;
-    opacity: 0;
-    transition: 0.1s;
+  z-index: 10;
+  opacity: 0;
+  transition: 0.1s;
 }
 
+.arrowLeft {
+  left: 50px;
+}
+
+.arrowRight {
+  right: 50px;
+}
 
 @include respond(lg) {
   .backgroundImage {
-    height: 300px;
-    top: -60px;
-    color:#fff
+    padding: 40px 0 60px 0; /* ลดระยะห่างบนล่าง สำหรับหน้าจอเล็ก */
   }
 
   .header {
-    top: 100px;
-    left: 1.25rem;
+    margin-left: 1.25rem;
+    margin-bottom: 20px;
 
     p {
-      font-size: 1rem;
-      width: 120px;
-      left: 50px;
+      display: none;
     }
   }
 
   .logo {
-    width: 32px;
-    height: 32px;
-
-    img {
-      width: 24px;
-      height: 24px;
-    }
+    display: none;
   }
 
   .slideContainer {
-    left: 1.25rem;
-    top: 50px;
+    margin-left: 1.25rem;
     gap: 12px;
     padding: 0 0.75rem;
   }
@@ -186,6 +183,7 @@
     height: 36px;
     font-size: 1.25rem;
     opacity: 1;
+    top: 55%;
   }
 
   .arrowLeft {
@@ -195,21 +193,4 @@
   .arrowRight {
     right: 0.5rem;
   }
-  
-  .bg {
-    display: none;
-  }
-
-  .logo {
-    display: none;
-  }
-
-  .header p {
-    display: none;
-  }
-
-  .backgroundImage {
-    background: var(--b-0); // ใส่สีพื้นหลัง fallback ตอนไม่มี bg image
-  }
-
 }
