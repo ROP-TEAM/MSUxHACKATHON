@@ -270,9 +270,48 @@ const serverMergedCache = buildMergedRows({ orders: [], purchases: [], paused: f
 // ── Store factory ────────────────────────────────────────────────────
 
 const BASE_INTERVAL = 2500;
-// Sim plateau = BASE_COUNT + MAX_ORDERS. Lower this to fill up faster
-// (e.g. 10 → tops out at BASE_COUNT + 10). Tune freely.
 const MAX_ORDERS = 150;
+
+// ── Per-event seat capacity ─────────────────────────────────
+// Real event_tickets.json has ~1-4 tickets per event.
+// Multiply by 5 for a capacity that allows sim to visually fill up.
+// Sim generates ~3 orders/event → events hit sold out quickly at small caps.
+const CAPACITY_MULTIPLIER = 2;
+const DEFAULT_CAPACITY = 3; // for events with 0 real tickets
+
+function getEventCapacity(eventId: string): number {
+  const real = TICKETS.filter((t) => t.event_id === eventId).length;
+  if (real === 0) return DEFAULT_CAPACITY;
+  return Math.max(real * CAPACITY_MULTIPLIER, DEFAULT_CAPACITY);
+}
+
+/** Count of real tickets (paid/used/reserved) for an event */
+function getRealSoldCount(eventId: string): number {
+  return TICKETS.filter(
+    (t) =>
+      t.event_id === eventId &&
+      (t.status === "PAID" || t.status === "USED" || t.status === "RESERVED"),
+  ).length;
+}
+
+/** Count of sim orders for an event */
+function getSimOrderCount(eventId: string, orders: SimOrder[]): number {
+  return orders.filter((o) => o.event_id === eventId).length;
+}
+
+/** Live sold-out check — combines real tickets + sim orders against capacity */
+export function isEventSoldOut(eventId: string, orders: SimOrder[]): boolean {
+  const ev = EVENT_MAP.get(eventId);
+  if (!ev || ev.ticket_price === 0) return false; // free events never sold out
+  const capacity = getEventCapacity(eventId);
+  const filled = getRealSoldCount(eventId) + getSimOrderCount(eventId, orders);
+  return filled >= capacity;
+}
+
+/** Get current state from the simulation store for sold-out checks */
+export function getSimOrdersSnapshot(): SimOrder[] {
+  return simulationStore.getSnapshot().orders;
+}
 
 function createSimulationStore() {
   let state: SimSnapshot = { ...INITIAL };

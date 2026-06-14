@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import EventStarField from "@/components/eventDetail/EventStarField";
 import EventPoster from "@/components/eventDetail/EventPoster";
 import EventHeroInfo from "@/components/eventDetail/EventHeroInfo";
@@ -10,6 +10,7 @@ import { ZoneModal } from "@/components/zoneModal/ZoneModal";
 import { SameEvent } from "@/components/sameEvent/SameEvent";
 import { Footer } from "@/components/footer/footer";
 import type { PosterEvent } from "@/components/home/homeData";
+import { simulationStore, isEventSoldOut } from "@/lib/simulation-store";
 import styles from "./page.module.scss";
 
 type Props = {
@@ -20,6 +21,16 @@ type Props = {
 
 export default function EventDetailClient({ event, eventId, description }: Props) {
   const [activeZone, setActiveZone] = useState<string | null>(null);
+
+  // Live soldOut — combines real tickets + sim orders
+  const orders = useSyncExternalStore(
+    simulationStore.subscribe,
+    () => simulationStore.getSnapshot().orders,
+    () => [],
+  );
+  const simSoldOut = isEventSoldOut(eventId, orders);
+  const liveSoldOut = event.soldOut || simSoldOut;
+
   const accent = event.accent ?? event.gradient[0];
   const venue = event.venue ?? "อิมแพค อารีน่า เมืองทองธานี";
   const price = event.price ?? 500;
@@ -37,7 +48,7 @@ export default function EventDetailClient({ event, eventId, description }: Props
               title={event.title}
               image={event.image}
               gradient={event.gradient}
-              soldOut={event.soldOut}
+              soldOut={liveSoldOut}
             />
 
             <div className={styles.body}>
@@ -48,7 +59,7 @@ export default function EventDetailClient({ event, eventId, description }: Props
                 date={event.date}
                 venue={venue}
                 price={price}
-                soldOut={event.soldOut}
+                soldOut={liveSoldOut}
                 onBuy={openPurchase}
               />
             </div>
