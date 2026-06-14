@@ -82,6 +82,9 @@
   font-weight: 500;
   cursor: pointer;
   outline: none;
+
+  width: fit-content;
+  max-width: 120px;
 }
 
 .searchBox {
@@ -169,5 +172,179 @@
   p {
     font-size: 0.875rem;
     color: var(--b-400);
+  }
+}
+
+/* =========================
+   Tablet
+========================= */
+@media (max-width: 1024px) {
+  .box {
+    width: 80%;
+    padding: 24px 32px 48px;
+  }
+
+  .filterRow,
+  .ticketCard {
+    width: 80%;
+  }
+
+  .filters {
+    gap: 20px;
+  }
+}
+
+/* =========================
+   Mobile
+========================= */
+@media (max-width: 768px) {
+  .box {
+    width: calc(100% - 32px);
+    top: 120px;
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .left_box {
+    gap: 8px;
+
+    h1 {
+      font-size: 0.875rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+    }
+
+    p {
+      font-size: 0.875rem;
+    }
+  }
+
+  .right_box {
+    p {
+      font-size: 0.875rem;
+    }
+  }
+
+  .sticker {
+    width: 140px !important;
+    height: auto !important;
+    top: 16px;
+  }
+
+  .tab {
+    margin-top: 140px;
+    padding: 0 16px;
+  }
+
+  .filterRow {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .searchBox {
+    order: 1;
+    width: 100%;
+    margin: 0;
+  }
+
+  .filters {
+    order: 2;
+
+    gap: 12px;
+
+    width: 100%;
+  }
+
+  .filterSelect {
+    width: 100%;
+    height: 44px;
+    border-radius: 8px;
+    padding: 0 12px;
+  }
+
+
+  .ticketList {
+    width: 100%;
+  }
+
+  .ticketCard {
+    width: 100%;
+    padding: 16px 0;
+  }
+
+  .details {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .text {
+    min-width: 0;
+
+    h3 {
+      font-size: 0.95rem;
+      line-height: 1.3;
+    }
+  }
+
+  .user {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    p {
+      font-size: 0.75rem;
+    }
+  }
+
+  .icon {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .status {
+    min-width: auto;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+/* =========================
+   Small Mobile
+========================= */
+@media (max-width: 480px) {
+  .box {
+    top: 50px;
+    padding: 16px;
+  }
+
+  .left_box {
+    h2 {
+      font-size: 1.75rem;
+    }
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .ticketCard {
+    gap: 12px;
+  }
+
+  .details {
+    gap: 8px;
+  }
+
+  .icon {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .status {
+    font-size: 0.7rem;
   }
 }

@@ -169,7 +169,7 @@ export default function Overview() {
                 onChange={(e) => setVenue(e.target.value)}
                 className={styles.filterSelect}
               >
-                <option value="all">สถานที่ทั้งหมด</option>
+                <option value="all">สถานที่</option>
 
                 {[...new Set(eventsData.map((e) => e.location))].map(
                   (location) => (
@@ -232,9 +232,9 @@ export default function Overview() {
                     <h3>{ticket.name}</h3>
 
                     <div className={styles.user}>
-                      <p>{ticket.id}</p>
                       <p>{ticket.eventTitle}</p>
-                      <p>{ticket.seat}</p>
+                      <p>{new Date(ticket.date).toLocaleDateString("th-TH")}</p>
+                      <p>Zone {ticket.seat}</p>
                     </div>
                   </div>
                 </div>
