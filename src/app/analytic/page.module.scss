@@ -1,0 +1,160 @@
+@use "../../styles/responsive" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  background: var(--p-0);
+  min-height: 100%;
+}
+
+.eventsArea {
+  max-width: 75rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.75rem 2rem 2.5rem;
+}
+
+@include respond(md) {
+  .eventsArea {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+.dashboardWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.mainTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* Orange Banner */
+.orangeBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f6ad55;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.bannerContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bannerIconContainer {
+  position: relative;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: flex-end;
+}
+
+.botIcon {
+  font-size: 1.8rem;
+}
+
+.chatIcon {
+  font-size: 1rem;
+  position: absolute;
+  bottom: -4px;
+  right: -8px;
+  background: white;
+  border-radius: 50%;
+}
+
+.bannerText {
+  color: #1a202c;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.arrowIcon {
+  font-size: 1.25rem;
+  color: #1a202c;
+  font-weight: 400;
+}
+
+/* Grey Sections & White Cards */
+.greySection {
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.whiteCard {
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.innerTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin: 0;
+}
+
+.timeFilter {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+  outline: none;
+}
+
+@include respond(md) {
+  .chartHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .orangeBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .arrowIcon {
+    align-self: flex-end;
+  }
+
+  .timeFilter {
+    align-self: self-end;
+  }
+}

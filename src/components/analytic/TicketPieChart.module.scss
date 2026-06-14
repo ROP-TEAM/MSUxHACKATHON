@@ -1,0 +1,70 @@
+@use "../../styles/responsive" as *;
+
+.chartBody {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.chartContainer {
+  width: 200px;
+  height: 200px;
+  position: relative;
+}
+
+.legendContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendPercent {
+  font-weight: 700;
+  color: #111827;
+  width: 65px;
+}
+
+.legendLabel {
+  white-space: nowrap;
+}
+
+.emptyState {
+  color: #6b7280;
+  font-size: 1rem;
+  padding: 2rem 0;
+  text-align: center;
+  width: 100%;
+}
+
+@include respond(md) {
+  .chartBody {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding-left: 0;
+  }
+  
+  .chartContainer {
+    margin: 0 auto; 
+  }
+
+  .legendContainer {
+    // align-items: center;  
+  }
+}
