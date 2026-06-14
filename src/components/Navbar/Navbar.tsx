@@ -8,6 +8,8 @@ import {
   useLayoutEffect,
 } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import styles from "./Navbar.module.scss";
 
 type NavKey =
@@ -35,7 +37,6 @@ type NavItem = NavLink | NavDropdown;
 type Props = {
   onAiToggle: () => void;
   aiOpen: boolean;
-  activeKey?: NavKey;
 };
 
 function isDropdown(item: NavItem): item is NavDropdown {
@@ -52,21 +53,20 @@ const NAV_ITEMS: NavItem[] = [
       { key: "my-tickets", label: "ตั๋วของฉัน", href: "/mytickets" },
     ],
   },
-  { key: "overview", label: "ภาพรวม", href: "/overviews" },
+  { key: "overview", label: "ภาพรวม", 
+    children: [
+      { key: "all-events", label: "วิเคราะห์", href: "/analytic" },
+      { key: "my-tickets", label: "list", href: "/list" },
+    ],
+  },
   { key: "contact", label: "ติดต่อเรา", href: "/contact" },
 ];
 
-export default function Navbar({
-  onAiToggle,
-  aiOpen,
-  activeKey = "home",
-}: Props) {
+export default function Navbar({ onAiToggle, aiOpen }: Props) {
+  const pathname = usePathname();
+
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [hoveredKey, setHoveredKey] = useState<NavKey | null>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState<{
-    left: number;
-    width: number;
-  } | null>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuClosing, setMenuClosing] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
@@ -79,6 +79,23 @@ export default function Navbar({
   const centerRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  const getActiveKey = (): NavKey => {
+    for (const item of NAV_ITEMS) {
+      if (isDropdown(item)) {
+        if (item.children.some((child) => pathname === child.href)) {
+          return item.key;
+        }
+      } else {
+        if (pathname === item.href) {
+          return item.key;
+        }
+      }
+    }
+    return "home";
+  };
+
+  const activeKey = getActiveKey();
 
   const setDropdownRef = useCallback(
     (key: string) => (el: HTMLDivElement | null) => {
@@ -132,7 +149,6 @@ export default function Navbar({
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
 
   function handleDropdownKeyDown(e: React.KeyboardEvent, key: string) {
@@ -147,9 +163,6 @@ export default function Navbar({
       firstItem?.focus();
     }
   }
-
-  // --- Sliding indicator ---
-  const indicatorTarget = hoveredKey || activeKey;
 
   function measureIndicator(key: string | null) {
     if (!key || !centerRef.current) return;
@@ -168,8 +181,8 @@ export default function Navbar({
   }
 
   useLayoutEffect(() => {
-    measureIndicator(indicatorTarget);
-  }, [indicatorTarget]);
+    measureIndicator(activeKey);
+  }, [activeKey]);
 
   useEffect(() => {
     if (menuOpen) {
@@ -188,17 +201,21 @@ export default function Navbar({
 
   useEffect(() => {
     function handleResize() {
-      measureIndicator(indicatorTarget);
+      measureIndicator(activeKey);
       if (window.innerWidth > 640) setMenuOpen(false);
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [indicatorTarget]);
+  }, [activeKey]);
+
+  useEffect(() => {
+    measureIndicator(activeKey);
+  }, [pathname, activeKey]);
 
   return (
     <nav className={styles.navbar} aria-label="Main navigation">
       {/* Left: Logo */}
-      <a href="/" className={styles.left} aria-label="iTiket หน้าแรก">
+      <Link href="/" className={styles.left} aria-label="iTiket หน้าแรก">
         <Image
           src="/icon/logoLight.svg"
           alt="iTiket"
@@ -207,13 +224,12 @@ export default function Navbar({
           className={styles.logo}
           priority
         />
-      </a>
+      </Link>
 
       {/* Center: Nav links + sliding indicator (desktop) */}
       <div
         ref={centerRef}
         className={styles.center}
-        onMouseLeave={() => setHoveredKey(null)}
       >
         {indicatorStyle !== null && (
           <div
@@ -221,8 +237,7 @@ export default function Navbar({
             style={{
               left: indicatorStyle.left,
               width: indicatorStyle.width,
-              transition:
-                "left 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              /* Removed the transition property so it snaps instantly */
             }}
             aria-hidden="true"
           />
@@ -235,9 +250,7 @@ export default function Navbar({
               className={styles.dropdown}
               ref={setDropdownRef(item.key)}
               onMouseEnter={() => {
-                if (dropdownHoverTimerRef.current)
-                  clearTimeout(dropdownHoverTimerRef.current);
-                setHoveredKey(item.key);
+                if (dropdownHoverTimerRef.current) clearTimeout(dropdownHoverTimerRef.current);
                 setActiveDropdown(item.key);
               }}
               onMouseLeave={() => {
@@ -251,10 +264,7 @@ export default function Navbar({
                 id={`nav-trigger-${item.key}`}
                 data-nav-key={item.key}
                 className={`${styles.navLink} ${styles.dropdownTrigger} ${
-                  activeKey === item.key ||
-                  item.children.some((c) => c.key === activeKey)
-                    ? styles.active
-                    : ""
+                  activeKey === item.key || item.children.some((c) => pathname === c.href) ? styles.active : ""
                 }`}
                 onClick={() =>
                   setActiveDropdown(
@@ -294,31 +304,29 @@ export default function Navbar({
                   role="menu"
                 >
                   {item.children.map((child, i) => (
-                    <a
+                    <Link
                       key={child.key}
                       id={`dropdown-item-${item.key}-${i}`}
-                      className={`${styles.dropdownItem}${activeKey === child.key ? ` ${styles.dropdownItemActive}` : ""}`}
+                      className={`${styles.dropdownItem}${pathname === child.href ? ` ${styles.dropdownItemActive}` : ""}`}
                       href={child.href}
                       role="menuitem"
-                      tabIndex={-1}
                     >
                       {child.label}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               )}
             </div>
           ) : (
-            <a
+            <Link
               key={item.key}
               data-nav-key={item.key}
               className={`${styles.navLink} ${activeKey === item.key ? styles.active : ""}`}
               href={item.href}
-              onMouseEnter={() => setHoveredKey(item.key)}
             >
               <span data-text-el={item.key}>{item.label}</span>
-            </a>
-          ),
+            </Link>
+          )
         )}
       </div>
 
@@ -339,7 +347,6 @@ export default function Navbar({
           />
         </button>
 
-        {/* Hamburger — mobile only */}
         <button
           ref={hamburgerRef}
           type="button"
@@ -357,33 +364,12 @@ export default function Navbar({
       {/* Mobile drawer */}
       {menuOpen && (
         <>
-          <div
-            className={styles.backdrop}
-            onClick={closeMenu}
-            aria-hidden="true"
-          />
-          <div
-            ref={mobileMenuRef}
-            className={`${styles.mobileMenu}${menuClosing ? ` ${styles.mobileMenuClosing}` : ""}`}
-            role="dialog"
-            aria-label="เมนูนำทาง"
-          >
-            {/* Drawer header */}
+          <div className={styles.backdrop} onClick={closeMenu} aria-hidden="true" />
+          <div ref={mobileMenuRef} className={`${styles.mobileMenu}${menuClosing ? ` ${styles.mobileMenuClosing}` : ""}`} role="dialog" aria-label="เมนูนำทาง">
             <div className={styles.mobileMenuHeader}>
-              <a
-                href="/"
-                className={styles.mobileMenuLogo}
-                aria-label="iTiket หน้าแรก"
-                onClick={closeMenu}
-              >
-                <Image
-                  src="/icon/logo.svg"
-                  alt=""
-                  width={80}
-                  height={40}
-                  aria-hidden="true"
-                />
-              </a>
+              <Link href="/" className={styles.mobileMenuLogo} aria-label="iTiket หน้าแรก" onClick={closeMenu}>
+                <Image src="/icon/logo.svg" alt="" width={80} height={40} aria-hidden="true" />
+              </Link>
               <button
                 type="button"
                 className={styles.mobileMenuClose}
@@ -407,7 +393,6 @@ export default function Navbar({
               </button>
             </div>
 
-            {/* Nav items */}
             <nav className={styles.mobileMenuNav}>
               {NAV_ITEMS.map((item) =>
                 isDropdown(item) ? (
@@ -449,34 +434,32 @@ export default function Navbar({
                     {mobileExpanded === item.key && (
                       <div className={styles.mobileDropdownChildren}>
                         {item.children.map((child) => (
-                          <a
+                          <Link
                             key={child.key}
                             className={`${styles.mobileDropdownItem} ${
-                              activeKey === child.key
-                                ? styles.mobileNavLinkActive
-                                : ""
+                              pathname === child.href ? styles.mobileNavLinkActive : ""
                             }`}
                             href={child.href}
                             onClick={closeMenu}
                           >
                             <span>{child.label}</span>
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     )}
                   </div>
                 ) : (
-                  <a
+                  <Link
                     key={item.key}
                     className={`${styles.mobileNavLink} ${
-                      activeKey === item.key ? styles.mobileNavLinkActive : ""
+                      pathname === item.href ? styles.mobileNavLinkActive : ""
                     }`}
                     href={item.href}
                     onClick={closeMenu}
                   >
                     <span>{item.label}</span>
-                  </a>
-                ),
+                  </Link>
+                )
               )}
             </nav>
           </div>
