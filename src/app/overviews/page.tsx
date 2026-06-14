@@ -2,55 +2,8 @@
 
 import styles from "./page.module.scss";
 import Image from "next/image";
-import { useMemo, useState } from "react";
-
-import ticketsData from "@/data/event_tickets.json";
-import usersData from "@/data/users.json";
-import eventsData from "@/data/events.json";
-
-type TicketStatus = "CANCELLED" | "USED" | "RESERVED" | "REFUNDED" | "PAID";
-
-type TicketRow = {
-  id: string;
-  name: string;
-  eventTitle: string;
-  location: string;
-  date: string;
-  seat: string;
-  price: number;
-  status: TicketStatus;
-  icon: string;
-  color: string;
-};
-
-const STATUS_CONFIG: Record<
-  TicketStatus,
-  {
-    icon: string;
-    color: string;
-  }
-> = {
-  CANCELLED: {
-    icon: "/icon/cancle.svg",
-    color: "#DC2626",
-  },
-  USED: {
-    icon: "/icon/used.svg",
-    color: "#16A34A",
-  },
-  RESERVED: {
-    icon: "/icon/reserved.svg",
-    color: "#7C3AED",
-  },
-  REFUNDED: {
-    icon: "/icon/refunded.svg",
-    color: "#2563EB",
-  },
-  PAID: {
-    icon: "/icon/paid.svg",
-    color: "#D97706",
-  },
-};
+import { useMemo, useState, useSyncExternalStore } from "react";
+import { simulationStore, STATUS_CONFIG, type TicketRow } from "@/lib/simulation-store";
 
 export default function Overview() {
   const [price, setPrice] = useState("all");
@@ -58,33 +11,11 @@ export default function Overview() {
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
 
-  const tickets = useMemo<TicketRow[]>(() => {
-    return ticketsData
-      .map((ticket) => {
-        const user = usersData.find((u) => u.user_id === ticket.user_id);
-
-        const event = eventsData.find((e) => e.event_id === ticket.event_id);
-
-        if (!user || !event) return null;
-
-        const statusConfig = STATUS_CONFIG[ticket.status as TicketStatus];
-
-        return {
-          id: ticket.ticket_id,
-          name: user.name,
-          eventTitle: event.title,
-          location: event.location,
-          date: event.date,
-          seat: ticket.seat_zone,
-          price: event.ticket_price,
-          status: ticket.status as TicketStatus,
-          icon: statusConfig.icon,
-          color: statusConfig.color,
-        };
-      })
-      .filter((ticket): ticket is TicketRow => ticket !== null)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, []);
+  const tickets = useSyncExternalStore(
+    simulationStore.subscribeMerged,
+    simulationStore.getMergedSnapshot,
+    simulationStore.getMergedServerSnapshot,
+  );
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -111,6 +42,11 @@ export default function Overview() {
     tickets.length > 0
       ? new Date(tickets[0].date).toLocaleDateString("th-TH")
       : "-";
+
+  const allLocations = useMemo(
+    () => [...new Set(tickets.map((t) => t.location))],
+    [tickets],
+  );
 
   return (
     <div className={styles.container}>
@@ -171,13 +107,11 @@ export default function Overview() {
               >
                 <option value="all">สถานที่</option>
 
-                {[...new Set(eventsData.map((e) => e.location))].map(
-                  (location) => (
-                    <option key={location} value={location}>
-                      {location}
-                    </option>
-                  ),
-                )}
+                {allLocations.map((location) => (
+                  <option key={location} value={location}>
+                    {location}
+                  </option>
+                ))}
               </select>
 
               <select

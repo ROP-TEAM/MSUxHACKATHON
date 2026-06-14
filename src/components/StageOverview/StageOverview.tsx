@@ -1,9 +1,9 @@
 "use client";
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useSyncExternalStore } from 'react';
 import { Tooltip } from '@mantine/core';
 import styles from './StageOverview.module.scss';
 import type { Ticket } from '@/app/concert/types';
-import ticketsData from '@/data/event_tickets.json';
+import { simulationStore } from '@/lib/simulation-store';
 
 interface ZoneSummary {
   total: number;
@@ -283,10 +283,22 @@ export default function StageOverview({
   const left2F_step = (left1F_end - left1F_start) / 4;
   for (let i = 0; i < 4; i++) blocks2F.push({ id: (42 + i).toString(), start: left1F_start + i * left2F_step + 0.5, end: left1F_start + (i + 1) * left2F_step - 0.5 });
 
+  const mergedRows = useSyncExternalStore(
+    simulationStore.subscribeMerged,
+    simulationStore.getMergedSnapshot,
+    simulationStore.getMergedServerSnapshot,
+  );
+
   const eventTickets = useMemo(() => {
-    const source = tickets ?? (ticketsData as Ticket[]);
+    const source = tickets ?? mergedRows.map((t) => ({
+      ticket_id: t.id,
+      user_id: t.user_id,
+      event_id: t.event_id,
+      seat_zone: t.seat,
+      status: t.status,
+    } as Ticket));
     return source.filter((t) => t.event_id === eventId);
-  }, [tickets, eventId]);
+  }, [tickets, eventId, mergedRows]);
 
   const ticketZoneSummary = useMemo(
     () => summarizeByTicketZone(eventTickets),

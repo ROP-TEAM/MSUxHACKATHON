@@ -3,9 +3,6 @@
   right: 1rem;
   bottom: 1rem;
   z-index: 60;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   width: min(320px, calc(100vw - 2rem));
   pointer-events: none;
 }
@@ -13,8 +10,8 @@
 .statusBar {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.6rem;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
   border-radius: 999px;
   background: #14141f;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -22,15 +19,18 @@
   font-size: 0.72rem;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #4ade80;
+  white-space: nowrap;
 }
 
 .pillPaused {
@@ -45,16 +45,60 @@
   animation: pulse 1.4s ease-in-out infinite;
 }
 
+.speedSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 48px;
+  min-width: 36px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #a5b4fc;
+    border: 2px solid #14141f;
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #a5b4fc;
+    border: 2px solid #14141f;
+    cursor: pointer;
+  }
+}
+
+.speedLabel {
+  font-weight: 700;
+  font-size: 0.6rem;
+  color: #a5b4fc;
+  min-width: 1.4em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
 .stats {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   margin-left: auto;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+  overflow: hidden;
 
   span {
     color: #ffffff;
+    white-space: nowrap;
   }
 }
 
@@ -66,33 +110,45 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
   border: none;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   color: #e8e8f0;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   cursor: pointer;
   transition: background 0.15s ease;
+  flex-shrink: 0;
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
   }
 }
 
+.activeToggle {
+  background: rgba(165, 180, 252, 0.25);
+  color: #a5b4fc;
+}
+
 .cards {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  pointer-events: none;
 }
 
 .card {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.85rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.75rem;
   background: rgba(20, 20, 32, 0.92);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -108,19 +164,19 @@
 }
 
 .ticket {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   line-height: 1;
 }
 
 .info {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.05rem;
   min-width: 0;
 }
 
 .title {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
@@ -128,13 +184,13 @@
 }
 
 .card .meta {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #a5b4fc;
   font-variant-numeric: tabular-nums;
 }
 
 .card .loc {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   color: rgba(255, 255, 255, 0.65);
   white-space: nowrap;
   overflow: hidden;
@@ -160,6 +216,30 @@
   50% {
     opacity: 0.4;
     transform: scale(0.7);
+  }
+}
+
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(20, 20, 31, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #a5b4fc;
+  font-size: 0.7rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  transition: background 0.15s ease;
+  float: right;
+
+  &:hover {
+    background: rgba(165, 180, 252, 0.2);
   }
 }
 

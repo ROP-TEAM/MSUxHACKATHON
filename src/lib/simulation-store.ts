@@ -1,17 +1,59 @@
 import eventsJson from "@/data/events.json";
 import usersJson from "@/data/users.json";
+import ticketsJson from "@/data/event_tickets.json";
 
-type RawEvent = { event_id: string; title: string; location: string; ticket_price: number };
-type RawUser = { name: string };
+type RawEvent = { event_id: string; title: string; date: string; location: string; ticket_price: number };
+type RawUser = { user_id: string; name: string };
+type RawTicket = { ticket_id: string; user_id: string; event_id: string; seat_zone: string; status: string };
 
 const EVENTS = eventsJson as RawEvent[];
 const USERS = usersJson as RawUser[];
-const ZONES = ["A", "B", "C", "D", "VIP"];
-const STATUSES = ["ชำระแล้ว", "รอชำระ", "ยืนยันแล้ว"];
+const TICKETS = ticketsJson as RawTicket[];
+
+// Extract real patterns from actual JSON data — no hardcoded arrays
+const REAL_ZONES = [...new Set(TICKETS.map((t) => t.seat_zone))];
+const REAL_STATUSES = [...new Set(TICKETS.map((t) => t.status))];
+
+// Build lookup maps from real data
+const EVENT_MAP = new Map(EVENTS.map((e) => [e.event_id, e]));
+const USER_MAP = new Map(USERS.map((u) => [u.user_id, u]));
+
+// ── Shared types (consumed by pages across the app) ──────────────────
+
+export type TicketStatus = "CANCELLED" | "USED" | "RESERVED" | "REFUNDED" | "PAID";
+
+export type TicketRow = {
+  id: string;
+  name: string;
+  eventTitle: string;
+  location: string;
+  date: string;
+  seat: string;
+  price: number;
+  status: TicketStatus;
+  icon: string;
+  color: string;
+  user_id: string;
+  event_id: string;
+};
+
+// Must be exported — status icons used in overviews page rendering
+export const STATUS_CONFIG: Record<TicketStatus, { icon: string; color: string }> = {
+  CANCELLED: { icon: "/icon/cancle.svg", color: "#DC2626" },
+  USED:      { icon: "/icon/used.svg",   color: "#16A34A" },
+  RESERVED:  { icon: "/icon/reserved.svg", color: "#7C3AED" },
+  REFUNDED:  { icon: "/icon/refunded.svg", color: "#2563EB" },
+  PAID:      { icon: "/icon/paid.svg",    color: "#D97706" },
+};
+
+// ── Sim types ────────────────────────────────────────────────────────
 
 export type SimOrder = {
   id: string;
   at: number;
+  ticket_id: string;
+  user_id: string;
+  event_id: string;
   title: string;
   buyer: string;
   zone: string;
@@ -26,26 +68,55 @@ export type SimSnapshot = {
   totalTickets: number;
   revenue: number;
   added: number;
+  speed: number; // multiplier: 1=normal, 2=doubled, 5=fast, 10=max
 };
+
+const STORAGE_KEY = "sim-store";
 
 function rand<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-let uid = 0;
-function makeOrder(): SimOrder {
-  const ev = rand(EVENTS);
-  return {
-    id: `sim-${++uid}`,
-    at: Date.now(),
-    title: ev.title,
-    buyer: rand(USERS).name,
-    zone: rand(ZONES),
-    price: ev.ticket_price,
-    location: ev.location,
-    status: rand(STATUSES),
-  };
+// ── Persistence ──────────────────────────────────────────────────────
+
+function loadPersisted(): { state: SimSnapshot | null; uid: number } {
+  if (typeof window === "undefined") return { state: null, uid: 0 };
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { state: null, uid: 0 };
+    const parsed = JSON.parse(raw);
+    return {
+      state: (parsed.state as SimSnapshot) ?? null,
+      uid: (parsed.uid as number) ?? 0,
+    };
+  } catch {
+    return { state: null, uid: 0 };
+  }
 }
+
+function savePersisted(state: SimSnapshot, uid: number) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, uid }));
+  } catch {
+    /* quota exceeded — silently ignore */
+  }
+}
+
+function clearPersisted() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* noop */
+  }
+}
+
+// ── State ────────────────────────────────────────────────────────────
+
+const persisted = loadPersisted();
+
+let uid = persisted.uid;
 
 const INITIAL: SimSnapshot = {
   orders: [],
@@ -53,19 +124,131 @@ const INITIAL: SimSnapshot = {
   totalTickets: 0,
   revenue: 0,
   added: 0,
+  speed: 1,
+  ...(persisted.state ?? {}),
 };
+
+function makeOrder(): SimOrder {
+  const event = rand(EVENTS);
+  const user = rand(USERS);
+  const zone = rand(REAL_ZONES);
+  const status = rand(REAL_STATUSES);
+  ++uid;
+
+  return {
+    id: `sim-${uid}`,
+    at: Date.now(),
+    ticket_id: `et-sim-${String(uid).padStart(3, "0")}`,
+    user_id: user.user_id,
+    event_id: event.event_id,
+    title: event.title,
+    buyer: user.name,
+    zone,
+    price: event.ticket_price,
+    location: event.location,
+    status,
+  };
+}
 
 const SERVER_SNAPSHOT: SimSnapshot = { ...INITIAL };
 
 type Listener = () => void;
 
+// ── Merge real tickets + sim orders into TicketRow[] ─────────────────
+
+let mergedCache: TicketRow[] | null = null;
+let mergedVersion = 0;
+
+function buildMergedRows(state: SimSnapshot): TicketRow[] {
+  const real: TicketRow[] = [];
+  for (const t of TICKETS) {
+    const user = USER_MAP.get(t.user_id);
+    const event = EVENT_MAP.get(t.event_id);
+    if (!user || !event) continue;
+    const cfg = STATUS_CONFIG[t.status as TicketStatus] ?? {
+      icon: "/icon/ticket1.svg",
+      color: "#888888",
+    };
+    real.push({
+      id: t.ticket_id,
+      name: user.name,
+      eventTitle: event.title,
+      location: event.location,
+      date: event.date,
+      seat: t.seat_zone,
+      price: event.ticket_price,
+      status: t.status as TicketStatus,
+      icon: cfg.icon,
+      color: cfg.color,
+      user_id: t.user_id,
+      event_id: t.event_id,
+    });
+  }
+
+  const sim: TicketRow[] = [];
+  for (const o of state.orders) {
+    const event = EVENT_MAP.get(o.event_id);
+    const cfg = STATUS_CONFIG[o.status as TicketStatus] ?? {
+      icon: "/icon/ticket1.svg",
+      color: "#888888",
+    };
+    sim.push({
+      id: o.ticket_id,
+      name: o.buyer,
+      eventTitle: o.title,
+      location: o.location,
+      date: event?.date ?? new Date(o.at).toISOString(),
+      seat: o.zone,
+      price: o.price,
+      status: o.status as TicketStatus,
+      icon: cfg.icon,
+      color: cfg.color,
+      user_id: o.user_id,
+      event_id: o.event_id,
+    });
+  }
+
+  const all = [...real, ...sim];
+  all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return all;
+}
+
+function ensureMerged(state: SimSnapshot): TicketRow[] {
+  if (mergedCache === null) {
+    mergedCache = buildMergedRows(state);
+  }
+  return mergedCache;
+}
+
+function invalidateMerged() {
+  mergedCache = null;
+  mergedVersion++;
+}
+
+// Stable reference for server-side rendering — never changes
+const serverMergedCache = buildMergedRows({ orders: [], paused: false, totalTickets: 0, revenue: 0, added: 0, speed: 1 });
+
+// ── Store factory ────────────────────────────────────────────────────
+
+const BASE_INTERVAL = 2500;
+const MAX_ORDERS = 50;
+
 function createSimulationStore() {
   let state: SimSnapshot = { ...INITIAL };
   const listeners = new Set<Listener>();
+  const mergedListeners = new Set<Listener>();
   let timer: ReturnType<typeof setInterval> | null = null;
+
+  function notifyMerged() {
+    mergedListeners.forEach((l) => l());
+  }
 
   function notify() {
     listeners.forEach((l) => l());
+  }
+
+  function persist() {
+    savePersisted(state, uid);
   }
 
   function tick() {
@@ -73,17 +256,30 @@ function createSimulationStore() {
     const order = makeOrder();
     state = {
       ...state,
-      orders: [order, ...state.orders].slice(0, 20),
+      orders: [order, ...state.orders].slice(0, MAX_ORDERS),
       totalTickets: state.totalTickets + 1,
       revenue: state.revenue + order.price,
       added: state.added + 1,
     };
+    persist();
+    invalidateMerged();
     notify();
+    notifyMerged();
+  }
+
+  function restartTimer() {
+    if (timer !== null) {
+      clearInterval(timer);
+      timer = null;
+    }
+    if (listeners.size > 0 || mergedListeners.size > 0) {
+      const ms = Math.round(BASE_INTERVAL / state.speed);
+      timer = setInterval(tick, Math.max(ms, 50)); // min 50ms
+    }
   }
 
   function start() {
-    if (timer !== null) return;
-    timer = setInterval(tick, 2500);
+    if (timer === null) restartTimer();
   }
 
   function stop() {
@@ -111,10 +307,42 @@ function createSimulationStore() {
       state = { ...state, paused };
       notify();
     },
-    reset() {
-      state = { ...INITIAL };
+    setSpeed(speed: number) {
+      const clamped = Math.max(0.5, Math.min(speed, 10));
+      state = { ...state, speed: clamped };
+      persist();
+      restartTimer();
       notify();
     },
+    reset() {
+      uid = 0;
+      state = {
+        orders: [],
+        paused: false,
+        totalTickets: 0,
+        revenue: 0,
+        added: 0,
+        speed: 1,
+      };
+      clearPersisted();
+      invalidateMerged();
+      notify();
+      notifyMerged();
+    },
+
+    // ── Merged subscription ───────────────────────────────────────
+    subscribeMerged(listener: Listener) {
+      mergedListeners.add(listener);
+      if (mergedListeners.size === 1 && listeners.size === 0) start();
+      return () => {
+        mergedListeners.delete(listener);
+        if (listeners.size === 0 && mergedListeners.size === 0) stop();
+      };
+    },
+    getMergedSnapshot(): TicketRow[] {
+      return ensureMerged(state);
+    },
+    getMergedServerSnapshot: () => serverMergedCache,
   };
 }
 
