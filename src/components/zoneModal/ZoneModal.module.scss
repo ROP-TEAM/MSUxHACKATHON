@@ -62,9 +62,16 @@
   background-color: #f8f9fa;
 
   background-image:
-    radial-gradient(rgba(0, 0, 0, 0.12) 1px, transparent 1px);
+    radial-gradient(circle at 20% 30%, rgba(0,0,0,.03) 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(0,0,0,.02) 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(0,0,0,.025) 1px, transparent 1px),
+    radial-gradient(circle at 90% 20%, rgba(0,0,0,.02) 1px, transparent 1px);
 
-  background-size: 8px 8px;
+  background-size:
+    17px 17px,
+    23px 23px,
+    19px 19px,
+    29px 29px;
 }
 
 /* ---- right panel (info) ---- */
