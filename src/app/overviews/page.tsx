@@ -251,9 +251,24 @@ export default function Overview() {
 
   const latestDate =
     tickets.length > 0
-      ? new Date(tickets[0].date).toLocaleDateString("th-TH")
-      : "-";
+      ? (() => {
+          const dateObj = new Date(tickets[0].date);
 
+          const dateStr = dateObj.toLocaleDateString("th-TH", {
+            day: "numeric",
+            month: "short",
+            year: "2-digit",
+          });
+
+          const timeStr = dateObj.toLocaleTimeString("th-TH", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+
+          return `${dateStr} - ${timeStr} น.`;
+        })()
+      : "-";
   const allLocations = useMemo(
     () => [...new Set(tickets.map((t) => t.location))],
     [tickets],
@@ -283,10 +298,10 @@ export default function Overview() {
         <div className={styles.right_box}>
           <p>{latestDate}</p>
           <Image
-            src="/image/box.svg"
+            src="/icon/box.svg"
             alt="icon"
-            width={250}
-            height={250}
+            width={1000}
+            height={1000}
             className={styles.sticker}
           />
         </div>

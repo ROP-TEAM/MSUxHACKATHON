@@ -71,7 +71,6 @@ function FilterSelect({
       position="bottom-start"
       offset={4}
       radius="md"
-      shadow="md"
     >
       <Popover.Target>
         <UnstyledButton
