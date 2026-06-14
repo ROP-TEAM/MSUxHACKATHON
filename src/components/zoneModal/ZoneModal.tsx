@@ -157,7 +157,7 @@ export function ZoneModal({
                         >
                           {activeStep === step && (
                             <Image
-                              src="/icon/logo.svg"
+                              src="/icon/logo2.svg"
                               alt="step"
                               width={15}
                               height={15}
