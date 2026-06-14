@@ -1,9 +1,9 @@
 .standingZone {
-  fill: #ff6b81;
-  stroke: #e8556b;
+  fill: #C81E31;
+  stroke: #FF5268;
 
   &:hover {
-    fill: #ff8a9a;
+    fill: #800C19;
   }
 
   &.selected {
@@ -16,11 +16,30 @@
   }
 }
 
-.ring1F {
-  fill: #20c997;
+.ZoneC,.ZoneD {
+  fill: #7CD227;
+  stroke: #A9FA54;
 
   &:hover {
-    fill: #38d9a9;
+    fill: #A9FA54;
+  }
+
+  &.selected {
+    fill: #868e96 !important;
+    stroke: #495057 !important;
+
+    &:hover {
+      fill: #868e96 !important;
+    }
+  }
+}
+
+
+.ring1F {
+  fill: #7CD227;
+
+  &:hover {
+    fill: #A9FA54;
   }
 
   &.selected {
@@ -33,10 +52,10 @@
 }
 
 .ring2F {
-  fill: #fd7e14;
+  fill: #7CD227;
 
   &:hover {
-    fill: #ffa94d;
+    fill: #7CD227;
   }
 
   &.selected {
