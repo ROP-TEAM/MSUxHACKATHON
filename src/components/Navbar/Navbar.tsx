@@ -54,7 +54,6 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
   const pathname = usePathname();
 
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [hoveredKey, setHoveredKey] = useState<NavKey | null>(null);
   const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuClosing, setMenuClosing] = useState(false);
@@ -70,7 +69,6 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
   const getActiveKey = (): NavKey => {
     for (const item of NAV_ITEMS) {
       if (isDropdown(item)) {
-        // If any child path matches the current URL, highlight the dropdown parent
         if (item.children.some((child) => pathname === child.href)) {
           return item.key;
         }
@@ -80,7 +78,7 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
         }
       }
     }
-    return "home"; // Fallback default
+    return "home";
   };
 
   const activeKey = getActiveKey();
@@ -148,9 +146,6 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
     }
   }
 
-  // --- Sliding indicator ---
-  const indicatorTarget = hoveredKey || activeKey;
-
   function measureIndicator(key: string | null) {
     if (!key || !centerRef.current) return;
     const parent = centerRef.current;
@@ -166,8 +161,8 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
   }
 
   useLayoutEffect(() => {
-    measureIndicator(indicatorTarget);
-  }, [indicatorTarget]);
+    measureIndicator(activeKey);
+  }, [activeKey]);
 
   useEffect(() => {
     if (menuOpen) {
@@ -186,14 +181,13 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
 
   useEffect(() => {
     function handleResize() {
-      measureIndicator(indicatorTarget);
+      measureIndicator(activeKey);
       if (window.innerWidth > 640) setMenuOpen(false);
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [indicatorTarget]);
+  }, [activeKey]);
 
-  // Recalculate physical indicator layout whenever the real URL pathname changes
   useEffect(() => {
     measureIndicator(activeKey);
   }, [pathname, activeKey]);
@@ -216,7 +210,6 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
       <div
         ref={centerRef}
         className={styles.center}
-        onMouseLeave={() => setHoveredKey(null)}
       >
         {indicatorStyle !== null && (
           <div
@@ -224,8 +217,7 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
             style={{
               left: indicatorStyle.left,
               width: indicatorStyle.width,
-              transition:
-                "left 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              /* Removed the transition property so it snaps instantly */
             }}
             aria-hidden="true"
           />
@@ -239,7 +231,6 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
               ref={setDropdownRef(item.key)}
               onMouseEnter={() => {
                 if (dropdownHoverTimerRef.current) clearTimeout(dropdownHoverTimerRef.current);
-                setHoveredKey(item.key);
                 setActiveDropdown(item.key);
               }}
               onMouseLeave={() => {
@@ -309,7 +300,6 @@ export default function Navbar({ onAiToggle, aiOpen }: Props) {
               data-nav-key={item.key}
               className={`${styles.navLink} ${activeKey === item.key ? styles.active : ""}`}
               href={item.href}
-              onMouseEnter={() => setHoveredKey(item.key)}
             >
               <span data-text-el={item.key}>{item.label}</span>
             </Link>
