@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import type { PosterEvent } from "@/components/home/homeData";
 import PosterCard from "@/components/ui/PosterCard/PosterCard";
 import styles from "./EventsPageClient.module.scss";
+import { Popover, UnstyledButton } from "@mantine/core";
 
 const ITEMS_PER_PAGE = 18;
 
@@ -58,24 +59,99 @@ function FilterSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const [opened, setOpened] = useState(false);
+
+  const selectedLabel =
+    options.find((opt) => opt.value === value)?.label || value;
+
   return (
-    <Select
-      data={options}
-      value={value}
-      onChange={(v) => v && onChange(v)}
-      allowDeselect={false}
-      styles={{
-        input: {
-          border: "none",
-          boxShadow: "none",
-          background: "transparent",
-          cursor: "pointer",
-        },
-        wrapper: {
-          border: "none",
-        },
-      }}
-    />
+    <Popover
+      opened={opened}
+      onChange={setOpened}
+      position="bottom-start"
+      offset={4}
+      radius="md"
+      shadow="md"
+    >
+      <Popover.Target>
+        <UnstyledButton
+          onClick={() => setOpened((o) => !o)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "1.5rem",
+            background: "transparent",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            fontSize: "1rem",
+            color: "inherit",
+          }}
+        >
+          <span>{selectedLabel}</span>
+
+          <span style={{ display: "inline-flex", alignItems: "center" }}>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+        </UnstyledButton>
+      </Popover.Target>
+
+      <Popover.Dropdown
+        style={{
+          padding: "0.5rem 0rem",
+          width: "max-content",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {options.map((option) => {
+            const isSelected = value === option.value;
+            return (
+              <UnstyledButton
+                key={option.value}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpened(false);
+                }}
+                style={{
+                  width: "100%",
+                  padding: isSelected
+                    ? "0.625rem 1.25rem 0.625rem 1rem"
+                    : "0.625rem 1.25rem",
+                  fontSize: "0.925rem",
+                  fontFamily: "inherit",
+                  textAlign: "left",
+                  fontWeight: isSelected ? 600 : 400,
+
+                  borderLeft: isSelected
+                    ? "4px solid var(--p-500)"
+                    : "4px solid transparent",
+                  backgroundColor: isSelected ? "#f8f9fa" : "transparent",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f8f9fa";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected)
+                    e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                {option.label}
+              </UnstyledButton>
+            );
+          })}
+        </div>
+      </Popover.Dropdown>
+    </Popover>
   );
 }
 export default function EventsPageClient({ allEvents }: Props) {
