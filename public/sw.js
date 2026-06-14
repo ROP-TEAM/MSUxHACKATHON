@@ -30,6 +30,8 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   // Never cache API calls (Gemini, etc.) — always hit network.
   if (url.pathname.startsWith("/api/")) return;
+  // Never cache Next.js chunks — they have content-hash names and break on rebuild if SW serves stale versions.
+  if (url.pathname.startsWith("/_next/")) return;
 
   // Pages: network-first, fall back to cache / root shell when offline.
   if (req.mode === "navigate") {
