@@ -163,11 +163,13 @@ export default function Overview() {
       <div className={styles.box}>
         <div className={styles.left_box}>
           <h1>รายการทั้งหมด</h1>
-          <h2>{(tickets.length + liveRows.length).toLocaleString("th-TH")} ใบ</h2>
+          <h2>
+            {(tickets.length + liveRows.length).toLocaleString("th-TH")} ใบ
+          </h2>
 
           <div className={styles.ticket}>
             <Image src="/icon/ticket1.svg" alt="icon" width={30} height={30} />
-            <p>จำนวนตั๋วทั้งหมด</p>
+            <p>ขายตั๋วทั้งหมด</p>
           </div>
         </div>
 
