@@ -64,7 +64,6 @@ export default async function EventDetailPage({ params }: Props) {
       </section>
 
       <SameEvent currentEventId={id} />
-      <Footer />
     </div>
   );
 }
