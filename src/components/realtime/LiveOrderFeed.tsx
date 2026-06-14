@@ -34,8 +34,6 @@ export default function LiveOrderFeed() {
 
   const snap = liveSnap;
   const visible = snap.orders.filter((o) => now - o.at < AUTO_DISMISS_MS);
-  const fillPct =
-    snap.totalCapacity > 0 ? Math.round((snap.totalSold / snap.totalCapacity) * 100) : 0;
 
   return (
     <div className={styles.feed} aria-live="polite" aria-label="ออเดอร์เรียลไทม์">
@@ -45,11 +43,11 @@ export default function LiveOrderFeed() {
           {snap.paused ? "หยุดชั่วคราว" : "LIVE"}
         </span>
         <div className={styles.stats}>
-          <span style={{ color: "#ffffff" }}>{snap.soldToday.toLocaleString("th-TH")} ใบ</span>
+          <span style={{ color: "#ffffff" }}>{snap.totalTickets.toLocaleString("th-TH")} ใบ</span>
           <span style={{ color: "rgba(255,255,255,0.4)" }}>·</span>
           <span style={{ color: "#ffffff" }}>{formatBaht(snap.revenue)}</span>
           <span style={{ color: "rgba(255,255,255,0.4)" }}>·</span>
-          <span style={{ color: "#ffffff" }}>{fillPct}%</span>
+          <span style={{ color: "#34d399" }}>+{snap.added.toLocaleString("th-TH")} ใหม่</span>
         </div>
         <button
           type="button"
@@ -78,10 +76,10 @@ export default function LiveOrderFeed() {
             <div className={styles.info}>
               <strong className={styles.title} style={{ color: "#ffffff" }}>{o.title}</strong>
               <span className={styles.meta} style={{ color: "#a5b4fc" }}>
-                โซน {o.zone} · {o.qty} ใบ · {formatBaht(o.total)}
+                {o.buyer} · โซน {o.zone} · {formatBaht(o.price)}
               </span>
               <span className={styles.loc} style={{ color: "rgba(255,255,255,0.65)" }}>
-                {o.location} · {o.remaining > 0 ? `เหลือ ${o.remaining} ที่` : "เต็มแล้ว"}
+                {o.location} · {o.status}
               </span>
             </div>
           </div>

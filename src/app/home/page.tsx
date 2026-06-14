@@ -1,7 +1,6 @@
 import HeroCarousel from "@/components/home/HeroCarousel/HeroCarousel";
 import AnnouncementBar from "@/components/home/AnnouncementBar/AnnouncementBar";
 import EventSectionRow from "@/components/home/EventSectionRow/EventSectionRow";
-import NearlyFullRow from "@/components/home/NearlyFullRow/NearlyFullRow";
 import { SlideList } from "@/components/slideCard/SlideCard";
 import { SECTIONS } from "@/components/home/homeData";
 import styles from "./page.module.scss";
@@ -13,8 +12,7 @@ const Home = () => {
       <AnnouncementBar />
 
       <div className={styles.eventsArea}>
-        <NearlyFullRow />
-        {SECTIONS.filter((section) => section.title !== "ใกล้เต็ม").map((section) => (
+        {SECTIONS.map((section) => (
           <EventSectionRow
             key={section.title}
             title={section.title}
