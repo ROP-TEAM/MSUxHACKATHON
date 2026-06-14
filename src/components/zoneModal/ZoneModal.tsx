@@ -30,8 +30,8 @@ const ZONE_LABEL: Record<string, string> = {
 
 const ZONE_COLOR: Record<string, string> = {
   Standing: "#f03e3e",
-  A: "#1971c2",
-  B: "#2f9e44",
+  A: "#7CD227",
+  B: "#7CD227",
   C: "#e8590c",
   D: "#862e9c",
 };
@@ -107,7 +107,7 @@ export function ZoneModal({
     setSeatZone(zoneText);
   };
   return (
-    <Modal isActive={isActive} onClose={onClose} marginTop="8rem">
+    <Modal isActive={isActive} onClose={onClose}>
       <div className={styles.container}>
         <button className={styles.floatingClose} onClick={onClose}>
           ✕

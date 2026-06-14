@@ -5,15 +5,6 @@ import styles from './StageOverview.module.scss';
 import type { Ticket } from '@/app/concert/types';
 import ticketsData from '@/data/event_tickets.json';
 
-interface ZoneSummary {
-  total: number;
-  used: number;
-  reserved: number;
-  cancelled: number;
-  refunded: number;
-  paid: number;
-}
-
 interface StageOverviewProps {
   onZoneClick: (zoneId: string) => void;
   tickets?: Ticket[];
@@ -23,24 +14,6 @@ interface StageOverviewProps {
   tooltipMode?: "summary" | "selection";
 }
 
-function summarizeByTicketZone(tickets: Ticket[]): Record<string, ZoneSummary> {
-  const map: Record<string, ZoneSummary> = {};
-  for (const t of tickets) {
-    const zone = t.seat_zone;
-    if (!map[zone]) {
-      map[zone] = { total: 0, used: 0, reserved: 0, cancelled: 0, refunded: 0, paid: 0 };
-    }
-    map[zone].total += 1;
-    switch (t.status) {
-      case "USED":      map[zone].used += 1;      break;
-      case "RESERVED":  map[zone].reserved += 1;  break;
-      case "CANCELLED": map[zone].cancelled += 1; break;
-      case "REFUNDED":  map[zone].refunded += 1;  break;
-      case "PAID":      map[zone].paid += 1;       break;
-    }
-  }
-  return map;
-}
 
 function SeatSelectionTooltip({
   zoneId,
@@ -56,53 +29,12 @@ function SeatSelectionTooltip({
   );
 }
 
-function getSummaryForZone(
-  zoneKey: string,
-  ticketZoneSummary: Record<string, ZoneSummary>
-): ZoneSummary | undefined {
-  return ticketZoneSummary[zoneKey];
-}
 
-// NEW: tooltip content shows zone + block/seat info when selected
-function ZoneTooltipContent({
-  zoneId,
-  summary,
-  blockLabel,
-}: {
-  zoneId: string;
-  summary?: ZoneSummary;
-  blockLabel?: string; // e.g. "บล็อก 31" for 2F seat blocks
-}) {
-  if (!summary || summary.total === 0) {
-    return (
-      <div style={{ fontSize: 12 }}>
-        <div style={{ fontWeight: 700, marginBottom: 4 }}>
-          Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
-        </div>
-        <div>ไม่พบข้อมูลตั๋ว</div>
-      </div>
-    );
-  }
-  const available = summary.total - summary.used - summary.reserved - summary.cancelled - summary.refunded;
-  return (
-    <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-      <div style={{ fontWeight: 700, marginBottom: 4 }}>
-        Zone {zoneId}{blockLabel ? ` · ${blockLabel}` : ""}
-      </div>
-      <div>ทั้งหมด: {summary.total} ที่นั่ง</div>
-      <div>ใช้แล้ว: {summary.used}</div>
-      <div>จ่ายแล้ว: {summary.paid}</div>
-      <div>จอง: {summary.reserved}</div>
-      <div>ยกเลิก: {summary.cancelled}</div>
-      <div>คืนเงิน: {summary.refunded}</div>
-    </div>
-  );
-}
+
 
 function ZoneTooltip({
   tooltipZoneId,
   blockId,
-  summary,
   activeId,
   setActiveId,
   selectedBlockId,
@@ -113,7 +45,6 @@ function ZoneTooltip({
 }: {
   tooltipZoneId: string;
   blockId: string;
-  summary?: ZoneSummary;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
   selectedBlockId?: string | null;
@@ -132,7 +63,6 @@ function ZoneTooltip({
     label = <SeatSelectionTooltip zoneId={tooltipZoneId} blockLabel={blockLabel} />;
   } else {
     opened = activeId === blockId || isSelected;
-    label = <ZoneTooltipContent zoneId={tooltipZoneId} summary={summary} blockLabel={blockLabel} />;
   }
   return (
     <Tooltip label={label} withArrow opened={opened}>
@@ -157,7 +87,6 @@ function ZoneWedge({
   rOut,
   pathClassName,
   textClassName,
-  summary,
   onClick,
   activeId,
   setActiveId,
@@ -176,7 +105,6 @@ function ZoneWedge({
   rOut: number;
   pathClassName: string;
   textClassName: string;
-  summary?: ZoneSummary;
   onClick: () => void;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
@@ -195,7 +123,6 @@ function ZoneWedge({
     <ZoneTooltip
       tooltipZoneId={tooltipZoneId}
       blockId={blockId}
-      summary={summary}
       activeId={activeId}
       setActiveId={setActiveId}
       selectedBlockId={selectedBlockId}
@@ -288,35 +215,6 @@ export default function StageOverview({
     return source.filter((t) => t.event_id === eventId);
   }, [tickets, eventId]);
 
-  const ticketZoneSummary = useMemo(
-    () => summarizeByTicketZone(eventTickets),
-    [eventTickets]
-  );
-
-  // NEW: per-block summary for 1F/2F blocks, keyed by "1F-<id>" / "2F-<id>"
-  // Assumes Ticket has a `seat_block` field matching block.id (e.g. "31").
-  // If your data uses a different field name, adjust `t.seat_block` below.
-  const ticketBlockSummary = useMemo(() => {
-    const map: Record<string, ZoneSummary> = {};
-    for (const t of eventTickets) {
-      const blockKey = (t as any).seat_block as string | undefined;
-      const ring = t.seat_zone === "B" ? "1F" : t.seat_zone === "A" ? "2F" : null;
-      if (!ring || !blockKey) continue;
-      const key = `${ring}-${blockKey}`;
-      if (!map[key]) {
-        map[key] = { total: 0, used: 0, reserved: 0, cancelled: 0, refunded: 0, paid: 0 };
-      }
-      map[key].total += 1;
-      switch (t.status) {
-        case "USED":      map[key].used += 1;      break;
-        case "RESERVED":  map[key].reserved += 1;  break;
-        case "CANCELLED": map[key].cancelled += 1; break;
-        case "REFUNDED":  map[key].refunded += 1;  break;
-        case "PAID":      map[key].paid += 1;       break;
-      }
-    }
-    return map;
-  }, [eventTickets]);
 
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -358,7 +256,6 @@ export default function StageOverview({
             <ZoneTooltip
               tooltipZoneId="Standing"
               blockId="SF-B"
-              summary={getSummaryForZone("Standing", ticketZoneSummary)}
               activeId={activeId}
               setActiveId={setActiveId}
               selectedBlockId={selectedZone === "Standing" ? "SF-B" : null}
@@ -376,7 +273,6 @@ export default function StageOverview({
             <ZoneTooltip
               tooltipZoneId="Standing"
               blockId="SF-A"
-              summary={getSummaryForZone("Standing", ticketZoneSummary)}
               activeId={activeId}
               setActiveId={setActiveId}
               selectedBlockId={selectedZone === "Standing" ? "SF-A" : null}
@@ -384,8 +280,7 @@ export default function StageOverview({
             >
               <path
                 d="M 615,115 L 565,80 L 430,80 L 430,235 L 565,235 L 570,205 L 615,205 Z"
-                className={`${styles.standingZone} transition-all duration-200 stroke-[4]`}
-                style={selectedZone === "Standing" ? { fill: "#868e96" } : undefined}
+                className={`${styles.standingZone} ${selectedZone === "Standing" ? styles.selected : ""}`}
               />
               <text x={532} y={168} textAnchor="middle" className="font-sans font-bold text-[8.5px] fill-rose-100 tracking-wider pointer-events-none">STANDING</text>
               <text x={532} y={184} textAnchor="middle" className="font-mono font-black text-[9px] fill-rose-200 pointer-events-none">FLOOR</text>
@@ -395,7 +290,6 @@ export default function StageOverview({
             <ZoneTooltip
               tooltipZoneId="D"
               blockId="zone-D"
-              summary={getSummaryForZone("D", ticketZoneSummary)}
               activeId={activeId}
               setActiveId={setActiveId}
               selectedBlockId={selectedZone === "D" ? "zone-D" : null}
@@ -413,7 +307,6 @@ export default function StageOverview({
             <ZoneTooltip
               tooltipZoneId="C"
               blockId="zone-C"
-              summary={getSummaryForZone("C", ticketZoneSummary)}
               activeId={activeId}
               setActiveId={setActiveId}
               selectedBlockId={selectedZone === "C" ? "zone-C" : null}
@@ -447,7 +340,6 @@ export default function StageOverview({
                   rOut={r1_out}
                   pathClassName={`${styles.ring1F} transition-all duration-200 stroke-[#495057] stroke-2`}
                   textClassName="font-sans text-[11px] font-black select-none pointer-events-none fill-white"
-                  summary={getSummaryForZone("B", ticketZoneSummary)}
                   onClick={() => handleZoneOrBlockClick("B", blockId)}
                   activeId={activeId}
                   setActiveId={setActiveId}
@@ -465,7 +357,6 @@ export default function StageOverview({
           <g id="ring-2F-wedges">
             {blocks2F.map((block) => {
               const blockId = `2F-${block.id}`;
-              const blockSummary = ticketBlockSummary[blockId] ?? getSummaryForZone("A", ticketZoneSummary);
               return (
                 <ZoneWedge
                   key={block.id}
@@ -476,7 +367,6 @@ export default function StageOverview({
                   rOut={r2_out}
                   pathClassName={`${styles.ring2F} transition-all duration-200 stroke-[#495057] stroke-2`}
                   textClassName="font-sans text-[10px] font-black select-none pointer-events-none fill-slate-900"
-                  summary={blockSummary}
                   onClick={() => handleZoneOrBlockClick("A", blockId)}
                   activeId={activeId}
                   setActiveId={setActiveId}

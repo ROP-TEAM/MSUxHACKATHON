@@ -1,12 +1,13 @@
 .container {
   width: 100%;
-  height: 100%;
+  height: 50vh;
   border-radius: 1rem;
   overflow: hidden;
   background: var(--b-0);
   display: flex;
   flex-direction: row;
 }
+
 
 /* ---- left panel (stage map) ---- */
 .leftPanel {
@@ -19,11 +20,6 @@
   min-width: 0;
   overflow: hidden;
   position: relative;
-
-  > div {
-    width: 100%;
-    max-width: 100%;
-  }
 }
 .leftPanel::before {
   content: "";
@@ -681,3 +677,4 @@
     border: none;
   }
 }
+

@@ -56,6 +56,7 @@ export default function EventStageSection({ eventId }: EventStageSectionProps) {
         eventId={eventId}
         tickets={tickets}
         onZoneClick={(zoneId) => setActiveZone(zoneId)}
+        tooltipMode="selection"
       />
 
      <ZoneModal

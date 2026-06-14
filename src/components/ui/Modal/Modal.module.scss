@@ -1,26 +1,22 @@
 .background {
-  width: 100vw;
-  height: 800px;
   position: fixed;
-  top: 60px;
-  left: 0;
+  inset: 0;
   z-index: 10;
   display: flex;
-  align-items: flex-start;
   justify-content: center;
-  overflow-y: auto;
-  padding-top: 5rem;
-  padding-bottom: 20rem;
+  align-items: center;  /* เปลี่ยนจาก flex-start เป็น center */
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .modal {
-  width: 80%;
-  height: 900px;
-  background-color: var(--p-0);
+  width: min(800px, 100%);
+  height: auto;           /* เปลี่ยนจาก fixed 500px */
+  max-height: 90vh;       /* ไม่เกิน 90% ของจอ */
+  background: var(--p-0);
   border-radius: 1rem;
-  flex-shrink: 0;
+  overflow: hidden;
 }
-
 @media (max-width: 768px) {
   .background {
     inset: 0;
