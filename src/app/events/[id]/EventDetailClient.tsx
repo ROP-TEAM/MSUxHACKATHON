@@ -1,0 +1,81 @@
+"use client";
+
+import { useState } from "react";
+import EventStarField from "@/components/eventDetail/EventStarField";
+import EventPoster from "@/components/eventDetail/EventPoster";
+import EventHeroInfo from "@/components/eventDetail/EventHeroInfo";
+import EventDetailCard from "@/components/eventDetail/EventDetailCard";
+import StageOverview from "@/components/StageOverview/StageOverview";
+import { ZoneModal } from "@/components/zoneModal/ZoneModal";
+import { SameEvent } from "@/components/sameEvent/SameEvent";
+import { Footer } from "@/components/footer/footer";
+import type { PosterEvent } from "@/components/home/homeData";
+import styles from "./page.module.scss";
+
+type Props = {
+  event: PosterEvent;
+  eventId: string;
+  description: string;
+};
+
+export default function EventDetailClient({ event, eventId, description }: Props) {
+  const [activeZone, setActiveZone] = useState<string | null>(null);
+  const accent = event.accent ?? event.gradient[0];
+  const venue = event.venue ?? "อิมแพค อารีน่า เมืองทองธานี";
+  const price = event.price ?? 500;
+
+  const openPurchase = () => setActiveZone("Standing");
+
+  return (
+    <div className={styles.page} style={{ ["--accent" as string]: accent }}>
+      <section className={styles.hero}>
+        <EventStarField gradient={event.gradient} />
+
+        <div className={styles.heroInner}>
+          <div className={styles.columns}>
+            <EventPoster
+              title={event.title}
+              image={event.image}
+              gradient={event.gradient}
+              soldOut={event.soldOut}
+            />
+
+            <div className={styles.body}>
+              <EventHeroInfo description={description} />
+
+              <EventDetailCard
+                subtitle={event.subtitle}
+                date={event.date}
+                venue={venue}
+                price={price}
+                soldOut={event.soldOut}
+                onBuy={openPurchase}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.container}>
+        <div className={styles.stage}>
+          <StageOverview
+            eventId={eventId}
+            onZoneClick={(zoneId) => setActiveZone(zoneId)}
+          />
+        </div>
+      </section>
+
+      <ZoneModal
+        isActive={activeZone !== null}
+        onClose={() => setActiveZone(null)}
+        zoneId={activeZone}
+        eventId={eventId}
+        eventTitle={event?.title ?? ""}
+        eventDate={event.rawDate}
+      />
+
+      <SameEvent currentEventId={eventId} />
+      <Footer />
+    </div>
+  );
+}

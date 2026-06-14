@@ -77,6 +77,7 @@ export type SimOrder = {
 
 export type SimSnapshot = {
   orders: SimOrder[];
+  purchases: SimOrder[]; // user purchases — never capped, never reset
   paused: boolean;
   totalTickets: number;
   revenue: number;
@@ -133,6 +134,7 @@ let uid = persisted.uid;
 
 const INITIAL: SimSnapshot = {
   orders: [],
+  purchases: [],
   paused: false,
   totalTickets: BASE_COUNT,
   revenue: BASE_REVENUE,
@@ -221,7 +223,30 @@ function buildMergedRows(state: SimSnapshot): TicketRow[] {
     });
   }
 
-  const all = [...real, ...sim];
+  const purchased: TicketRow[] = [];
+  for (const o of state.purchases) {
+    const event = EVENT_MAP.get(o.event_id);
+    const cfg = STATUS_CONFIG[o.status as TicketStatus] ?? {
+      icon: "/icon/ticket1.svg",
+      color: "#888888",
+    };
+    purchased.push({
+      id: o.ticket_id,
+      name: o.buyer,
+      eventTitle: o.title,
+      location: o.location,
+      date: event?.date ?? new Date(o.at).toISOString(),
+      seat: o.zone,
+      price: o.price,
+      status: o.status as TicketStatus,
+      icon: cfg.icon,
+      color: cfg.color,
+      user_id: o.user_id,
+      event_id: o.event_id,
+    });
+  }
+
+  const all = [...real, ...sim, ...purchased];
   all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   return all;
 }
@@ -239,7 +264,7 @@ function invalidateMerged() {
 }
 
 // Stable reference for server-side rendering — never changes
-const serverMergedCache = buildMergedRows({ orders: [], paused: false, totalTickets: 0, revenue: 0, added: 0, speed: 1 });
+const serverMergedCache = buildMergedRows({ orders: [], purchases: [], paused: false, totalTickets: 0, revenue: 0, added: 0, speed: 1 });
 
 // ── Store factory ────────────────────────────────────────────────────
 
@@ -273,11 +298,12 @@ function createSimulationStore() {
     // Derive every counter from `orders` (capped) — single source, no drift.
     // Plateaus at BASE + MAX_ORDERS, so the sim visibly "fills up" then holds.
     const simRevenue = orders.reduce((s, o) => s + o.price, 0);
+    const purchaseRevenue = state.purchases.reduce((s, o) => s + o.price, 0);
     state = {
       ...state,
       orders,
-      totalTickets: BASE_COUNT + orders.length,
-      revenue: BASE_REVENUE + simRevenue,
+      totalTickets: BASE_COUNT + orders.length + state.purchases.length,
+      revenue: BASE_REVENUE + simRevenue + purchaseRevenue,
       added: orders.length,
     };
     persist();
@@ -335,15 +361,51 @@ function createSimulationStore() {
     },
     reset() {
       uid = 0;
+      const purchases = state.purchases; // keep user purchases
+      const purchaseRevenue = purchases.reduce((s, o) => s + o.price, 0);
       state = {
         orders: [],
+        purchases,
         paused: false,
-        totalTickets: BASE_COUNT,
-        revenue: BASE_REVENUE,
+        totalTickets: BASE_COUNT + purchases.length,
+        revenue: BASE_REVENUE + purchaseRevenue,
         added: 0,
         speed: 1,
       };
-      clearPersisted();
+      persist();
+      invalidateMerged();
+      notify();
+      notifyMerged();
+    },
+
+    buyTicket(buyEventId: string, buyZone?: string) {
+      const ev = EVENT_MAP.get(buyEventId);
+      if (!ev) return;
+      const user = rand(USERS);
+      ++uid;
+      const purchase: SimOrder = {
+        id: `buy-${uid}`,
+        at: Date.now(),
+        ticket_id: `et-buy-${String(uid).padStart(3, "0")}`,
+        user_id: user.user_id,
+        event_id: buyEventId,
+        title: ev.title,
+        buyer: user.name,
+        zone: buyZone ?? rand(REAL_ZONES),
+        price: ev.ticket_price,
+        location: ev.location,
+        status: "PAID",
+      };
+      const purchases = [...state.purchases, purchase];
+      const simRevenue = state.orders.reduce((s, o) => s + o.price, 0);
+      const purchaseRevenue = purchases.reduce((s, o) => s + o.price, 0);
+      state = {
+        ...state,
+        purchases,
+        totalTickets: BASE_COUNT + state.orders.length + purchases.length,
+        revenue: BASE_REVENUE + simRevenue + purchaseRevenue,
+      };
+      persist();
       invalidateMerged();
       notify();
       notifyMerged();

@@ -9,6 +9,7 @@ import Image from "next/image";
 import { IconChevronDown, IconChevronLeft } from "@tabler/icons-react";
 import { IconArrowRight } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
+import { simulationStore } from "@/lib/simulation-store";
 
 interface ZoneModalProps {
   isActive: boolean;
@@ -16,6 +17,7 @@ interface ZoneModalProps {
   zoneId: string | null;
   eventId: string;
   eventTitle: string;
+  eventDate?: string;
   onViewDetails?: (zoneId: string) => void;
 }
 
@@ -42,6 +44,7 @@ export function ZoneModal({
   zoneId,
   eventId,
   eventTitle,
+  eventDate,
 }: ZoneModalProps) {
   const [currentZone, setCurrentZone] = useState<string | null>(zoneId);
   const [currentBlockId, setCurrentBlockId] = useState<string | null>(null);
@@ -88,13 +91,19 @@ export function ZoneModal({
   useEffect(() => {
     setCurrentZone(zoneId);
     setCurrentBlockId(null);
-  }, [zoneId]);
+    setActiveStep(1);
+    if (eventDate && !selectedDate) setSelectedDate(eventDate);
+  }, [zoneId, eventDate]);
 
   if (!currentZone) return null;
 
   const label = ZONE_LABEL[currentZone] ?? `Zone ${currentZone}`;
   const color = ZONE_COLOR[currentZone] ?? "#495057";
   const blockNumber = currentBlockId ? currentBlockId.split("-")[1] : null;
+
+  const dateOptions = eventDate
+    ? [{ value: eventDate, label: new Date(eventDate).toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" }) }]
+    : [];
 
   const handleZoneClick = (zone: string, blockId?: string | null) => {
     setCurrentZone(zone);
@@ -203,20 +212,7 @@ export function ZoneModal({
                   <Select
                     label="เลือกวันที่"
                     placeholder="ยังไม่ได้เลือกวันที่"
-                    data={[
-                      {
-                        value: "2026-06-20",
-                        label: "20 มิถุนายน 2569",
-                      },
-                      {
-                        value: "2026-06-21",
-                        label: "21 มิถุนายน 2569",
-                      },
-                      {
-                        value: "2026-06-22",
-                        label: "22 มิถุนายน 2569",
-                      },
-                    ]}
+                    data={dateOptions}
                     value={selectedDate}
                     onChange={setSelectedDate}
                     variant="unstyled"
@@ -268,7 +264,10 @@ export function ZoneModal({
                       <button
                         key={item.id}
                         className={styles.paymentItem}
-                        onClick={() => console.log(item.text)}
+                        onClick={() => {
+                          simulationStore.buyTicket(eventId, currentZone);
+                          setActiveStep(3);
+                        }}
                       >
                         <div className={styles.left}>
                           <Image
@@ -301,6 +300,7 @@ export function ZoneModal({
                     height={250}
                   />
                   <h1>ชำระเงินเสร็จสิ้น</h1>
+                  <p>ซื้อบัตร {eventTitle} — โซน {currentZone} เรียบร้อย</p>
                   <p>
                     ขอบคุณสำหรับการสั่งซื้อบัตรเข้าชมของคุณ <br></br>
                     ระบบได้บันทึกรายการและยืนยันการจองเรียบร้อย

@@ -13,6 +13,9 @@ export function useClickOutSide<T extends HTMLElement>(callback: () => void) {
     function handleClick(e: MouseEvent) {
       if (!mounted.current) return;
       if (ref.current && !ref.current.contains(e.target as Node)) {
+        // Ignore clicks inside Mantine popovers/portals (Select dropdown, etc.)
+        const target = e.target as HTMLElement;
+        if (target.closest("[data-portal]")) return;
         callback();
       }
     }
