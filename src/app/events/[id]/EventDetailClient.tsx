@@ -10,7 +10,7 @@ import { ZoneModal } from "@/components/zoneModal/ZoneModal";
 import { SameEvent } from "@/components/sameEvent/SameEvent";
 import { Footer } from "@/components/footer/footer";
 import type { PosterEvent } from "@/components/home/homeData";
-import { simulationStore, isEventSoldOut } from "@/lib/simulation-store";
+import { simulationStore, isEventSoldOut, EMPTY_ORDERS } from "@/lib/simulation-store";
 import styles from "./page.module.scss";
 
 type Props = {
@@ -26,7 +26,7 @@ export default function EventDetailClient({ event, eventId, description }: Props
   const orders = useSyncExternalStore(
     simulationStore.subscribe,
     () => simulationStore.getSnapshot().orders,
-    () => [],
+    () => EMPTY_ORDERS,
   );
   const simSoldOut = isEventSoldOut(eventId, orders);
   const liveSoldOut = event.soldOut || simSoldOut;

@@ -1,3 +1,5 @@
+"use client";
+
 import type { PosterEvent } from "../homeData";
 import PosterCard from "@/components/ui/PosterCard/PosterCard";
 import styles from "./EventSectionRow.module.scss";

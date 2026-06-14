@@ -18,12 +18,12 @@ const REAL_STATUSES = [...new Set(TICKETS.map((t) => t.status))];
 const EVENT_MAP = new Map(EVENTS.map((e) => [e.event_id, e]));
 const USER_MAP = new Map(USERS.map((u) => [u.user_id, u]));
 
-// Real base: count + revenue of the resolvable tickets in event_tickets.json.
-// Every headline number starts from here, so the UI reflects the full real
-// dataset from the first frame (not 0) and feed == overview always.
+// Real base: count + revenue of active tickets (PAID/USED/RESERVED) in event_tickets.json.
+// CANCELLED/REFUNDED don't consume seats.
 let BASE_COUNT = 0;
 let BASE_REVENUE = 0;
 for (const t of TICKETS) {
+  if (t.status !== "PAID" && t.status !== "USED" && t.status !== "RESERVED") continue;
   const u = USER_MAP.get(t.user_id);
   const e = EVENT_MAP.get(t.event_id);
   if (!u || !e) continue;
@@ -87,6 +87,9 @@ export type SimSnapshot = {
 
 const STORAGE_KEY = "sim-store";
 
+/** Stable empty array — never mutates. Use as server snapshot for order subscriptions. */
+export const EMPTY_ORDERS: SimOrder[] = [];
+
 function rand<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -148,7 +151,9 @@ function makeOrder(): SimOrder {
   const event = rand(EVENTS);
   const user = rand(USERS);
   const zone = rand(REAL_ZONES);
-  const status = rand(REAL_STATUSES);
+  // All orders start active — cancelled/refunded come from flipping later
+  const r = Math.random();
+  const status = r < 0.20 ? "RESERVED" : r < 0.30 ? "USED" : "PAID";
   ++uid;
 
   return {
@@ -279,14 +284,26 @@ const MAX_ORDERS = 150;
 const CAPACITY_MULTIPLIER = 2;
 const DEFAULT_CAPACITY = 3; // for events with 0 real tickets
 
-function getEventCapacity(eventId: string): number {
-  const real = TICKETS.filter((t) => t.event_id === eventId).length;
-  if (real === 0) return DEFAULT_CAPACITY;
-  return Math.max(real * CAPACITY_MULTIPLIER, DEFAULT_CAPACITY);
+export function getEventCapacity(eventId: string): number {
+  // Only count active tickets — cancelled/refunded don't consume a seat
+  const active = TICKETS.filter(
+    (t) =>
+      t.event_id === eventId &&
+      (t.status === "PAID" || t.status === "USED" || t.status === "RESERVED"),
+  ).length;
+  if (active === 0) return DEFAULT_CAPACITY;
+  return Math.max(active * CAPACITY_MULTIPLIER, DEFAULT_CAPACITY);
+}
+
+/** 0–1 ratio of how full an event is (real active + sim orders / capacity) */
+export function computeLiveFill(eventId: string, orders: SimOrder[]): number {
+  const capacity = getEventCapacity(eventId);
+  const filled = getRealSoldCount(eventId) + getSimOrderCount(eventId, orders);
+  return Math.min(filled / capacity, 1);
 }
 
 /** Count of real tickets (paid/used/reserved) for an event */
-function getRealSoldCount(eventId: string): number {
+export function getRealSoldCount(eventId: string): number {
   return TICKETS.filter(
     (t) =>
       t.event_id === eventId &&
@@ -294,9 +311,28 @@ function getRealSoldCount(eventId: string): number {
   ).length;
 }
 
-/** Count of sim orders for an event */
+const ACTIVE_STATUSES = new Set(["PAID", "USED", "RESERVED"]);
+
+function filterActive(orders: SimOrder[]): SimOrder[] {
+  return orders.filter((o) => ACTIVE_STATUSES.has(o.status));
+}
+
+/** Randomly flip one active order to CANCELLED/REFUNDED — simulates real cancellations */
+function maybeFlipOrder(orders: SimOrder[]): SimOrder[] {
+  // ~20% chance per tick if enough active orders exist
+  if (orders.length < 5 || Math.random() > 0.20) return orders;
+  const active = filterActive(orders);
+  if (active.length < 3) return orders;
+  const target = active[Math.floor(Math.random() * active.length)];
+  const newStatus = Math.random() < 0.5 ? "CANCELLED" : "REFUNDED";
+  return orders.map((o) =>
+    o.ticket_id === target.ticket_id ? { ...o, status: newStatus } : o,
+  );
+}
+
+/** Count of active sim orders for an event */
 function getSimOrderCount(eventId: string, orders: SimOrder[]): number {
-  return orders.filter((o) => o.event_id === eventId).length;
+  return filterActive(orders).filter((o) => o.event_id === eventId).length;
 }
 
 /** Live sold-out check — combines real tickets + sim orders against capacity */
@@ -334,17 +370,19 @@ function createSimulationStore() {
   function tick() {
     if (state.paused) return;
     const order = makeOrder();
-    const orders = [order, ...state.orders].slice(0, MAX_ORDERS);
-    // Derive every counter from `orders` (capped) — single source, no drift.
-    // Plateaus at BASE + MAX_ORDERS, so the sim visibly "fills up" then holds.
-    const simRevenue = orders.reduce((s, o) => s + o.price, 0);
+    let orders = [order, ...state.orders].slice(0, MAX_ORDERS);
+    // Maybe cancel/refund an old order — totalTickets visibly drops
+    orders = maybeFlipOrder(orders);
+    // Only active orders count toward revenue / capacity
+    const activeOrders = filterActive(orders);
+    const simRevenue = activeOrders.reduce((s, o) => s + o.price, 0);
     const purchaseRevenue = state.purchases.reduce((s, o) => s + o.price, 0);
     state = {
       ...state,
       orders,
-      totalTickets: BASE_COUNT + orders.length + state.purchases.length,
+      totalTickets: BASE_COUNT + activeOrders.length + state.purchases.length,
       revenue: BASE_REVENUE + simRevenue + purchaseRevenue,
-      added: orders.length,
+      added: activeOrders.length,
     };
     persist();
     invalidateMerged();
@@ -438,12 +476,13 @@ function createSimulationStore() {
         status: "PAID",
       };
       const purchases = [...state.purchases, purchase];
-      const simRevenue = state.orders.reduce((s, o) => s + o.price, 0);
+      const activeOrders = filterActive(state.orders);
+      const simRevenue = activeOrders.reduce((s, o) => s + o.price, 0);
       const purchaseRevenue = purchases.reduce((s, o) => s + o.price, 0);
       state = {
         ...state,
         purchases,
-        totalTickets: BASE_COUNT + state.orders.length + purchases.length,
+        totalTickets: BASE_COUNT + activeOrders.length + purchases.length,
         revenue: BASE_REVENUE + simRevenue + purchaseRevenue,
       };
       persist();

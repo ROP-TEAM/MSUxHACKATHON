@@ -2,12 +2,11 @@
 
 import styles from "./page.module.scss";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { Popover, UnstyledButton } from "@mantine/core";
 
-import ticketsData from "@/data/event_tickets.json";
-import usersData from "@/data/users.json";
 import eventsData from "@/data/events.json";
+import { simulationStore } from "@/lib/simulation-store";
 
 // --- คอมโพเนนต์ FilterSelect เขียนเองสไตล์ Dime! ---
 function FilterSelect({
@@ -180,35 +179,15 @@ export default function Overview() {
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
 
-  const tickets = useMemo<TicketRow[]>(() => {
-    return ticketsData
-      .map((ticket) => {
-        const user = usersData.find((u) => u.user_id === ticket.user_id);
-        const event = eventsData.find((e) => e.event_id === ticket.event_id);
-
-        if (!user || !event) return null;
-
-        const statusConfig = STATUS_CONFIG[ticket.status as TicketStatus];
-
-        return {
-          id: ticket.ticket_id,
-          name: user.name,
-          eventTitle: event.title,
-          location: event.location,
-          date: event.date,
-          seat: ticket.seat_zone,
-          price: event.ticket_price,
-          status: ticket.status as TicketStatus,
-          icon: statusConfig.icon,
-          color: statusConfig.color,
-        };
-      })
-      .filter((ticket): ticket is TicketRow => ticket !== null)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, []);
+  // Live merged list: real tickets from JSON + sim orders + user purchases
+  const mergedTickets = useSyncExternalStore(
+    simulationStore.subscribeMerged,
+    () => simulationStore.getMergedSnapshot(),
+    () => simulationStore.getMergedServerSnapshot(),
+  );
 
   const filteredTickets = useMemo(() => {
-    return tickets.filter((ticket) => {
+    return mergedTickets.filter((ticket) => {
       const matchSearch =
         search === "" ||
         ticket.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -225,7 +204,7 @@ export default function Overview() {
 
       return matchSearch && matchVenue && matchStatus && matchPrice;
     });
-  }, [tickets, search, venue, status, price]);
+  }, [mergedTickets, search, venue, status, price]);
 
   // คัดแยกโครงสร้างข้อมูลส่งเข้าคอมโพเนนต์ Filter
   const priceOptions = [
@@ -250,9 +229,9 @@ export default function Overview() {
   ];
 
   const latestDate =
-    tickets.length > 0
+    mergedTickets.length > 0
       ? (() => {
-          const dateObj = new Date(tickets[0].date);
+          const dateObj = new Date(mergedTickets[0].date);
 
           const dateStr = dateObj.toLocaleDateString("th-TH", {
             day: "numeric",
@@ -269,10 +248,6 @@ export default function Overview() {
           return `${dateStr} - ${timeStr} น.`;
         })()
       : "-";
-  const allLocations = useMemo(
-    () => [...new Set(tickets.map((t) => t.location))],
-    [tickets],
-  );
 
   return (
     <div className={styles.container}>
@@ -287,7 +262,7 @@ export default function Overview() {
       <div className={styles.box}>
         <div className={styles.left_box}>
           <h1>รายการทั้งหมด</h1>
-          <h2>{tickets.length.toLocaleString("th-TH")} ใบ</h2>
+                    <h2>{mergedTickets.filter(t => t.status === "PAID" || t.status === "USED" || t.status === "RESERVED").length.toLocaleString("th-TH")} ใบ</h2>
 
           <div className={styles.ticket}>
             <Image src="/icon/ticket1.svg" alt="icon" width={30} height={30} />
