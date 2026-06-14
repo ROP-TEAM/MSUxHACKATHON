@@ -2,6 +2,7 @@
   position: relative;
 }
 .box {
+  overflow: hidden;
   position: absolute;
   top: 240px;
   left: 50%;
@@ -15,7 +16,7 @@
   );
   border-radius: 10px;
   width: 50%;
-  padding: 30px 50px 90px 50px;
+  padding: 30px 50px 50px 50px;
   display: flex;
   justify-content: space-between;
 }
@@ -47,6 +48,8 @@
 }
 
 .right_box {
+  height: 8rem;
+  overflow: hidden;
   p {
     font-size: 1.25rem;
     color: var(--b-300);
@@ -56,7 +59,8 @@
 .sticker {
   position: absolute;
   top: 8px;
-  right: 0px;
+  height: 22rem;
+  right: -380px;
 }
 .tab {
   width: 100%;
@@ -65,6 +69,7 @@
 }
 .filterRow {
   padding-top: 1.5rem;
+  padding-inline: 1rem;
   display: flex;
   width: 50%;
   margin: 1rem auto;
@@ -207,7 +212,12 @@
     padding: 20px;
     border-radius: 12px;
   }
-
+  .sticker {
+    position: absolute;
+    top: -30px;
+    width: 16rem;
+    right: -30px;
+  }
   .left_box {
     gap: 8px;
 
@@ -228,12 +238,6 @@
     p {
       font-size: 0.875rem;
     }
-  }
-
-  .sticker {
-    width: 140px !important;
-    height: auto !important;
-    top: 16px;
   }
 
   .tab {

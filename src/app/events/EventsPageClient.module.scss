@@ -63,9 +63,7 @@
   background: var(--b-50);
   border: 1px solid var(--b-50);
   min-width: 19rem;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  transition: border-color 0.15s;
 
   &:focus-within {
     border-color: var(--p-400);

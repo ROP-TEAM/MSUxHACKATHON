@@ -92,7 +92,9 @@
   border-radius: 0.75rem;
   background: var(--b-900);
   color: #fff;
-  transition: background 0.15s, transform 0.15s;
+  transition:
+    background 0.15s,
+    transform 0.15s;
 
   &:hover {
     background: var(--b-700);
@@ -111,11 +113,12 @@
   color: #fff;
   font-size: 1.1rem;
   font-weight: 800;
-  transition: background 0.15s, transform 0.15s;
+  transition:
+    background 0.15s,
+    transform 0.15s;
 
   &:hover:not(:disabled) {
-    background: var(--accent);
-    transform: translateY(-0.125rem);
+    background: var(--b-800);
   }
 
   &:disabled {

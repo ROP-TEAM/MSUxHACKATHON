@@ -2,9 +2,12 @@
 
 import styles from "./page.module.scss";
 import Image from "next/image";
-import { useMemo, useState, useSyncExternalStore } from "react";
-import { simulationStore } from "@/lib/simulation-store";
+import { useMemo, useState } from "react";
 import { Popover, UnstyledButton } from "@mantine/core";
+
+import ticketsData from "@/data/event_tickets.json";
+import usersData from "@/data/users.json";
+import eventsData from "@/data/events.json";
 
 // --- คอมโพเนนต์ FilterSelect เขียนเองสไตล์ Dime! ---
 function FilterSelect({
@@ -148,17 +151,61 @@ function FilterSelect({
   );
 }
 
+type TicketStatus = "CANCELLED" | "USED" | "RESERVED" | "REFUNDED" | "PAID";
+
+type TicketRow = {
+  id: string;
+  name: string;
+  eventTitle: string;
+  location: string;
+  date: string;
+  seat: string;
+  price: number;
+  status: TicketStatus;
+  icon: string;
+  color: string;
+};
+
+const STATUS_CONFIG: Record<TicketStatus, { icon: string; color: string }> = {
+  CANCELLED: { icon: "/icon/cancle.svg", color: "#DC2626" },
+  USED: { icon: "/icon/used.svg", color: "#16A34A" },
+  RESERVED: { icon: "/icon/reserved.svg", color: "#7C3AED" },
+  REFUNDED: { icon: "/icon/refunded.svg", color: "#2563EB" },
+  PAID: { icon: "/icon/paid.svg", color: "#D97706" },
+};
+
 export default function Overview() {
   const [price, setPrice] = useState("all");
   const [venue, setVenue] = useState("all");
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
 
-  const tickets = useSyncExternalStore(
-    simulationStore.subscribeMerged,
-    simulationStore.getMergedSnapshot,
-    simulationStore.getMergedServerSnapshot,
-  );
+  const tickets = useMemo<TicketRow[]>(() => {
+    return ticketsData
+      .map((ticket) => {
+        const user = usersData.find((u) => u.user_id === ticket.user_id);
+        const event = eventsData.find((e) => e.event_id === ticket.event_id);
+
+        if (!user || !event) return null;
+
+        const statusConfig = STATUS_CONFIG[ticket.status as TicketStatus];
+
+        return {
+          id: ticket.ticket_id,
+          name: user.name,
+          eventTitle: event.title,
+          location: event.location,
+          date: event.date,
+          seat: ticket.seat_zone,
+          price: event.ticket_price,
+          status: ticket.status as TicketStatus,
+          icon: statusConfig.icon,
+          color: statusConfig.color,
+        };
+      })
+      .filter((ticket): ticket is TicketRow => ticket !== null)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, []);
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -188,11 +235,11 @@ export default function Overview() {
   ];
 
   const venueOptions = useMemo(() => {
-    return [...new Set(tickets.map((t) => t.location))].map((location) => ({
+    return [...new Set(eventsData.map((e) => e.location))].map((location) => ({
       value: location,
       label: location,
     }));
-  }, [tickets]);
+  }, []);
 
   const statusOptions = [
     { value: "CANCELLED", label: "CANCELLED" },
@@ -204,8 +251,28 @@ export default function Overview() {
 
   const latestDate =
     tickets.length > 0
-      ? new Date(tickets[0].date).toLocaleDateString("th-TH")
+      ? (() => {
+          const dateObj = new Date(tickets[0].date);
+
+          const dateStr = dateObj.toLocaleDateString("th-TH", {
+            day: "numeric",
+            month: "short",
+            year: "2-digit",
+          });
+
+          const timeStr = dateObj.toLocaleTimeString("th-TH", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+
+          return `${dateStr} - ${timeStr} น.`;
+        })()
       : "-";
+  const allLocations = useMemo(
+    () => [...new Set(tickets.map((t) => t.location))],
+    [tickets],
+  );
 
   return (
     <div className={styles.container}>
@@ -231,10 +298,10 @@ export default function Overview() {
         <div className={styles.right_box}>
           <p>{latestDate}</p>
           <Image
-            src="/image/box.svg"
+            src="/icon/box.svg"
             alt="icon"
-            width={250}
-            height={250}
+            width={1000}
+            height={1000}
             className={styles.sticker}
           />
         </div>
