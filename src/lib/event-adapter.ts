@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import type { PosterEvent } from "@/components/home/homeData";
 import rawEvents from "@/data/events.json";
 import rawTickets from "@/data/event_tickets.json";
@@ -46,10 +48,20 @@ function extractCategory(title: string): string {
 
 // ---- poster image resolution ----
 
-/** Images exist for ev-001 → ev-010; derive path from id, no per-event entries. */
+const EVENTS_IMG_DIR = path.join(process.cwd(), "public", "image", "events");
+
+/** Scan directory once at startup; key = stem (ev-001), value = public URL. */
+const POSTER_FILES: Map<string, string> = new Map(
+  fs.existsSync(EVENTS_IMG_DIR)
+    ? fs.readdirSync(EVENTS_IMG_DIR).map((file) => [
+        path.basename(file, path.extname(file)),
+        `/image/events/${file}`,
+      ])
+    : []
+);
+
 function resolvePoster(eventId: string): string | undefined {
-  const num = parseInt(eventId.replace("ev-", ""), 10);
-  if (num >= 1 && num <= 10) return `/image/events/${eventId}.jpg`;
+  return POSTER_FILES.get(eventId);
 }
 
 // ---- gradient palette (deterministic by category name) ----

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { HERO_SLIDES } from "../homeData";
+import { HERO_SLIDES } from "../homeStaticData";
 import styles from "./HeroCarousel.module.scss";
 
 const AUTOPLAY_MS = 5000;

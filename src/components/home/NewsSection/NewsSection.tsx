@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { NEWS } from "../homeData";
+import { NEWS } from "../homeStaticData";
 import styles from "./NewsSection.module.scss";
 
 export default function NewsSection() {
