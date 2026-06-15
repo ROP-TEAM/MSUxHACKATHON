@@ -4,11 +4,56 @@ import styles from "./page.module.scss";
 import Image from "next/image";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { Popover, UnstyledButton } from "@mantine/core";
-
-import eventsData from "@/data/events.json";
+import { Modal } from "@mantine/core";
+import eventsData from "@/data/events.json"; // ← ยังใช้อยู่เพื่อ join location
+import ticketsData from "@/data/event_tickets.json"; // ← เพิ่ม
+import user from "@/data/users.json";
+import IconSvgMono from "@/components/icon/SvgIcon";
 import { simulationStore } from "@/lib/simulation-store";
 
-// --- คอมโพเนนต์ FilterSelect เขียนเองสไตล์ Dime! ---
+// ────────────────────────────────────────────────────────────
+// User type + helpers
+// ────────────────────────────────────────────────────────────
+type User = {
+  user_id: string;
+  name: string;
+  email: string;
+  phone: string;
+  loyalty_points: number;
+  role: string;
+};
+
+/** O(1) lookup map: user_id → User */
+const userMap: Record<string, User> = Object.fromEntries(
+  (user as User[]).map((u) => [u.user_id, u]),
+);
+
+/** ดึงข้อมูล user จาก user_id — คืน undefined ถ้าไม่พบ */
+function getUserById(userId: string): User | undefined {
+  return userMap[userId];
+}
+
+// ────────────────────────────────────────────────────────────
+// Lookup map: event_id → location  (join จาก events.json)
+// ────────────────────────────────────────────────────────────
+const eventLocationMap: Record<string, string> = Object.fromEntries(
+  (eventsData as { event_id: string; location: string }[]).map((e) => [
+    e.event_id,
+    e.location,
+  ]),
+);
+
+// ────────────────────────────────────────────────────────────
+// Unique venue list  ← อ่านจาก event_tickets.json + join location
+// ────────────────────────────────────────────────────────────
+const uniqueVenues = [
+  ...new Set(
+    (ticketsData as { event_id: string }[])
+      .map((t) => eventLocationMap[t.event_id])
+      .filter(Boolean),
+  ),
+];
+
 function FilterSelect({
   options,
   value,
@@ -70,13 +115,9 @@ function FilterSelect({
       </Popover.Target>
 
       <Popover.Dropdown
-        style={{
-          padding: "0.5rem 0rem",
-          width: "max-content",
-        }}
+        style={{ padding: "0.5rem 0rem", width: "max-content" }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          {/* เพิ่มตัวเลือก "ทั้งหมด" กลับเข้าไปในลิสต์ Dropdown */}
           <UnstyledButton
             onClick={() => {
               onChange("all");
@@ -152,19 +193,6 @@ function FilterSelect({
 
 type TicketStatus = "CANCELLED" | "USED" | "RESERVED" | "REFUNDED" | "PAID";
 
-type TicketRow = {
-  id: string;
-  name: string;
-  eventTitle: string;
-  location: string;
-  date: string;
-  seat: string;
-  price: number;
-  status: TicketStatus;
-  icon: string;
-  color: string;
-};
-
 const STATUS_CONFIG: Record<TicketStatus, { icon: string; color: string }> = {
   CANCELLED: { icon: "/icon/cancle.svg", color: "#DC2626" },
   USED: { icon: "/icon/used.svg", color: "#16A34A" },
@@ -174,12 +202,14 @@ const STATUS_CONFIG: Record<TicketStatus, { icon: string; color: string }> = {
 };
 
 export default function Overview() {
+  const [selectedTicket, setSelectedTicket] = useState<
+    (typeof mergedTickets)[0] | null
+  >(null);
   const [price, setPrice] = useState("all");
   const [venue, setVenue] = useState("all");
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
 
-  // Live merged list: real tickets from JSON + sim orders + user purchases
   const mergedTickets = useSyncExternalStore(
     simulationStore.subscribeMerged,
     () => simulationStore.getMergedSnapshot(),
@@ -193,9 +223,11 @@ export default function Overview() {
         ticket.name.toLowerCase().includes(search.toLowerCase()) ||
         ticket.eventTitle.toLowerCase().includes(search.toLowerCase());
 
-      const matchVenue = venue === "all" || ticket.location === venue;
+      // join location ผ่าน eventLocationMap แทนการเก็บ location ใน mergedTickets โดยตรง
+      const ticketLocation =
+        eventLocationMap[ticket.event_id] ?? ticket.location;
+      const matchVenue = venue === "all" || ticketLocation === venue;
       const matchStatus = status === "all" || ticket.status === status;
-
       const matchPrice =
         price === "all" ||
         (price === "500" && ticket.price < 500) ||
@@ -206,19 +238,18 @@ export default function Overview() {
     });
   }, [mergedTickets, search, venue, status, price]);
 
-  // คัดแยกโครงสร้างข้อมูลส่งเข้าคอมโพเนนต์ Filter
+  // ── Filter options ────────────────────────────────────────
   const priceOptions = [
     { value: "500", label: "ต่ำกว่า 500" },
     { value: "1000", label: "500 - 1000" },
     { value: "1500", label: "มากกว่า 1000" },
   ];
 
-  const venueOptions = useMemo(() => {
-    return [...new Set(eventsData.map((e) => e.location))].map((location) => ({
-      value: location,
-      label: location,
-    }));
-  }, []);
+  // venueOptions  ← derive จาก event_tickets.json (ผ่าน uniqueVenues ด้านบน)
+  const venueOptions = useMemo(
+    () => uniqueVenues.map((loc) => ({ value: loc, label: loc })),
+    [],
+  );
 
   const statusOptions = [
     { value: "CANCELLED", label: "CANCELLED" },
@@ -232,19 +263,16 @@ export default function Overview() {
     mergedTickets.length > 0
       ? (() => {
           const dateObj = new Date(mergedTickets[0].date);
-
           const dateStr = dateObj.toLocaleDateString("th-TH", {
             day: "numeric",
             month: "short",
             year: "2-digit",
           });
-
           const timeStr = dateObj.toLocaleTimeString("th-TH", {
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
           });
-
           return `${dateStr} - ${timeStr} น.`;
         })()
       : "-";
@@ -262,8 +290,17 @@ export default function Overview() {
       <div className={styles.box}>
         <div className={styles.left_box}>
           <h1>รายการทั้งหมด</h1>
-                    <h2>{mergedTickets.filter(t => t.status === "PAID" || t.status === "USED" || t.status === "RESERVED").length.toLocaleString("th-TH")} ใบ</h2>
-
+          <h2>
+            {mergedTickets
+              .filter(
+                (t) =>
+                  t.status === "PAID" ||
+                  t.status === "USED" ||
+                  t.status === "RESERVED",
+              )
+              .length.toLocaleString("th-TH")}{" "}
+            ใบ
+          </h2>
           <div className={styles.ticket}>
             <Image src="/icon/ticket1.svg" alt="icon" width={30} height={30} />
             <p>ขายตั๋วทั้งหมด</p>
@@ -289,21 +326,18 @@ export default function Overview() {
               className={styles.filters}
               style={{ display: "flex", gap: "1.5rem" }}
             >
-              {/* เปลี่ยนมาใช้คอมโพเนนต์ FilterSelect ทั้งหมด */}
               <FilterSelect
                 options={priceOptions}
                 value={price}
                 onChange={setPrice}
                 defaultLabel="ราคาบัตร"
               />
-
               <FilterSelect
                 options={venueOptions}
                 value={venue}
                 onChange={setVenue}
                 defaultLabel="สถานที่"
               />
-
               <FilterSelect
                 options={statusOptions}
                 value={status}
@@ -324,7 +358,6 @@ export default function Overview() {
                 <circle cx="11" cy="11" r="8" />
                 <path d="M21 21l-4.35-4.35" />
               </svg>
-
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -335,9 +368,174 @@ export default function Overview() {
             </div>
           </div>
 
+          <Modal
+            opened={!!selectedTicket}
+            onClose={() => setSelectedTicket(null)}
+            withCloseButton={false}
+          >
+            {selectedTicket &&
+              (() => {
+                const matchedUser = getUserById(selectedTicket.user_id);
+                return (
+                  <div>
+                    <div style={{ position: "relative", marginBottom: "1rem" }}>
+                      <Image
+                        src="/image/cover.png"
+                        width={400}
+                        height={100}
+                        alt="cover"
+                        style={{ height: "auto", margin: "0 auto" }}
+                      />
+                      <Image
+                        src="/image/profile.png"
+                        width={120}
+                        height={100}
+                        alt="profile"
+                        style={{
+                          height: "auto",
+                          margin: "0 auto",
+                          position: "absolute",
+                          bottom: "-10%",
+                          left: "10px",
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <div
+                        style={{ padding: "0.5rem 1rem", marginTop: "1rem" }}
+                      >
+                        <h2>{matchedUser?.name || selectedTicket.name}</h2>
+                        <p>Email: {matchedUser?.email || "-"}</p>
+                      </div>
+                      <div
+                        style={{
+                          padding: "0.25rem 0.8rem",
+                          fontWeight: "500",
+                          borderRadius: "8px",
+                          background:
+                            matchedUser?.role == "VIP" ? "#E9D327" : "#BEBEBE",
+                          color: "white",
+                          fontSize: "0.725rem",
+                          marginRight: "1rem",
+                        }}
+                      >
+                        {matchedUser?.role}
+                      </div>
+                    </div>
+                    <hr
+                      style={{
+                        margin: "1rem 1rem",
+                        backgroundColor: "#BEBEBE",
+                        color: "#BEBEBE",
+                      }}
+                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <div style={{ padding: "0 1rem " }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "16px",
+                            alignItems: "center",
+                          }}
+                        >
+                          <IconSvgMono
+                            src="/icon/phone.svg"
+                            width={30}
+                            height={30}
+                          ></IconSvgMono>
+                          <h2>{matchedUser?.phone}</h2>
+                        </div>
+                        <p
+                          style={{
+                            margin: "auto",
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "1rem",
+                          }}
+                        >
+                          มือถือ
+                        </p>
+                      </div>
+                      <div style={{ padding: "0 1rem " }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "16px",
+                            alignItems: "center",
+                          }}
+                        >
+                          <IconSvgMono
+                            src="/icon/toom2.svg"
+                            width={30}
+                            height={30}
+                          ></IconSvgMono>
+                          <h2>{matchedUser?.loyalty_points}</h2>
+                        </div>
+                        <p
+                          style={{
+                            margin: "auto",
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "1rem",
+                          }}
+                        >
+                          คะนแนสะสม
+                        </p>
+                      </div>{" "}
+                      <div style={{ padding: "0 1rem " }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "16px",
+                            alignItems: "center",
+                          }}
+                        >
+                          <IconSvgMono
+                            src="/icon/toom1.svg"
+                            width={30}
+                            height={30}
+                          ></IconSvgMono>
+                          <h2>1</h2>
+                        </div>
+                        <p
+                          style={{
+                            margin: "auto",
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "1rem",
+                          }}
+                        >
+                          ตั๋วที่เคยซื้อ
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+          </Modal>
+
           <div className={styles.ticketList}>
             {filteredTickets.map((ticket) => (
-              <div key={ticket.id} className={styles.ticketCard}>
+              <div
+                key={ticket.id}
+                className={styles.ticketCard}
+                onClick={() => setSelectedTicket(ticket)}
+                style={{ cursor: "pointer" }}
+              >
                 <div className={styles.details}>
                   <Image
                     src={ticket.icon}
@@ -345,7 +543,6 @@ export default function Overview() {
                     width={60}
                     height={60}
                   />
-
                   <div className={styles.text}>
                     <h3>{ticket.name}</h3>
                     <div className={styles.user}>
@@ -355,7 +552,6 @@ export default function Overview() {
                     </div>
                   </div>
                 </div>
-
                 <h2 style={{ color: ticket.color }}>{ticket.status}</h2>
               </div>
             ))}

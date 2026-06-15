@@ -109,7 +109,16 @@ export function ZoneModal({
   const blockNumber = currentBlockId ? currentBlockId.split("-")[1] : null;
 
   const dateOptions = eventDate
-    ? [{ value: eventDate, label: new Date(eventDate).toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" }) }]
+    ? [
+        {
+          value: eventDate,
+          label: new Date(eventDate).toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+        },
+      ]
     : [];
 
   const handleZoneClick = (zone: string, blockId?: string | null) => {
@@ -151,9 +160,9 @@ export function ZoneModal({
           }`}
         >
           <div
-  className={styles.sheetHandle}
-  onClick={() => setMobileExpanded(prev => !prev)}
-/>
+            className={styles.sheetHandle}
+            onClick={() => setMobileExpanded((prev) => !prev)}
+          />
           <div>
             <div className={styles.sheetContent}>
               <div className={styles.topBar}>
@@ -164,19 +173,19 @@ export function ZoneModal({
                         <button
                           className={
                             activeStep === step
-                              ? styles.activeStep
+                              ? ""
                               : step < activeStep
-                                ? styles.completedStep
+                                ? ""
                                 : styles.pendingStep
                           }
                           onClick={() => setActiveStep(step)}
                         >
                           {activeStep === step && (
                             <Image
-                              src="/icon/logo2.svg"
+                              src="/icon/logo3.svg"
                               alt="step"
-                              width={15}
-                              height={15}
+                              width={25}
+                              height={25}
                             />
                           )}
                         </button>
@@ -272,7 +281,11 @@ export function ZoneModal({
                         key={item.id}
                         className={styles.paymentItem}
                         onClick={() => {
-                          simulationStore.buyTicket(eventId, currentZone, userId);
+                          simulationStore.buyTicket(
+                            eventId,
+                            currentZone,
+                            userId,
+                          );
                           setActiveStep(3);
                         }}
                       >
@@ -307,7 +320,9 @@ export function ZoneModal({
                     height={250}
                   />
                   <h1>ชำระเงินเสร็จสิ้น</h1>
-                  <p>ซื้อบัตร {eventTitle} — โซน {currentZone} เรียบร้อย</p>
+                  <p>
+                    ซื้อบัตร {eventTitle} — โซน {currentZone} เรียบร้อย
+                  </p>
                   <p>
                     ขอบคุณสำหรับการสั่งซื้อบัตรเข้าชมของคุณ <br></br>
                     ระบบได้บันทึกรายการและยืนยันการจองเรียบร้อย
