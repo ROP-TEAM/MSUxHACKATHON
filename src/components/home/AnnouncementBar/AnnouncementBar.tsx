@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./AnnouncementBar.module.scss";
 
 export default function AnnouncementBar() {
@@ -5,9 +6,9 @@ export default function AnnouncementBar() {
     <div className={styles.bar}>
       <div className={styles.inner}>
         {/* CTA pill */}
-        <a className={styles.cta} href="/events">
+        <Link className={styles.cta} href="/events">
           จองตั๋วง่ายด้วย AI Matching
-        </a>
+        </Link>
 
         {/* icons + hashtag + tagline */}
         <div className={styles.mid}>

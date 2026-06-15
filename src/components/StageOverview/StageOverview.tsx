@@ -304,7 +304,7 @@ export default function StageOverview({
   const ticketBlockSummary = useMemo(() => {
     const map: Record<string, ZoneSummary> = {};
     for (const t of eventTickets) {
-      const blockKey = (t as any).seat_block as string | undefined;
+      const blockKey = (t as { seat_block?: string }).seat_block;
       const ring = t.seat_zone === "B" ? "1F" : t.seat_zone === "A" ? "2F" : null;
       if (!ring || !blockKey) continue;
       const key = `${ring}-${blockKey}`;
@@ -326,9 +326,12 @@ export default function StageOverview({
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // NEW: keep selected block's tooltip pinned open; clear hover state when selection changes
-  useEffect(() => {
+  const selectionKey = `${selectedBlockId ?? ""}|${selectedZone ?? ""}`;
+  const [prevSelectionKey, setPrevSelectionKey] = useState(selectionKey);
+  if (selectionKey !== prevSelectionKey) {
+    setPrevSelectionKey(selectionKey);
     setActiveId(null);
-  }, [selectedBlockId, selectedZone]);
+  }
 
   // Maps a clicked SVG element id -> what gets reported to parent + highlighted
   const handleZoneOrBlockClick = (zoneId: string, blockId: string) => {

@@ -51,7 +51,9 @@ export function ZoneModal({
   const [currentZone, setCurrentZone] = useState<string | null>(zoneId);
   const [currentBlockId, setCurrentBlockId] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(
+    eventDate ?? null,
+  );
   const [seatZone, setSeatZone] = useState("");
   const [selectedGift, setSelectedGift] = useState("banner");
   const [mobileExpanded, setMobileExpanded] = useState(false);
@@ -90,12 +92,15 @@ export function ZoneModal({
     },
   ];
 
-  useEffect(() => {
+  // Re-sync internal selection when the zone prop changes (no effect needed)
+  const [prevZoneId, setPrevZoneId] = useState(zoneId);
+  if (zoneId !== prevZoneId) {
+    setPrevZoneId(zoneId);
     setCurrentZone(zoneId);
     setCurrentBlockId(null);
     setActiveStep(1);
     if (eventDate && !selectedDate) setSelectedDate(eventDate);
-  }, [zoneId, eventDate]);
+  }
 
   if (!currentZone) return null;
 

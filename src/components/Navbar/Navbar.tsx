@@ -8,6 +8,7 @@ import {
   useLayoutEffect,
 } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./Navbar.module.scss";
 import UserSwitcher from "@/components/UserSwitcher/UserSwitcher";
 
@@ -127,13 +128,11 @@ export default function Navbar({
     if (!anyInside) closeDropdown();
   }
 
-  const outsideClickRef = useRef<boolean>(false);
-  if (!outsideClickRef.current) {
-    if (typeof document !== "undefined") {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    outsideClickRef.current = true;
-  }
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function closeMenu() {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
@@ -202,6 +201,7 @@ export default function Navbar({
   }, [activeKey, hoveredKey, measureStyle]);
 
   useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM measurement for indicator position
     updateIndicators();
   }, [updateIndicators]);
 
@@ -232,7 +232,7 @@ export default function Navbar({
   return (
     <nav className={styles.navbar} aria-label="Main navigation">
       {/* Left: Logo */}
-      <a href="/" className={styles.left} aria-label="iTiket หน้าแรก">
+      <Link href="/" className={styles.left} aria-label="iTiket หน้าแรก">
         <Image
           src="/icon/logoLight.svg"
           alt="iTiket"
@@ -241,7 +241,7 @@ export default function Navbar({
           className={styles.logo}
           priority
         />
-      </a>
+      </Link>
 
       {/* Center: Nav links + sliding indicator (desktop) */}
       <div
@@ -417,7 +417,7 @@ export default function Navbar({
           >
             {/* Drawer header */}
             <div className={styles.mobileMenuHeader}>
-              <a
+              <Link
                 href="/"
                 className={styles.mobileMenuLogo}
                 aria-label="iTiket หน้าแรก"
@@ -430,7 +430,7 @@ export default function Navbar({
                   height={40}
                   aria-hidden="true"
                 />
-              </a>
+              </Link>
               <button
                 type="button"
                 className={styles.mobileMenuClose}

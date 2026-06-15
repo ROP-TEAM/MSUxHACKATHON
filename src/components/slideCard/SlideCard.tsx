@@ -120,6 +120,7 @@ export const SlideList = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration guard
     setIsMounted(true); // ยืนยันว่าฝั่ง Client โหลดเสร็จแล้ว
     checkScroll();
     const el = containerRef.current;
