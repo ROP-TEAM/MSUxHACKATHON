@@ -18,20 +18,7 @@ function createUserStore() {
   let currentUserId: string = "u001";
   const listeners = new Set<Listener>();
 
-  function load() {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (typeof parsed === "string" && USERS.some((u) => u.user_id === parsed)) {
-          currentUserId = parsed;
-        }
-      }
-    } catch {
-      /* ignore */
-    }
-  }
+  let hydrated = false;
 
   function save() {
     if (typeof window === "undefined") return;
@@ -42,9 +29,32 @@ function createUserStore() {
     }
   }
 
-  load();
-
   return {
+    /**
+     * Load persisted user from localStorage AFTER mount.
+     * Kept out of module init so SSR + first client render both use the
+     * default (u001), avoiding a hydration mismatch. Call once on mount.
+     */
+    hydrate() {
+      if (hydrated || typeof window === "undefined") return;
+      hydrated = true;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (
+          typeof parsed === "string" &&
+          parsed !== currentUserId &&
+          USERS.some((u) => u.user_id === parsed)
+        ) {
+          currentUserId = parsed;
+          listeners.forEach((l) => l());
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+
     getCurrentUserId(): string {
       return currentUserId;
     },

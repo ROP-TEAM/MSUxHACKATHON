@@ -14,6 +14,11 @@ export default function UserSwitcher() {
   );
   const allUsers = userStore.getAllUsers();
 
+  // Load persisted user after mount (avoids SSR/client hydration mismatch)
+  useEffect(() => {
+    userStore.hydrate();
+  }, []);
+
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -65,7 +70,9 @@ export default function UserSwitcher() {
             boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
             minWidth: 200,
             zIndex: 100,
-            overflow: "hidden",
+            maxHeight: "min(360px, calc(100vh - 80px))",
+            overflowY: "auto",
+            overflowX: "hidden",
           }}
         >
           {allUsers.map((user) => {
