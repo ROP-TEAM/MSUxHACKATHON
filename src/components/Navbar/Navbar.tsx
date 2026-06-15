@@ -94,6 +94,19 @@ export default function Navbar({
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
+  const getParentKey = (key: NavKey): NavKey => {
+    for (const item of NAV_ITEMS) {
+      if (
+        isDropdown(item) &&
+        item.children.some((child) => child.key === key)
+      ) {
+        return item.key;
+      }
+    }
+
+    return key;
+  };
+
   const setDropdownRef = useCallback(
     (key: string) => (el: HTMLDivElement | null) => {
       if (el) dropdownRefs.current.set(key, el);
@@ -163,7 +176,7 @@ export default function Navbar({
   }
 
   // --- Sliding indicator ---
-  const indicatorTarget = hoveredKey || activeKey;
+  const indicatorTarget = hoveredKey || getParentKey(activeKey);
 
   // --- Indicator Logic ---
   const measureStyle = useCallback((key: string | null) => {
@@ -183,7 +196,7 @@ export default function Navbar({
   }, []);
 
   const updateIndicators = useCallback(() => {
-    setActiveIndicatorStyle(measureStyle(activeKey));
+    setActiveIndicatorStyle(measureStyle(getParentKey(activeKey)));
     // ถ้ามีการ hover และจุดที่ hover ไม่ใช่หน้าต่างปัจจุบัน ให้โชว์ indicator อันที่สอง
     setHoverIndicatorStyle(
       hoveredKey && hoveredKey !== activeKey ? measureStyle(hoveredKey) : null,
