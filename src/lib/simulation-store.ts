@@ -205,6 +205,7 @@ function buildMergedRows(state: SimSnapshot): TicketRow[] {
       color: cfg.color,
       user_id: t.user_id,
       event_id: t.event_id,
+      image: `/image/events/${t.event_id}.jpg`,
     });
   }
 
@@ -228,6 +229,7 @@ function buildMergedRows(state: SimSnapshot): TicketRow[] {
       color: cfg.color,
       user_id: o.user_id,
       event_id: o.event_id,
+      image: `/image/events/${o.event_id}.jpg`,
     });
   }
 
@@ -251,6 +253,7 @@ function buildMergedRows(state: SimSnapshot): TicketRow[] {
       color: cfg.color,
       user_id: o.user_id,
       event_id: o.event_id,
+      image: `/image/events/${o.event_id}.jpg`,
     });
   }
 

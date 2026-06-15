@@ -67,6 +67,15 @@ $ink: #1f2937;
 
 .heroImg {
   object-fit: cover;
+  // Poster is portrait; frame is 6:1. Swap box dims then rotate so the
+  // rotated image fully covers the banner (% are vs. heroInner: W = 6H).
+  inset: auto !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 16.6667% !important; // = H / W
+  height: 600% !important; // = W / H
+  transform: translate(-50%, -50%) rotate(270deg);
+  transform-origin: center center;
 }
 
 .heroPlaceholder {
@@ -171,6 +180,7 @@ $ink: #1f2937;
 
 .serial {
   writing-mode: vertical-rl;
+  transform: rotate(180deg);
   font-size: 0.5rem;
   letter-spacing: 0.05em;
   color: #6b7280;
