@@ -28,8 +28,18 @@ interface RawTicket {
 // ---- date formatting: ISO → "26 ก.ค. 2026" ----
 
 const THAI_MONTHS = [
-  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
-  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.",
+  "ม.ค.",
+  "ก.พ.",
+  "มี.ค.",
+  "เม.ย.",
+  "พ.ค.",
+  "มิ.ย.",
+  "ก.ค.",
+  "ส.ค.",
+  "ก.ย.",
+  "ต.ค.",
+  "พ.ย.",
+  "ธ.ค.",
 ];
 
 function formatThaiDate(iso: string): string {
@@ -48,24 +58,10 @@ function extractCategory(title: string): string {
 
 /**
  * Poster images bundled under public/image/events/.
- * Static map (no fs) so this module stays importable in client bundles.
- * Add new files here when poster art is added.
+ * Using dynamic string template to support all events automatically.
  */
-const POSTER_FILES: Map<string, string> = new Map([
-  ["ev-001", "/image/events/ev-001.jpg"],
-  ["ev-002", "/image/events/ev-002.jpg"],
-  ["ev-003", "/image/events/ev-003.jpg"],
-  ["ev-004", "/image/events/ev-004.jpg"],
-  ["ev-005", "/image/events/ev-005.jpg"],
-  ["ev-006", "/image/events/ev-006.jpg"],
-  ["ev-007", "/image/events/ev-007.jpg"],
-  ["ev-008", "/image/events/ev-008.jpg"],
-  ["ev-009", "/image/events/ev-009.jpg"],
-  ["ev-010", "/image/events/ev-010.jpg"],
-]);
-
-function resolvePoster(eventId: string): string | undefined {
-  return POSTER_FILES.get(eventId);
+function resolvePoster(eventId: string): string {
+  return `/image/events/${eventId}.jpg`;
 }
 
 // ---- gradient palette (deterministic by category name) ----
@@ -209,7 +205,9 @@ export function getSections(): { title: string; events: PosterEvent[] }[] {
   // 3. ใกล้ถึงวันงาน — future dates, closest first
   const upcoming = all
     .filter((e) => new Date(e.rawDate) >= now)
-    .sort((a, b) => new Date(a.rawDate).getTime() - new Date(b.rawDate).getTime())
+    .sort(
+      (a, b) => new Date(a.rawDate).getTime() - new Date(b.rawDate).getTime(),
+    )
     .slice(0, 8);
 
   return [
@@ -220,7 +218,10 @@ export function getSections(): { title: string; events: PosterEvent[] }[] {
 }
 
 /** Group events by category (from title) — for /events page */
-export function getCategorySections(): { title: string; events: PosterEvent[] }[] {
+export function getCategorySections(): {
+  title: string;
+  events: PosterEvent[];
+}[] {
   const all = getAllPosterEvents();
   const map = new Map<string, PosterEvent[]>();
 
