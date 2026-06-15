@@ -14,13 +14,16 @@ type NavKey =
   | "all-events"
   | "my-tickets"
   | "overview"
+  | "analytics"
+  | "list"
   | "contact";
 
 function getActiveKey(pathname: string): NavKey {
-  if (pathname === "/") return "home";
+  if (pathname === "/" || pathname.startsWith("/home")) return "home";
   if (pathname.startsWith("/events")) return "all-events";
-  if (pathname.startsWith("/tickets")) return "my-tickets";
-  if (pathname.startsWith("/overview")) return "overview";
+  if (pathname.startsWith("/mytickets")) return "my-tickets";
+  if (pathname.startsWith("/analytics")) return "analytics";
+  if (pathname.startsWith("/list")) return "list";
   if (pathname.startsWith("/contact")) return "contact";
   return "home";
 }

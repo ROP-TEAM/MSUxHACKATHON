@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import IconSvgMono from "../icon/SvgIcon";
+import { simulationStore, type TicketRow } from "@/lib/simulation-store";
 import {
   PieChart,
   Pie,
@@ -14,18 +15,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-// ────────────────────────────────────────────────
-// Types
-// ────────────────────────────────────────────────
-interface Ticket {
-  ticket_id: string;
-  user_id: string;
-  event_id: string;
-  seat_zone: string;
-  status: string;
-  purchased_at?: string;
-}
 
 // ────────────────────────────────────────────────
 // Static event name map — derived from event_tickets.json event_ids
@@ -53,7 +42,7 @@ const STATUS_COLORS: Record<string, string> = {
 // ────────────────────────────────────────────────
 // Helpers
 // ────────────────────────────────────────────────
-function buildChartData(tickets: Ticket[]) {
+function buildChartData(tickets: TicketRow[]) {
   const counts: Record<string, number> = {};
 
   tickets.forEach((ticket) => {
@@ -131,21 +120,23 @@ const LegendRow = ({
 // ────────────────────────────────────────────────
 // Analytics component
 // ────────────────────────────────────────────────
-interface AnalyticsProps {
-  /** Pass the parsed contents of event_tickets.json */
-  tickets: Ticket[];
-}
-
-const Analytics = ({ tickets }: AnalyticsProps) => {
+const Analytics = () => {
   const [filter] = useState<"ปีนี้" | "ทั้งหมด">("ปีนี้");
+
+  // Live merged data: real tickets + sim orders + user purchases (same source as /list)
+  const tickets = useSyncExternalStore(
+    simulationStore.subscribeMerged,
+    () => simulationStore.getMergedSnapshot(),
+    () => simulationStore.getMergedServerSnapshot(),
+  );
 
   // Filter by current year when "ปีนี้" is selected
   const filtered = useMemo(() => {
     if (filter === "ทั้งหมด") return tickets;
     const year = new Date().getFullYear().toString();
     return tickets.filter((t) => {
-      if (!t.purchased_at) return true; // include if no date
-      return t.purchased_at.startsWith(year);
+      if (!t.date) return true; // include if no date
+      return t.date.startsWith(year);
     });
   }, [tickets, filter]);
 

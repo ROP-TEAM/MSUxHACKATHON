@@ -1,4 +1,3 @@
-import ticketsRaw from "@/data/event_tickets.json";
 import Analytics from "@/components/Analytics/Analytics";
 import Image from "next/image";
 const AnalyticsPage = () => {
@@ -66,7 +65,7 @@ const AnalyticsPage = () => {
           justifyContent: "center",
         }}
       >
-        <Analytics tickets={ticketsRaw} />
+        <Analytics />
       </div>
     </div>
   );
