@@ -45,6 +45,15 @@
   padding-right: 2rem;
 }
 
+// desktop: description (info) above details card
+.infoBlock {
+  order: 1;
+}
+
+.cardBlock {
+  order: 2;
+}
+
 
 
 .container{
@@ -62,28 +71,58 @@
 }
 
 @include respond(md) {
+  // leave room for fixed bottom buy bar
+  .page {
+    padding-bottom: 5.5rem;
+  }
+
+  // dark band only behind title + poster
   .hero::before {
-    height: 100%;
+    display: none;
   }
 
   .heroInner {
-    padding: 2rem 1.25rem 0;
+    max-width: none;
+    padding: 0;
   }
 
   .columns {
     flex-direction: column;
-    gap: 1.5rem;
-    align-items: center;
+    gap: 0;
+    align-items: stretch;
+    padding-top: 0;
   }
 
+  // dark hero panel wrapping title + poster
+  .columns > :first-child {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1.25rem 2rem;
+    background: radial-gradient(120% 140% at 50% 0%, #16131c 0%, #0a0a0d 70%);
+  }
+
+  // white sheet below
   .body {
     width: 100%;
-    padding-right: 0;
+    padding: 1.5rem 1.25rem 0;
+    padding-right: 1.25rem;
+    background: var(--b-0);
   }
-  .container{
+
+  // mobile order: details card first, then tags + description
+  .cardBlock {
+    order: 1;
+  }
+
+  .infoBlock {
+    order: 2;
+  }
+
+  .container {
     margin-top: 80px;
   }
-  .stage{
+
+  .stage {
     width: 100%;
   }
 }

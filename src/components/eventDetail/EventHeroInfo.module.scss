@@ -57,17 +57,36 @@
 }
 
 @include respond(md) {
+  // below poster sits on the white sheet -> dark text
   .darkInfo {
     min-height: 0;
-    text-align: center;
+    color: var(--b-900);
+    text-align: left;
   }
 
   .actions {
-    justify-content: center;
+    justify-content: flex-start;
+    padding-right: 0;
+    margin-top: 0.25rem;
+  }
+
+  .followBtn {
+    background: var(--b-900);
+    color: #fff;
+
+    &:hover {
+      background: var(--b-700);
+    }
+  }
+
+  .tag {
+    border-color: var(--b-200);
+    background: var(--b-0);
+    color: var(--b-900);
   }
 
   .description {
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: 1rem;
+    color: var(--b-600);
   }
 }

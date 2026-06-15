@@ -129,14 +129,23 @@
 
 @include respond(md) {
   .detail {
-    margin-top: 2rem;
-    padding: 1.5rem;
-    background: var(--b-0);
-    border-radius: 1rem;
-    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.4);
+    padding-top: 1.5rem;
   }
 
   .detailMid {
     align-items: flex-start;
+  }
+
+  // fixed bottom buy bar
+  .purchaseRow {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin-top: 0;
+    padding: 0.75rem 1.25rem;
+    background: var(--b-0);
+    box-shadow: 0 -0.5rem 1.5rem rgba(0, 0, 0, 0.18);
   }
 }

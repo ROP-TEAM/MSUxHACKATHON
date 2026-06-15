@@ -54,16 +54,19 @@ export default function EventDetailClient({ event, eventId, description }: Props
             />
 
             <div className={styles.body}>
-              <EventHeroInfo description={description} />
-
-              <EventDetailCard
-                subtitle={event.subtitle}
-                date={event.date}
-                venue={venue}
-                price={price}
-                soldOut={liveSoldOut}
-                onBuy={openPurchase}
-              />
+              <div className={styles.cardBlock}>
+                <EventDetailCard
+                  subtitle={event.subtitle}
+                  date={event.date}
+                  venue={venue}
+                  price={price}
+                  soldOut={liveSoldOut}
+                  onBuy={openPurchase}
+                />
+              </div>
+              <div className={styles.infoBlock}>
+                <EventHeroInfo description={description} />
+              </div>
             </div>
           </div>
         </div>

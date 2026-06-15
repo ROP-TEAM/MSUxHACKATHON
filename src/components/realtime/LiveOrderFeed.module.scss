@@ -253,6 +253,11 @@
   .feedShifted {
     right: 1rem;
   }
+
+  // ยกเหนือ fixed buy bar (สูง ~5rem) กันบังปุ่มซื้อบัตร
+  .feed {
+    bottom: 5.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

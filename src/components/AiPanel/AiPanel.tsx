@@ -189,7 +189,7 @@ export default function AiPanel({ role, onClose }: Props) {
     setMessages((prev) => [...prev, { role: "user", text: q }]);
     setLoading(true);
     try {
-      const res = await fetch("/api/ai/gemini", {
+      const res = await fetch("/api/ai/deepseek", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q, role }),

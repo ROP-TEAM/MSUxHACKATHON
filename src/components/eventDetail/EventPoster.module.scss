@@ -51,11 +51,12 @@
   }
 
   .title {
-    text-align: center;
+    text-align: left;
+    margin-bottom: 1rem;
   }
 
   .poster {
-    width: min(20rem, 80vw);
+    width: 100%;
     margin-top: 0;
   }
 }
