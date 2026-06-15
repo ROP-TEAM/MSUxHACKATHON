@@ -9,6 +9,7 @@ import {
 } from "react";
 import Image from "next/image";
 import styles from "./Navbar.module.scss";
+import UserSwitcher from "@/components/UserSwitcher/UserSwitcher";
 
 type NavKey =
   | "home"
@@ -322,8 +323,10 @@ export default function Navbar({
         )}
       </div>
 
-      {/* Right: AI Chat Trigger + Hamburger */}
+      {/* Right: UserSwitcher + AI Chat Trigger + Hamburger */}
       <div className={styles.right}>
+        <UserSwitcher />
+
         <button
           className={`${styles.aiTrigger} ${aiOpen ? styles.aiTriggerOpen : ""}`}
           onClick={onAiToggle}

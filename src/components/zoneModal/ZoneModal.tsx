@@ -19,6 +19,7 @@ interface ZoneModalProps {
   eventTitle: string;
   eventDate?: string;
   onViewDetails?: (zoneId: string) => void;
+  userId?: string;
 }
 
 const stepIcon = <Image src="/icon/logo.svg" alt="" width={30} height={30} />;
@@ -45,6 +46,7 @@ export function ZoneModal({
   eventId,
   eventTitle,
   eventDate,
+  userId,
 }: ZoneModalProps) {
   const [currentZone, setCurrentZone] = useState<string | null>(zoneId);
   const [currentBlockId, setCurrentBlockId] = useState<string | null>(null);
@@ -265,7 +267,7 @@ export function ZoneModal({
                         key={item.id}
                         className={styles.paymentItem}
                         onClick={() => {
-                          simulationStore.buyTicket(eventId, currentZone);
+                          simulationStore.buyTicket(eventId, currentZone, userId);
                           setActiveStep(3);
                         }}
                       >

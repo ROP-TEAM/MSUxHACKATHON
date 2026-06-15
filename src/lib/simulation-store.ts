@@ -48,6 +48,8 @@ export type TicketRow = {
   color: string;
   user_id: string;
   event_id: string;
+  /** Optional hero image for the ticket card; absent → sky placeholder. */
+  image?: string;
 };
 
 // Must be exported — status icons used in overviews page rendering
@@ -349,6 +351,11 @@ export function getSimOrdersSnapshot(): SimOrder[] {
   return simulationStore.getSnapshot().orders;
 }
 
+/** Get all tickets (real + sim + purchases) filtered by user_id */
+export function getUserTickets(userId: string): TicketRow[] {
+  return simulationStore.getMergedSnapshot().filter((t) => t.user_id === userId);
+}
+
 function createSimulationStore() {
   let state: SimSnapshot = { ...INITIAL };
   const listeners = new Set<Listener>();
@@ -457,19 +464,20 @@ function createSimulationStore() {
       notifyMerged();
     },
 
-    buyTicket(buyEventId: string, buyZone?: string) {
+    buyTicket(buyEventId: string, buyZone?: string, userId?: string) {
       const ev = EVENT_MAP.get(buyEventId);
       if (!ev) return;
-      const me = USERS[0]; // "Somchai Jaidee" — แทนตัวผู้ใช้
+      const buyer = userId ? USER_MAP.get(userId) : USERS[0];
+      if (!buyer) return;
       ++uid;
       const purchase: SimOrder = {
         id: `buy-${uid}`,
         at: Date.now(),
         ticket_id: `et-buy-${String(uid).padStart(3, "0")}`,
-        user_id: me.user_id,
+        user_id: buyer.user_id,
         event_id: buyEventId,
         title: ev.title,
-        buyer: me.name,
+        buyer: buyer.name,
         zone: buyZone ?? rand(REAL_ZONES),
         price: ev.ticket_price,
         location: ev.location,
@@ -489,6 +497,48 @@ function createSimulationStore() {
       invalidateMerged();
       notify();
       notifyMerged();
+    },
+
+    cancelTicket(ticketId: string) {
+      const purchaseIdx = state.purchases.findIndex((o) => o.ticket_id === ticketId);
+      if (purchaseIdx !== -1) {
+        const updated = state.purchases.map((o) =>
+          o.ticket_id === ticketId ? { ...o, status: "CANCELLED" as TicketStatus } : o,
+        );
+        const activeOrders = filterActive(state.orders);
+        const simRevenue = activeOrders.reduce((s, o) => s + o.price, 0);
+        const purchaseRevenue = updated.reduce((s, o) => s + o.price, 0);
+        state = {
+          ...state,
+          purchases: updated,
+          totalTickets: BASE_COUNT + activeOrders.length + updated.filter((o) => ACTIVE_STATUSES.has(o.status)).length,
+          revenue: BASE_REVENUE + simRevenue + purchaseRevenue,
+        };
+        persist();
+        invalidateMerged();
+        notify();
+        notifyMerged();
+        return;
+      }
+      // Check sim orders too
+      const orderIdx = state.orders.findIndex((o) => o.ticket_id === ticketId);
+      if (orderIdx !== -1) {
+        const updated = state.orders.map((o) =>
+          o.ticket_id === ticketId ? { ...o, status: "CANCELLED" as TicketStatus } : o,
+        );
+        const activeOrders = filterActive(updated);
+        const simRevenue = activeOrders.reduce((s, o) => s + o.price, 0);
+        state = {
+          ...state,
+          orders: updated,
+          totalTickets: BASE_COUNT + activeOrders.length + state.purchases.length,
+          revenue: BASE_REVENUE + simRevenue + state.purchases.reduce((s, o) => s + o.price, 0),
+        };
+        persist();
+        invalidateMerged();
+        notify();
+        notifyMerged();
+      }
     },
 
     // ── Merged subscription ───────────────────────────────────────

@@ -1,0 +1,221 @@
+// Ticket recreated as a CSS object — pixel-matched to public/tickets/*.png
+// Cream stub-style ticket: inset hero photo + info row + perforated barcode stub.
+
+$cream: #fbf3df;
+$cream-edge: #f4ead2;
+$label: #a59e8c;
+$ink: #1f2937;
+
+.ticket {
+  position: relative;
+  display: flex;
+  width: 100%;
+  background: $cream;
+  font-family: inherit;
+
+  // perforation geometry (overridden per variant)
+  --perf: 5.75rem; // distance of the perforation line from the right edge
+  --notch: 8px; // half-width of the triangular notch
+  --depth: 10px; // how deep the notch bites into the ticket
+
+  // real (transparent) triangular notches at the perforation, cut straight
+  // out of the element so any background shows through; square right corners
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--perf) - var(--notch)) 0,
+    calc(100% - var(--perf)) var(--depth),
+    calc(100% - var(--perf) + var(--notch)) 0,
+    100% 0,
+    100% 100%,
+    calc(100% - var(--perf) + var(--notch)) 100%,
+    calc(100% - var(--perf)) calc(100% - var(--depth)),
+    calc(100% - var(--perf) - var(--notch)) 100%,
+    0 100%
+  );
+}
+
+.clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.14));
+  }
+}
+
+// ── Main body (everything left of the perforation) ──────────────────
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  padding: 0.85rem 0.85rem 0; // cream margin around the inset photo
+}
+
+.heroInner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 6 / 1;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  background: linear-gradient(150deg, #cfe6f4 0%, #dcecf8 0%, #e9f3fb 55%, #f1f6f3 100%);
+}
+
+.heroImg {
+  object-fit: cover;
+}
+
+.heroPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(110, 140, 160, 0.5);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+// ── Info row (STATUS / EVENT / PLACE / DATE / SEAT) ──────────────────
+.info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 0.7rem 1.1rem 0.95rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.fieldStatus {
+  min-width: 4.5rem;
+}
+
+.fieldEvent {
+  flex: 1;
+}
+
+.label {
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $label;
+}
+
+.value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: $ink;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusValue {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+// ── Perforated barcode stub ─────────────────────────────────────────
+.stub {
+  position: relative;
+  flex-shrink: 0;
+  width: 5.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0.55rem;
+  background: $cream-edge;
+  border-left: 2px dashed rgba(0, 0, 0, 0.22);
+}
+
+.stubText {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  color: #8a8472;
+  white-space: nowrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $ink;
+  white-space: nowrap;
+}
+
+.brandGlyph {
+  flex-shrink: 0;
+  transform: rotate(180deg);
+}
+
+.serial {
+  writing-mode: vertical-rl;
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.barcode {
+  width: 1.6rem;
+  align-self: stretch;
+  margin: 0.15rem 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    #1f2937 0,
+    #1f2937 1px,
+    transparent 1px,
+    transparent 2px,
+    #1f2937 2px,
+    #1f2937 3px,
+    transparent 3px,
+    transparent 5px,
+    #1f2937 5px,
+    #1f2937 7px,
+    transparent 7px,
+    transparent 8px
+  );
+}
+
+// ── Modal size variant — bigger ticket ──────────────────────────────
+.modal {
+  --perf: 6.75rem; // keep notch aligned with the wider modal stub
+
+  .value,
+  .statusValue {
+    font-size: 1.0625rem;
+  }
+
+  .label {
+    font-size: 0.5625rem;
+  }
+
+  .info {
+    padding: 0.9rem 1.4rem 1.15rem;
+  }
+
+  .stub {
+    width: 6.75rem;
+  }
+}

@@ -11,6 +11,7 @@ import { SameEvent } from "@/components/sameEvent/SameEvent";
 import { Footer } from "@/components/footer/footer";
 import type { PosterEvent } from "@/components/home/homeData";
 import { simulationStore, isEventSoldOut, EMPTY_ORDERS } from "@/lib/simulation-store";
+import { userStore } from "@/lib/user-store";
 import styles from "./page.module.scss";
 
 type Props = {
@@ -21,6 +22,7 @@ type Props = {
 
 export default function EventDetailClient({ event, eventId, description }: Props) {
   const [activeZone, setActiveZone] = useState<string | null>(null);
+  const userId = useSyncExternalStore(userStore.subscribe, () => userStore.getCurrentUserId(), () => "u001");
 
   // Live soldOut — combines real tickets + sim orders
   const orders = useSyncExternalStore(
@@ -83,6 +85,7 @@ export default function EventDetailClient({ event, eventId, description }: Props
         eventId={eventId}
         eventTitle={event?.title ?? ""}
         eventDate={event.rawDate}
+        userId={userId}
       />
 
       <SameEvent currentEventId={eventId} />

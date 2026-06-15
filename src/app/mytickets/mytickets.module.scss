@@ -8,11 +8,10 @@
   }
 }
 
-.tickets_image {
-  width: 100%;
-  height: auto;
-  cursor: pointer;
-  display: block;
+.tickets_container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   margin-top: 1rem;
 }
 
@@ -57,19 +56,28 @@
       color: var(--b-300);
     }
   }
+}
 
-  @media (max-width: 768px) and (orientation: portrait) {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(90deg);
-    width: 90vh;
-    max-width: 72rem;
+.cancel_btn {
+  margin-top: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #fca5a5;
+  background: #fff;
+  color: #dc2626;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
 
-    .modal_ticket_title {
-      .modal_ticket_name {
-        font-size: 0.85rem;
-      }
-    }
+  &:hover {
+    background: #fef2f2;
   }
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #9ca3af;
+  font-size: 0.9375rem;
 }

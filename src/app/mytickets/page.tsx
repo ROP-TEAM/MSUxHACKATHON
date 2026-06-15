@@ -1,50 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import styles from "./mytickets.module.scss";
-import Image from "next/image";
 import { Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import IconSvgMono from "@/components/icon/SvgIcon";
+import TicketCard from "@/components/TicketCard/TicketCard";
+import { simulationStore } from "@/lib/simulation-store";
+import { userStore } from "@/lib/user-store";
 
 const MyTicket = () => {
   const [opened, { open, close }] = useDisclosure(false);
-  const [selectedTicketSrc, setSelectedTicketSrc] = useState<string | null>(
-    null,
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+
+  const userId = useSyncExternalStore(
+    userStore.subscribe,
+    () => userStore.getCurrentUserId(),
+    () => "u001",
   );
 
-  const tickets = [
-    { id: 1, src: "/tickets/01.png", alt: "tickets-01" },
-    { id: 2, src: "/tickets/02.png", alt: "tickets-02" },
-  ];
+  const mergedTickets = useSyncExternalStore(
+    simulationStore.subscribeMerged,
+    () => simulationStore.getMergedSnapshot(),
+    () => simulationStore.getMergedServerSnapshot(),
+  );
 
-  const handleTicketClick = (src: string) => {
-    setSelectedTicketSrc(src);
+  const tickets = mergedTickets.filter((t) => t.user_id === userId);
+
+  const selectedTicket = selectedTicketId
+    ? tickets.find((t) => t.id === selectedTicketId)
+    : null;
+
+  const handleTicketClick = (ticketId: string) => {
+    setSelectedTicketId(ticketId);
     open();
   };
 
-  const handleDownload = async () => {
-    if (!selectedTicketSrc) return;
-    try {
-      const response = await fetch(selectedTicketSrc);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = selectedTicketSrc.split("/").pop() || "ticket.png";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error(error);
-    }
+  const handleDownload = () => {
+    alert("ระบบจะดาวน์โหลด E-Ticket ในเวอร์ชันจริง");
   };
 
   const handleShare = async () => {
-    if (!selectedTicketSrc) return;
+    if (!selectedTicketId) return;
     try {
-      const fullUrl = `${window.location.origin}${selectedTicketSrc}`;
+      const fullUrl = `${window.location.origin}/mytickets/${selectedTicketId}`;
       await navigator.clipboard.writeText(fullUrl);
     } catch (error) {
       console.error(error);
@@ -56,18 +55,17 @@ const MyTicket = () => {
       <h2 className={styles.mytickets_title}>ตั๋วของฉัน</h2>
 
       <div className={styles.tickets_container}>
-        {tickets.map((ticket) => (
-          <Image
-            key={ticket.id}
-            className={styles.tickets_image}
-            src={ticket.src}
-            width={1000}
-            height={1000}
-            alt={ticket.alt}
-            onClick={() => handleTicketClick(ticket.src)}
-            style={{ cursor: "pointer" }}
-          />
-        ))}
+        {tickets.length === 0 ? (
+          <p className={styles.empty}>ไม่พบตั๋ว</p>
+        ) : (
+          tickets.map((ticket) => (
+            <TicketCard
+              key={ticket.id}
+              ticket={ticket}
+              onClick={() => handleTicketClick(ticket.id)}
+            />
+          ))
+        )}
       </div>
 
       <Modal
@@ -82,37 +80,40 @@ const MyTicket = () => {
             boxShadow: "none",
             overflow: "visible",
           },
-          body: {
-            padding: 0,
-            overflow: "visible",
-          },
+          body: { padding: 0, overflow: "visible" },
         }}
       >
-        {selectedTicketSrc && (
+        {selectedTicket && (
           <div className={styles.modal_ticket_wrapper}>
             <div className={styles.modal_ticket_title}>
               <h2 className={styles.modal_ticket_name}>
-                Drive-To-Blue-Concert-120607
+                {selectedTicket.eventTitle}
               </h2>
               <div className={styles.modal_tiket_icon}>
-                <div onClick={handleDownload} style={{ cursor: "pointer" }}>
-                  <IconSvgMono
-                    src="/icon/download.svg"
-                    alt="download"
-                  ></IconSvgMono>
+                <div onClick={handleDownload}>
+                  <IconSvgMono src="/icon/download.svg" alt="download" />
                 </div>
-                <div onClick={handleShare} style={{ cursor: "pointer" }}>
-                  <IconSvgMono src="/icon/share.svg" alt="share"></IconSvgMono>
+                <div onClick={handleShare}>
+                  <IconSvgMono src="/icon/share.svg" alt="share" />
                 </div>
               </div>
             </div>
-            <Image
-              src={selectedTicketSrc}
-              width={800}
-              height={800}
-              alt="Selected Ticket"
-              style={{ objectFit: "contain", width: "100%", height: "auto" }}
-            />
+
+            <TicketCard ticket={selectedTicket} variant="modal" />
+
+            {(selectedTicket.status === "RESERVED" ||
+              selectedTicket.status === "PAID") && (
+              <button
+                type="button"
+                className={styles.cancel_btn}
+                onClick={() => {
+                  simulationStore.cancelTicket(selectedTicket.id);
+                  close();
+                }}
+              >
+                ยกเลิกบัตรนี้
+              </button>
+            )}
           </div>
         )}
       </Modal>
