@@ -17,6 +17,8 @@ type NavKey =
   | "all-events"
   | "my-tickets"
   | "overview"
+  | "analytics"
+  | "list"
   | "contact";
 
 type NavLink = {
@@ -53,7 +55,14 @@ const NAV_ITEMS: NavItem[] = [
       { key: "my-tickets", label: "ตั๋วของฉัน", href: "/mytickets" },
     ],
   },
-  { key: "overview", label: "ภาพรวม", href: "/overviews" },
+  {
+    key: "overview",
+    label: "ภาพรวม",
+    children: [
+      { key: "analytics", label: "วิเคราะห์ข้อมูล", href: "/analytics" },
+      { key: "list", label: "รายการทั้งหมด", href: "/list" },
+    ],
+  },
   { key: "contact", label: "ติดต่อเรา", href: "/contact" },
 ];
 
@@ -64,7 +73,12 @@ export default function Navbar({
 }: Props) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [hoveredKey, setHoveredKey] = useState<NavKey | null>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState<{
+  const [activeIndicatorStyle, setActiveIndicatorStyle] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
+
+  const [hoverIndicatorStyle, setHoverIndicatorStyle] = useState<{
     left: number;
     width: number;
   } | null>(null);
@@ -80,6 +94,19 @@ export default function Navbar({
   const centerRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  const getParentKey = (key: NavKey): NavKey => {
+    for (const item of NAV_ITEMS) {
+      if (
+        isDropdown(item) &&
+        item.children.some((child) => child.key === key)
+      ) {
+        return item.key;
+      }
+    }
+
+    return key;
+  };
 
   const setDropdownRef = useCallback(
     (key: string) => (el: HTMLDivElement | null) => {
@@ -149,28 +176,43 @@ export default function Navbar({
     }
   }
 
-  // --- Sliding indicator ---
-  const indicatorTarget = hoveredKey || activeKey;
-
-  function measureIndicator(key: string | null) {
-    if (!key || !centerRef.current) return;
+  // --- Indicator Logic ---
+  const measureStyle = useCallback((key: string | null) => {
+    if (!key || !centerRef.current) return null;
     const parent = centerRef.current;
     const textEl = parent.querySelector(
       `[data-text-el="${key}"]`,
     ) as HTMLElement | null;
-    if (!textEl) return;
+    if (!textEl) return null;
     const parentRect = parent.getBoundingClientRect();
     const textRect = textEl.getBoundingClientRect();
     const extra = 0.8;
-    setIndicatorStyle({
+    return {
       left: textRect.left - parentRect.left - extra,
       width: textRect.width + extra * 2,
-    });
-  }
+    };
+  }, []);
+
+  const updateIndicators = useCallback(() => {
+    setActiveIndicatorStyle(measureStyle(getParentKey(activeKey)));
+    // ถ้ามีการ hover และจุดที่ hover ไม่ใช่หน้าต่างปัจจุบัน ให้โชว์ indicator อันที่สอง
+    setHoverIndicatorStyle(
+      hoveredKey && hoveredKey !== activeKey ? measureStyle(hoveredKey) : null,
+    );
+  }, [activeKey, hoveredKey, measureStyle]);
 
   useLayoutEffect(() => {
-    measureIndicator(indicatorTarget);
-  }, [indicatorTarget, aiOpen]);
+    updateIndicators();
+  }, [updateIndicators]);
+
+  useEffect(() => {
+    function handleResize() {
+      updateIndicators();
+      if (window.innerWidth > 640) setMenuOpen(false);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [updateIndicators]);
 
   useEffect(() => {
     if (menuOpen) {
@@ -186,15 +228,6 @@ export default function Navbar({
       document.body.style.paddingRight = "";
     };
   }, [menuOpen]);
-
-  useEffect(() => {
-    function handleResize() {
-      measureIndicator(indicatorTarget);
-      if (window.innerWidth > 640) setMenuOpen(false);
-    }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [indicatorTarget]);
 
   return (
     <nav className={styles.navbar} aria-label="Main navigation">
@@ -216,14 +249,25 @@ export default function Navbar({
         className={styles.center}
         onMouseLeave={() => setHoveredKey(null)}
       >
-        {indicatorStyle !== null && (
+        {/* Indicator สำหรับหน้าปัจจุบัน (Active) */}
+        {activeIndicatorStyle !== null && (
           <div
             className={styles.indicator}
             style={{
-              left: indicatorStyle.left,
-              width: indicatorStyle.width,
-              transition:
-                "left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              left: activeIndicatorStyle.left,
+              width: activeIndicatorStyle.width,
+            }}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Indicator สำหรับตัวที่กำลัง Hover */}
+        {hoverIndicatorStyle !== null && (
+          <div
+            className={styles.indicator}
+            style={{
+              left: hoverIndicatorStyle.left,
+              width: hoverIndicatorStyle.width,
             }}
             aria-hidden="true"
           />

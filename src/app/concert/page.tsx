@@ -26,8 +26,7 @@ const ConcertPage = () => {
     [merged],
   );
 
-  const currentEventId =
-    liveTickets.length > 0 ? liveTickets[0].event_id : "";
+  const currentEventId = liveTickets.length > 0 ? liveTickets[0].event_id : "";
 
   return (
     <div className={styles.pageContainer}>
@@ -41,7 +40,6 @@ const ConcertPage = () => {
         </div>
       </div>
       <SameEvent />
-      <Footer />
     </div>
   );
 };
