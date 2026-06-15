@@ -12,7 +12,7 @@ function formatBaht(n: number): string {
   return n === 0 ? "ฟรี" : `฿${n.toLocaleString("th-TH")}`;
 }
 
-export default function LiveOrderFeed() {
+export default function LiveOrderFeed({ aiOpen = false }: { aiOpen?: boolean }) {
   const liveSnap = useSyncExternalStore(
     simulationStore.subscribe,
     simulationStore.getSnapshot,
@@ -47,7 +47,7 @@ export default function LiveOrderFeed() {
 
   if (collapsed) {
     return (
-      <div className={styles.feed}>
+      <div className={`${styles.feed}${aiOpen ? ` ${styles.feedShifted}` : ""}`}>
         <button
           type="button"
           className={styles.expandBtn}
@@ -62,7 +62,7 @@ export default function LiveOrderFeed() {
   }
 
   return (
-    <div className={styles.feed} aria-live="polite" aria-label="ออเดอร์เรียลไทม์">
+    <div className={`${styles.feed}${aiOpen ? ` ${styles.feedShifted}` : ""}`} aria-live="polite" aria-label="ออเดอร์เรียลไทม์">
       <div className={styles.cards}>
           {visible.map((o) => (
             <div key={o.id} className={styles.card}>

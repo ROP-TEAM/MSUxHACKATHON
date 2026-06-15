@@ -73,7 +73,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {children}
           <Footer />
         </main>
-        <LiveOrderFeed />
+        <LiveOrderFeed aiOpen={aiOpen} />
       </div>
       <div
         ref={panelRef}

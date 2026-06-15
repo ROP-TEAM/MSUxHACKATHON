@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import styles from "./AiPanel.module.scss";
 import eventsJson from "@/data/events.json";
 
@@ -20,6 +21,7 @@ type Message = {
   role: "user" | "ai";
   text: string;
   isError?: boolean;
+  retry?: string;
   events?: MatchedEvent[];
 };
 
@@ -37,14 +39,16 @@ const cardImages = [
   "/image/card5.png",
 ];
 
-const THAI_MONTHS = [
-  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
-  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.",
+const THAI_MONTHS_FULL = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
 ];
+
+const CARD_DESC = "Lorem Ipsum is simply dummy text of the printing and typesetting ...";
 
 function formatThaiDate(iso: string): string {
   const d = new Date(iso);
-  return `${d.getUTCDate()} ${THAI_MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear() + 543}`;
+  return `${d.getUTCDate()} ${THAI_MONTHS_FULL[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
 function detectBookingEvents(text: string): MatchedEvent[] {
@@ -78,11 +82,6 @@ const SUGGESTIONS: Record<Role, string[]> = {
     "มีตั๋วถูกยกเลิกกี่ใบ คิดเป็นเท่าไร?",
     "รายได้รวมทุก Event เท่าไร?",
   ],
-};
-
-const ROLE_LABEL: Record<Role, string> = {
-  user: "ผู้ใช้ทั่วไป",
-  admin: "แอดมิน",
 };
 
 function renderInline(text: string) {
@@ -196,7 +195,14 @@ export default function AiPanel({ role, onClose }: Props) {
         body: JSON.stringify({ question: q, role }),
       });
       const data = await res.json();
-      const aiText: string = data.answer ?? data.error ?? "ไม่ได้รับคำตอบ";
+      if (!res.ok || data.error) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "ai", text: data.error ?? "ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้", isError: true, retry: q },
+        ]);
+        return;
+      }
+      const aiText: string = data.answer ?? "ไม่ได้รับคำตอบ";
       const events = role === "user" ? detectBookingEvents(aiText) : undefined;
       setMessages((prev) => [
         ...prev,
@@ -205,7 +211,7 @@ export default function AiPanel({ role, onClose }: Props) {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "ai", text: "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง", isError: true },
+        { role: "ai", text: "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง", isError: true, retry: q },
       ]);
     } finally {
       setLoading(false);
@@ -217,39 +223,19 @@ export default function AiPanel({ role, onClose }: Props) {
     router.push(href);
   }
 
-  const aiIcon = role === "admin" ? "⬡" : "✦";
-
   return (
     <aside className={styles.panel} data-role={role}>
-      <div className={styles.header}>
-        <span className={styles.icon}>{aiIcon}</span>
-        <div className={styles.headerText}>
-          <h2 className={styles.title}>
-            {role === "admin" ? "Admin AI" : "Hi, I'm Gemini!"}
-          </h2>
+      {messages.length === 0 && (
+        <div className={styles.header}>
+          <span className={styles.icon}>
+            <Image src="/logo/msuLogo.svg" alt="" width={16} height={20} />
+          </span>
+          <h2 className={styles.title}>แชทบอท</h2>
           <p className={styles.subtitle}>
-            {role === "admin"
-              ? "วิเคราะห์ภาพรวม Event & ยอดขาย"
-              : "AI ช่วยตอบคำถามเกี่ยวกับ Event"}
+            แชทบอทสามารถตอบกลับผิดพลาดได้ กรุณาเช็คความถูกต้อง
           </p>
         </div>
-        <div className={styles.headerRight}>
-          <span className={styles.badge}>{ROLE_LABEL[role]}</span>
-          {messages.length > 0 && (
-            <button
-              type="button"
-              className={styles.clearBtn}
-              onClick={() => { setMessages([]); setInput(""); }}
-              aria-label="ล้างการสนทนา"
-              title="ล้างการสนทนา"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-              </svg>
-            </button>
-          )}
-        </div>
-      </div>
+      )}
 
       <div className={styles.body}>
         {messages.length === 0 ? (
@@ -257,9 +243,11 @@ export default function AiPanel({ role, onClose }: Props) {
             <p className={styles.suggestLabel}>ลองถาม</p>
             {SUGGESTIONS[role].map((s) => (
               <button type="button" key={s} className={styles.chip} onClick={() => send(s)}>
-                <svg className={styles.chipIcon} width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
-                  <path d="M6.5 1.5L7.9 5.3H11.8L8.7 7.6L10.1 11.4L6.5 9.1L2.9 11.4L4.3 7.6L1.2 5.3H5.1L6.5 1.5Z" fill="currentColor"/>
-                </svg>
+                <span className={styles.chipIcon}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M3 2h10a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 13 12H6.5L3.5 14.5V12H3a1.5 1.5 0 0 1-1.5-1.5v-7A1.5 1.5 0 0 1 3 2Z"/>
+                  </svg>
+                </span>
                 <span>{s}</span>
               </button>
             ))}
@@ -271,28 +259,72 @@ export default function AiPanel({ role, onClose }: Props) {
                 <div key={i} className={styles.userMsg}>
                   <p>{msg.text}</p>
                 </div>
+              ) : msg.isError ? (
+                <div key={i} className={styles.errorCard}>
+                  <span className={styles.errorIcon}>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M10 6v5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                      <circle cx="10" cy="14" r="0.9" fill="currentColor" />
+                    </svg>
+                  </span>
+                  <div className={styles.errorBody}>
+                    <strong className={styles.errorTitle}>เกิดข้อผิดพลาด</strong>
+                    <p className={styles.errorText}>{msg.text}</p>
+                    {msg.retry && (
+                      <button
+                        type="button"
+                        className={styles.retryBtn}
+                        onClick={() => send(msg.retry as string)}
+                        disabled={loading}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="M13 8a5 5 0 1 1-1.46-3.54M13 2.5V5h-2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        ลองอีกครั้ง
+                      </button>
+                    )}
+                  </div>
+                </div>
               ) : (
-                <div key={i} className={`${styles.aiMsg}${msg.isError ? ` ${styles.aiMsgError}` : ""}`}>
-                  <span className={styles.aiDot}>{aiIcon}</span>
+                <div key={i} className={styles.aiMsg}>
                   <div className={styles.aiContent}>
                     {renderMarkdown(msg.text)}
                     {msg.events && msg.events.length > 0 && (
                       <div className={styles.eventCards}>
                         {msg.events.map((ev) => (
-                          <div key={ev.event_id} className={styles.eventCard}>
+                          <div
+                            key={ev.event_id}
+                            className={styles.eventCard}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => handleActionClick(`/events/${ev.event_id}`)}
+                            onKeyDown={(e) => e.key === "Enter" && handleActionClick(`/events/${ev.event_id}`)}
+                          >
                             <img src={ev.imageUrl} alt={ev.title} className={styles.eventCardImg} />
-                            <div className={styles.eventCardInfo}>
-                              <strong>{ev.title}</strong>
-                              <span>{ev.date} · {ev.location}</span>
-                              <span>{ev.ticket_price === 0 ? "ฟรี" : `฿${ev.ticket_price.toLocaleString("th-TH")}`}</span>
+                            <div className={styles.eventCardBody}>
+                              <strong className={styles.eventCardTitle}>{ev.title}</strong>
+                              <p className={styles.eventCardDesc}>{CARD_DESC}</p>
+                              <div className={styles.eventCardMeta}>
+                                <span className={styles.metaItem}>
+                                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                    <rect x="2.5" y="3.5" width="11" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+                                    <path d="M2.5 6.5h11M5.5 2v3M10.5 2v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                                  </svg>
+                                  {ev.date}
+                                </span>
+                                <span className={styles.metaItem}>
+                                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                    <circle cx="8" cy="5.5" r="2.5" stroke="currentColor" strokeWidth="1.2"/>
+                                    <path d="M3.5 13c0-2.2 2-3.8 4.5-3.8s4.5 1.6 4.5 3.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                                  </svg>
+                                  {ev.location}
+                                </span>
+                                <span className={styles.eventCardPrice}>
+                                  {ev.ticket_price === 0 ? "ฟรี" : `${ev.ticket_price.toLocaleString("th-TH")} บาท`}
+                                </span>
+                              </div>
                             </div>
-                            <button
-                              type="button"
-                              className={styles.eventCardBtn}
-                              onClick={() => handleActionClick(`/events/${ev.event_id}`)}
-                            >
-                              จอง
-                            </button>
                           </div>
                         ))}
                       </div>
@@ -303,7 +335,6 @@ export default function AiPanel({ role, onClose }: Props) {
             ))}
             {loading && (
               <div className={styles.aiMsg}>
-                <span className={styles.aiDot}>{aiIcon}</span>
                 <div className={styles.typingDots}>
                   <span /><span /><span />
                 </div>

@@ -5,6 +5,11 @@
   z-index: 60;
   width: min(320px, calc(100vw - 2rem));
   pointer-events: none;
+  transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.feedShifted {
+  right: calc(1rem + 320px);
 }
 
 .statusBar {
@@ -240,6 +245,13 @@
 
   &:hover {
     background: rgba(165, 180, 252, 0.2);
+  }
+}
+
+@media (max-width: 768px) {
+  // panel เป็น full-width overlay → ไม่ต้องเลื่อน
+  .feedShifted {
+    right: 1rem;
   }
 }
 
